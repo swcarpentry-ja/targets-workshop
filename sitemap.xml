@@ -10,6 +10,9 @@
     <loc>https://joelnitta.github.io/targets-workshop/LICENSE.html</loc>
   </url>
   <url>
+    <loc>https://joelnitta.github.io/targets-workshop/aio.html</loc>
+  </url>
+  <url>
     <loc>https://joelnitta.github.io/targets-workshop/basic-targets.html</loc>
   </url>
   <url>
@@ -20,6 +23,9 @@
   </url>
   <url>
     <loc>https://joelnitta.github.io/targets-workshop/files.html</loc>
+  </url>
+  <url>
+    <loc>https://joelnitta.github.io/targets-workshop/images.html</loc>
   </url>
   <url>
     <loc>https://joelnitta.github.io/targets-workshop/index.html</loc>
@@ -34,6 +40,9 @@
     <loc>https://joelnitta.github.io/targets-workshop/instructor/LICENSE.html</loc>
   </url>
   <url>
+    <loc>https://joelnitta.github.io/targets-workshop/instructor/aio.html</loc>
+  </url>
+  <url>
     <loc>https://joelnitta.github.io/targets-workshop/instructor/basic-targets.html</loc>
   </url>
   <url>
@@ -46,10 +55,19 @@
     <loc>https://joelnitta.github.io/targets-workshop/instructor/files.html</loc>
   </url>
   <url>
+    <loc>https://joelnitta.github.io/targets-workshop/instructor/images.html</loc>
+  </url>
+  <url>
     <loc>https://joelnitta.github.io/targets-workshop/instructor/index.html</loc>
   </url>
   <url>
+    <loc>https://joelnitta.github.io/targets-workshop/instructor/instructor-notes.html</loc>
+  </url>
+  <url>
     <loc>https://joelnitta.github.io/targets-workshop/instructor/introduction.html</loc>
+  </url>
+  <url>
+    <loc>https://joelnitta.github.io/targets-workshop/instructor/key-points.html</loc>
   </url>
   <url>
     <loc>https://joelnitta.github.io/targets-workshop/instructor/lifecycle.html</loc>
@@ -73,7 +91,13 @@
     <loc>https://joelnitta.github.io/targets-workshop/instructor/reference.html</loc>
   </url>
   <url>
+    <loc>https://joelnitta.github.io/targets-workshop/instructor-notes.html</loc>
+  </url>
+  <url>
     <loc>https://joelnitta.github.io/targets-workshop/introduction.html</loc>
+  </url>
+  <url>
+    <loc>https://joelnitta.github.io/targets-workshop/key-points.html</loc>
   </url>
   <url>
     <loc>https://joelnitta.github.io/targets-workshop/lifecycle.html</loc>
