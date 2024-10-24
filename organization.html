@@ -252,7 +252,7 @@
 
     <div id="flush-collapsecurrent" class="accordion-collapse collapse show" aria-labelledby="flush-headingcurrent" data-bs-parent="#accordionFlushcurrent">
       <div class="accordion-body">
-        <ul><li><a href="#a-simpler-way-to-write-workflow-plans">A simpler way to write workflow plans</a></li>
+        <ul><li><a href="#%E3%83%AF%E3%83%BC%E3%82%AF%E3%83%95%E3%83%AD%E3%83%BC%E3%83%97%E3%83%A9%E3%83%B3%E3%82%92%E3%82%88%E3%82%8A%E7%B0%A1%E5%8D%98%E3%81%AB%E6%9B%B8%E3%81%8F%E6%96%B9%E6%B3%95">ワークフロープランをより簡単に書く方法</a></li>
 <li><a href="#%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB%E3%81%A8%E3%83%95%E3%82%A9%E3%83%AB%E3%83%80%E3%81%AE%E6%95%B4%E7%90%86">ファイルとフォルダの整理</a></li>
 <li><a href="#%E9%96%A2%E6%95%B0%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6%E3%81%AE%E4%B8%80%E8%A8%80">関数についての一言</a></li>
         </ul></div><!--/div.accordion-body-->
@@ -364,7 +364,7 @@
       </div>
       <hr></nav><main id="main-content" class="main-content"><div class="container lesson-content">
         <h1>targetsプロジェクト組織のベストプラクティス</h1>
-        <p>最終更新日：2024-10-10 |
+        <p>最終更新日：2024-10-24 |
 
         <a href="https://github.com/swcarpentry-ja/targets-workshop/edit/main/episodes/organization.Rmd" class="external-link">ページの編集 <i aria-hidden="true" data-feather="edit"></i></a></p>
 
@@ -407,23 +407,23 @@
 </div>
 </div>
 
-<section><h2 class="section-heading" id="a-simpler-way-to-write-workflow-plans">A simpler way to write workflow plans<a class="anchor" aria-label="anchor" href="#a-simpler-way-to-write-workflow-plans"></a></h2>
-<hr class="half-width"><p>The default way to specify targets in the plan is with the
-<code>tar_target()</code> function. But this way of writing plans can be
-a bit verbose.</p>
-<p>There is an alternative provided by the <code>tarchetypes</code>
-package, also written by the creator of <code>targets</code>, Will
-Landau.</p>
-<div id="install-tarchetypes" class="callout prereq">
+<section><h2 class="section-heading" id="ワークフロープランをより簡単に書く方法">ワークフロープランをより簡単に書く方法<a class="anchor" aria-label="anchor" href="#%E3%83%AF%E3%83%BC%E3%82%AF%E3%83%95%E3%83%AD%E3%83%BC%E3%83%97%E3%83%A9%E3%83%B3%E3%82%92%E3%82%88%E3%82%8A%E7%B0%A1%E5%8D%98%E3%81%AB%E6%9B%B8%E3%81%8F%E6%96%B9%E6%B3%95"></a></h2>
+<hr class="half-width"><p>プラン内でターゲットを指定するデフォルトの方法は、<code>tar_target()</code>
+関数を使うことです。
+しかし、この書き方は少し冗長に感じるかもしれません。</p>
+<p>その代わりに、<code>targets</code>の開発者であるWill
+Landauによって作成された <code>tarchetypes</code>
+パッケージを使う方法があります。</p>
+<div id="tarchetypes-のインストール" class="callout prereq">
 <div class="callout-square">
 <i class="callout-icon" data-feather="check"></i>
 </div>
-<div id="install-tarchetypes" class="callout-inner">
-<h3 class="callout-title">Install <code>tarchetypes</code>
-</h3>
+<div id="tarchetypes-のインストール" class="callout-inner">
+<h3 class="callout-title">
+<code>tarchetypes</code> のインストール</h3>
 <div class="callout-content">
-<p>If you haven’t done so yet, install <code>tarchetypes</code> with
-<code>install.packages("tarchetypes")</code>.</p>
+<p>まだインストールしていない場合は、<code>install.packages("tarchetypes")</code>
+で <code>tarchetypes</code> をインストールしてください。</p>
 </div>
 </div>
 </div>
@@ -569,7 +569,7 @@ Last error traceback:
     doTryCatch(return(expr), name, parentenv, handler)
     base::withCallingHandlers({ NULL base::saveRDS(base::do.call(base::do.ca...
     base::saveRDS(base::do.call(base::do.call, base::c(base::readRDS("/tmp/R...
-    base::do.call(base::do.call, base::c(base::readRDS("/tmp/RtmpC3GbeG/call...
+    base::do.call(base::do.call, base::c(base::readRDS("/tmp/Rtmp8yhWqG/call...
     (function (what, args, quote = FALSE, envir = parent.frame()) { if (!is....
     (function (targets_function, targets_arguments, options, envir = NULL, s...
     tryCatch(out &lt;- withCallingHandlers(targets::tar_callr_inner_try(targets...
@@ -671,9 +671,9 @@ any links that you are not going to use.
   "creativeWorkStatus": "active",
   "url": "https://swcarpentry-ja.github.io/targets-workshop/organization.html",
   "identifier": "https://swcarpentry-ja.github.io/targets-workshop/organization.html",
-  "dateCreated": "2024-10-10",
-  "dateModified": "2024-10-10",
-  "datePublished": "2024-10-22"
+  "dateCreated": "2024-10-24",
+  "dateModified": "2024-10-24",
+  "datePublished": "2024-10-24"
 }
 
   </script><script>
