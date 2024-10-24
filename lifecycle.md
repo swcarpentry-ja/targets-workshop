@@ -42,7 +42,7 @@ tar_make()
 ✔ skipped target penguins_csv_file
 ✔ skipped target penguins_data_raw
 ✔ skipped target penguins_data
-✔ skipped pipeline [0.198 seconds]
+✔ skipped pipeline [0.213 seconds]
 ```
 
 最初にパイプラインを実行したとき、`targets` がビルドされている各ターゲットのリストを出力したことを覚えていますか？
@@ -86,8 +86,8 @@ tar_make()
 ✔ skipped target penguins_csv_file
 ✔ skipped target penguins_data_raw
 ▶ dispatched target penguins_data
-● completed target penguins_data [0.013 seconds]
-▶ ended pipeline [0.234 seconds]
+● completed target penguins_data [0.012 seconds]
+▶ ended pipeline [0.253 seconds]
 ```
 
 何が起こったでしょうか？
@@ -192,7 +192,7 @@ tar_visnetwork()
 
 ここで `*` は `B` が最後にワークフローを実行したときと比較して変更されたことを示します。ネットワークの可視化では `B`, `C`, `D` がすべて薄い青色で表示されます。
 
-しかし、ワークフローを再実行して `C` が以前と全く同じ値になる場合、`D` は再実行されず（「スキップ」されます）。
+しかし、ワークフローを再実行して `C` が以前と全く同じ値になる場合、`D` は再実行されません（「スキップ」されます）。
 
 ほとんどの場合、単一の変更が下流のターゲット全体に影響を及ぼし、再構築を引き起こしますが、必ずしもそうではありません。`targets` は事前に実際の出力がどうなるかを知る方法がないため、将来を完全に予測するネットワーク可視化を提供することはできません！
 
@@ -252,7 +252,7 @@ tar_make()
 ✔ skipped target penguins_csv_file
 ✔ skipped target penguins_data_raw
 ✔ skipped target penguins_data
-✔ skipped pipeline [0.226 seconds]
+✔ skipped pipeline [0.236 seconds]
 ```
 
 `penguins_data` を無効化し、再度実行してみましょう：
@@ -268,7 +268,7 @@ tar_make()
 ✔ skipped target penguins_data_raw
 ▶ dispatched target penguins_data
 ● completed target penguins_data [0.012 seconds]
-▶ ended pipeline [0.243 seconds]
+▶ ended pipeline [0.258 seconds]
 ```
 
 もしすべてをリセットして新たに開始したい場合は、`tar_invalidate(everything())` を使用して `_targets` フォルダ全体を削除することができます（`tar_invalidate()` はターゲット名を指定するために `tidyselect` 式を受け入れます）。

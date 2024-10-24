@@ -26,18 +26,18 @@ Episode summary: プロジェクト組織のベストプラクティスを実演
 
 
 
-## A simpler way to write workflow plans
+## ワークフロープランをより簡単に書く方法
 
-The default way to specify targets in the plan is with the `tar_target()` function.
-But this way of writing plans can be a bit verbose.
+プラン内でターゲットを指定するデフォルトの方法は、`tar_target()` 関数を使うことです。
+しかし、この書き方は少し冗長に感じるかもしれません。
 
-There is an alternative provided by the `tarchetypes` package, also written by the creator of `targets`, Will Landau.
+その代わりに、`targets`の開発者であるWill Landauによって作成された `tarchetypes` パッケージを使う方法があります。
 
 ::::::::::::::::::::::::::::::::::::: prereq
 
-## Install `tarchetypes`
+## `tarchetypes` のインストール
 
-If you haven't done so yet, install `tarchetypes` with `install.packages("tarchetypes")`.
+まだインストールしていない場合は、`install.packages("tarchetypes")` で `tarchetypes` をインストールしてください。
 
 :::::::::::::::::::::::::::::::::::::
 
@@ -170,7 +170,7 @@ Last error traceback:
     doTryCatch(return(expr), name, parentenv, handler)
     base::withCallingHandlers({ NULL base::saveRDS(base::do.call(base::do.ca...
     base::saveRDS(base::do.call(base::do.call, base::c(base::readRDS("/tmp/R...
-    base::do.call(base::do.call, base::c(base::readRDS("/tmp/RtmpC3GbeG/call...
+    base::do.call(base::do.call, base::c(base::readRDS("/tmp/Rtmp8yhWqG/call...
     (function (what, args, quote = FALSE, envir = parent.frame()) { if (!is....
     (function (targets_function, targets_arguments, options, envir = NULL, s...
     tryCatch(out <- withCallingHandlers(targets::tar_callr_inner_try(targets...
