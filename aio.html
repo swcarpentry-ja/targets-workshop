@@ -416,7 +416,7 @@
         
 <section id="aio-introduction"><p>Content from <a href="introduction.html">はじめに</a></p>
 <hr>
-<p>最終更新日：2024-10-10 |
+<p>最終更新日：2024-11-19 |
 
         <a href="https://github.com/swcarpentry-ja/targets-workshop/edit/main/episodes/introduction.Rmd" class="external-link">ページの編集 <i aria-hidden="true" data-feather="edit"></i></a></p>
 <div class="text-end">
@@ -578,7 +578,7 @@ any links that you are not going to use.
  -->
 </section></section><section id="aio-basic-targets"><p>Content from <a href="basic-targets.html">初めての targets ワークフロー</a></p>
 <hr>
-<p>最終更新日：2024-10-10 |
+<p>最終更新日：2024-11-19 |
 
         <a href="https://github.com/swcarpentry-ja/targets-workshop/edit/main/episodes/basic-targets.Rmd" class="external-link">ページの編集 <i aria-hidden="true" data-feather="edit"></i></a></p>
 <div class="text-end">
@@ -905,10 +905,10 @@ date (1): Date Egg
 <pre class="output" tabindex="0"><code>▶ dispatched target penguins_csv_file
 ● completed target penguins_csv_file [0.001 seconds]
 ▶ dispatched target penguins_data_raw
-● completed target penguins_data_raw [0.102 seconds]
+● completed target penguins_data_raw [0.19 seconds]
 ▶ dispatched target penguins_data
-● completed target penguins_data [0.007 seconds]
-▶ ended pipeline [0.308 seconds]</code></pre>
+● completed target penguins_data [0.006 seconds]
+▶ ended pipeline [0.35 seconds]</code></pre>
 </div>
 <p>おめでとうございます、<code>targets</code>
 を使って最初のワークフローを実行しました！</p>
@@ -940,7 +940,7 @@ any links that you are not going to use.
  -->
 </section></section><section id="aio-cache"><p>Content from <a href="cache.html">ワークフローオブジェクトの読み込み</a></p>
 <hr>
-<p>最終更新日：2024-10-10 |
+<p>最終更新日：2024-11-19 |
 
         <a href="https://github.com/swcarpentry-ja/targets-workshop/edit/main/episodes/cache.Rmd" class="external-link">ページの編集 <i aria-hidden="true" data-feather="edit"></i></a></p>
 <div class="text-end">
@@ -1125,7 +1125,7 @@ any links that you are not going to use.
  -->
 </section></section><section id="aio-lifecycle"><p>Content from <a href="lifecycle.html">ワークフローのライフサイクル</a></p>
 <hr>
-<p>最終更新日：2024-10-24 |
+<p>最終更新日：2024-11-19 |
 
         <a href="https://github.com/swcarpentry-ja/targets-workshop/edit/main/episodes/lifecycle.Rmd" class="external-link">ページの編集 <i aria-hidden="true" data-feather="edit"></i></a></p>
 <div class="text-end">
@@ -1180,7 +1180,7 @@ any links that you are not going to use.
 <pre class="output" tabindex="0"><code>✔ skipped target penguins_csv_file
 ✔ skipped target penguins_data_raw
 ✔ skipped target penguins_data
-✔ skipped pipeline [0.213 seconds]</code></pre>
+✔ skipped pipeline [0.152 seconds]</code></pre>
 </div>
 <p>最初にパイプラインを実行したとき、<code>targets</code>
 がビルドされている各ターゲットのリストを出力したことを覚えていますか？</p>
@@ -1224,7 +1224,7 @@ any links that you are not going to use.
 ✔ skipped target penguins_data_raw
 ▶ dispatched target penguins_data
 ● completed target penguins_data [0.012 seconds]
-▶ ended pipeline [0.253 seconds]</code></pre>
+▶ ended pipeline [0.284 seconds]</code></pre>
 </div>
 <p>何が起こったでしょうか？</p>
 <p>今回は、<code>penguins_csv_file</code> と
@@ -1432,7 +1432,7 @@ targets キャッシュ（<code>_targets</code> フォルダ）に保存しま�
 <pre class="output" tabindex="0"><code>✔ skipped target penguins_csv_file
 ✔ skipped target penguins_data_raw
 ✔ skipped target penguins_data
-✔ skipped pipeline [0.236 seconds]</code></pre>
+✔ skipped pipeline [0.251 seconds]</code></pre>
 </div>
 <p><code>penguins_data</code> を無効化し、再度実行してみましょう：</p>
 <div class="codewrapper sourceCode" id="cb13">
@@ -1449,7 +1449,7 @@ targets キャッシュ（<code>_targets</code> フォルダ）に保存しま�
 ✔ skipped target penguins_data_raw
 ▶ dispatched target penguins_data
 ● completed target penguins_data [0.012 seconds]
-▶ ended pipeline [0.258 seconds]</code></pre>
+▶ ended pipeline [0.28 seconds]</code></pre>
 </div>
 <p>もしすべてをリセットして新たに開始したい場合は、<code>tar_invalidate(everything())</code>
 を使用して <code>_targets</code>
@@ -1499,7 +1499,7 @@ any links that you are not going to use.
  -->
 </section></section><section id="aio-organization"><p>Content from <a href="organization.html">targetsプロジェクト組織のベストプラクティス</a></p>
 <hr>
-<p>最終更新日：2024-10-24 |
+<p>最終更新日：2024-11-19 |
 
         <a href="https://github.com/swcarpentry-ja/targets-workshop/edit/main/episodes/organization.Rmd" class="external-link">ページの編集 <i aria-hidden="true" data-feather="edit"></i></a></p>
 <div class="text-end">
@@ -1707,7 +1707,7 @@ Last error traceback:
     doTryCatch(return(expr), name, parentenv, handler)
     base::withCallingHandlers({ NULL base::saveRDS(base::do.call(base::do.ca...
     base::saveRDS(base::do.call(base::do.call, base::c(base::readRDS("/tmp/R...
-    base::do.call(base::do.call, base::c(base::readRDS("/tmp/Rtmp8yhWqG/call...
+    base::do.call(base::do.call, base::c(base::readRDS("/tmp/RtmpaSC2wJ/call...
     (function (what, args, quote = FALSE, envir = parent.frame()) { if (!is....
     (function (targets_function, targets_arguments, options, envir = NULL, s...
     tryCatch(out &lt;- withCallingHandlers(targets::tar_callr_inner_try(targets...
@@ -1755,7 +1755,7 @@ any links that you are not going to use.
  -->
 </section></section><section id="aio-packages"><p>Content from <a href="packages.html">パッケージの管理</a></p>
 <hr>
-<p>最終更新日：2024-10-10 |
+<p>最終更新日：2024-11-19 |
 
         <a href="https://github.com/swcarpentry-ja/targets-workshop/edit/main/episodes/packages.Rmd" class="external-link">ページの編集 <i aria-hidden="true" data-feather="edit"></i></a></p>
 <div class="text-end">
@@ -1854,8 +1854,8 @@ any links that you are not going to use.
 <h3 class="code-label">出力<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="output" tabindex="0"><code>▶ dispatched target adelie_data
-● completed target adelie_data [0.018 seconds]
-▶ ended pipeline [0.098 seconds]</code></pre>
+● completed target adelie_data [0.017 seconds]
+▶ ended pipeline [0.102 seconds]</code></pre>
 </div>
 <p>この方法は、方法1で時々経験するかもしれない遅延を回避します。</p>
 </div>
@@ -1885,8 +1885,8 @@ any links that you are not going to use.
 <h3 class="code-label">出力<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="output" tabindex="0"><code>▶ dispatched target adelie_data
-● completed target adelie_data [0.016 seconds]
-▶ ended pipeline [0.097 seconds]</code></pre>
+● completed target adelie_data [0.018 seconds]
+▶ ended pipeline [0.106 seconds]</code></pre>
 </div>
 <p>これは、すべてのパッケージを読み込むよりもメモリ効率が良い場合があります。なぜなら、ワークフローの通常の実行中にすべてのターゲットが常に作成されるわけではないからです。
 しかし、ターゲットごとに必要なパッケージを覚えて指定するのは手間がかかることがあります。</p>
@@ -1914,8 +1914,8 @@ any links that you are not going to use.
 <h3 class="code-label">出力<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="output" tabindex="0"><code>▶ dispatched target adelie_data
-● completed target adelie_data [0.008 seconds]
-▶ ended pipeline [0.088 seconds]</code></pre>
+● completed target adelie_data [0.009 seconds]
+▶ ended pipeline [0.098 seconds]</code></pre>
 </div>
 <p>このアプローチの利点は、すべての関数の起源が明確になることです。例えば、GitHub
 でソースを見たりすることで、すぐに関数がどこから来ているかを知ることができます。
@@ -2074,7 +2074,7 @@ any links that you are not going to use.
  -->
 </section></section><section id="aio-files"><p>Content from <a href="files.html">外部ファイルの取り扱い</a></p>
 <hr>
-<p>最終更新日：2024-10-10 |
+<p>最終更新日：2024-11-19 |
 
         <a href="https://github.com/swcarpentry-ja/targets-workshop/edit/main/episodes/files.Rmd" class="external-link">ページの編集 <i aria-hidden="true" data-feather="edit"></i></a></p>
 <div class="text-end">
@@ -2149,7 +2149,7 @@ World」という一行のテキストを入力し、<code>_targets/user/data/</
 </h3>
 <pre class="output" tabindex="0"><code>▶ dispatched target some_data
 ● completed target some_data [0.001 seconds]
-▶ ended pipeline [0.082 seconds]</code></pre>
+▶ ended pipeline [0.086 seconds]</code></pre>
 </div>
 <p><code>tar_read(some_data)</code> を使用して <code>some_data</code>
 の内容を検査すると、期待通り <code>"Hello World"</code>
@@ -2172,7 +2172,7 @@ you?」としましょう。これをRStudioのテキストエディタで編集
 <h3 class="code-label">出力<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="output" tabindex="0"><code>✔ skipped target some_data
-✔ skipped pipeline [0.079 seconds]</code></pre>
+✔ skipped pipeline [0.086 seconds]</code></pre>
 </div>
 <p>ターゲット <code>some_data</code>
 がスキップされましたが、これはファイルの内容が変更されたにもかかわらずです。</p>
@@ -2201,7 +2201,7 @@ you?」としましょう。これをRStudioのテキストエディタで編集
 ● completed target data_file [0.001 seconds]
 ▶ dispatched target some_data
 ● completed target some_data [0 seconds]
-▶ ended pipeline [0.101 seconds]</code></pre>
+▶ ended pipeline [0.129 seconds]</code></pre>
 </div>
 <p>今回は、<code>targets</code> が期待通りに <code>some_data</code>
 を再構築するのが確認できます。</p>
@@ -2287,7 +2287,7 @@ you?」としましょう。これをRStudioのテキストエディタで編集
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> 回答を表示する </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <div class="codewrapper sourceCode" id="cb10">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -2311,10 +2311,10 @@ you?」としましょう。これをRStudioのテキストエディタで編集
 <pre class="output" tabindex="0"><code>▶ dispatched target penguins_data_raw_file
 ● completed target penguins_data_raw_file [0.001 seconds]
 ▶ dispatched target penguins_data_raw
-● completed target penguins_data_raw [0.176 seconds]
+● completed target penguins_data_raw [0.102 seconds]
 ▶ dispatched target penguins_data
-● completed target penguins_data [0.014 seconds]
-▶ ended pipeline [0.324 seconds]</code></pre>
+● completed target penguins_data [0.015 seconds]
+▶ ended pipeline [0.382 seconds]</code></pre>
 </div>
 </div>
 </div>
@@ -2390,14 +2390,14 @@ you?」としましょう。これをRStudioのテキストエディタで編集
 <h3 class="code-label">出力<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="output" tabindex="0"><code>▶ dispatched target hello_file
-● completed target hello_file [0.001 seconds]
+● completed target hello_file [0 seconds]
 ▶ dispatched target hello
 ● completed target hello [0 seconds]
 ▶ dispatched target hello_caps
 ● completed target hello_caps [0 seconds]
 ▶ dispatched target hello_caps_out
 ● completed target hello_caps_out [0 seconds]
-▶ ended pipeline [0.097 seconds]</code></pre>
+▶ ended pipeline [0.109 seconds]</code></pre>
 </div>
 <p><code>results</code> フォルダ内の <code>hello_caps.txt</code>
 を見て、期待通りであることを確認してください。</p>
@@ -2419,7 +2419,7 @@ you?」としましょう。これをRStudioのテキストエディタで編集
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> 回答を表示する </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
 <p><code>targets</code> は <code>hello_caps_out</code>
 が変更された（「無効化された」）ことを検出し、再構築のためにコードを再実行します。これにより、<code>hello_caps.txt</code>
@@ -2458,7 +2458,7 @@ any links that you are not going to use.
  -->
 </section></section><section id="aio-branch"><p>Content from <a href="branch.html">ブランチング</a></p>
 <hr>
-<p>最終更新日：2024-10-10 |
+<p>最終更新日：2024-11-19 |
 
         <a href="https://github.com/swcarpentry-ja/targets-workshop/edit/main/episodes/branch.Rmd" class="external-link">ページの編集 <i aria-hidden="true" data-feather="edit"></i></a></p>
 <div class="text-end">
@@ -2550,8 +2550,8 @@ any links that you are not going to use.
 ✔ skipped target penguins_data_raw
 ✔ skipped target penguins_data
 ▶ dispatched target combined_model
-● completed target combined_model [0.022 seconds]
-▶ ended pipeline [0.244 seconds]</code></pre>
+● completed target combined_model [0.01 seconds]
+▶ ended pipeline [0.276 seconds]</code></pre>
 </div>
 <p>モデルを見てみましょう。<code>broom</code> パッケージの
 <code>glance()</code> 関数を使用します。これは base R の
@@ -2629,12 +2629,12 @@ tidyverse
 ▶ dispatched target species_model
 ● completed target species_model [0.001 seconds]
 ▶ dispatched target combined_summary
-● completed target combined_summary [0.011 seconds]
+● completed target combined_summary [0.007 seconds]
 ▶ dispatched target interaction_summary
-● completed target interaction_summary [0.002 seconds]
+● completed target interaction_summary [0.004 seconds]
 ▶ dispatched target species_summary
-● completed target species_summary [0.002 seconds]
-▶ ended pipeline [0.272 seconds]</code></pre>
+● completed target species_summary [0.003 seconds]
+▶ ended pipeline [0.301 seconds]</code></pre>
 </div>
 <p>モデルの一つのサマリーを見てみましょう：</p>
 <div class="codewrapper sourceCode" id="cb8">
@@ -2706,15 +2706,15 @@ tidyverse
 ✔ skipped target penguins_data_raw
 ✔ skipped target penguins_data
 ▶ dispatched target models
-● completed target models [0.004 seconds]
+● completed target models [0.005 seconds]
 ▶ dispatched branch model_summaries_812e3af782bee03f
-● completed branch model_summaries_812e3af782bee03f [0.007 seconds]
+● completed branch model_summaries_812e3af782bee03f [0.009 seconds]
 ▶ dispatched branch model_summaries_2b8108839427c135
-● completed branch model_summaries_2b8108839427c135 [0.003 seconds]
+● completed branch model_summaries_2b8108839427c135 [0.004 seconds]
 ▶ dispatched branch model_summaries_533cd9a636c3e05b
 ● completed branch model_summaries_533cd9a636c3e05b [0.003 seconds]
 ● completed pattern model_summaries
-▶ ended pipeline [0.27 seconds]</code></pre>
+▶ ended pipeline [0.298 seconds]</code></pre>
 </div>
 <p>一連の小さなターゲット（ブランチ）があり、それぞれが
 model_summaries_812e3af782bee03f のように名前付けされ、その後に全体の
@@ -2850,13 +2850,13 @@ model_summaries_812e3af782bee03f のように名前付けされ、その後に�
 ✔ skipped target penguins_data
 ✔ skipped target models
 ▶ dispatched branch model_summaries_812e3af782bee03f
-● completed branch model_summaries_812e3af782bee03f [0.012 seconds]
+● completed branch model_summaries_812e3af782bee03f [0.014 seconds]
 ▶ dispatched branch model_summaries_2b8108839427c135
-● completed branch model_summaries_2b8108839427c135 [0.005 seconds]
+● completed branch model_summaries_2b8108839427c135 [0.007 seconds]
 ▶ dispatched branch model_summaries_533cd9a636c3e05b
 ● completed branch model_summaries_533cd9a636c3e05b [0.004 seconds]
 ● completed pattern model_summaries
-▶ ended pipeline [0.273 seconds]</code></pre>
+▶ ended pipeline [0.3 seconds]</code></pre>
 </div>
 <p>今回は、<code>model_summaries</code>
 をロードすると、各行がどのモデルに対応しているかを知ることができます（右にスクロールする必要があるかもしれません）。</p>
@@ -3053,7 +3053,7 @@ any links that you are not going to use.
 </div>
 </section></section><section id="aio-parallel"><p>Content from <a href="parallel.html">並列処理</a></p>
 <hr>
-<p>最終更新日：2024-10-10 |
+<p>最終更新日：2024-11-19 |
 
         <a href="https://github.com/swcarpentry-ja/targets-workshop/edit/main/episodes/parallel.Rmd" class="external-link">ページの編集 <i aria-hidden="true" data-feather="edit"></i></a></p>
 <div class="text-end">
@@ -3297,7 +3297,7 @@ any links that you are not going to use.
  -->
 </div></section><section id="aio-quarto"><p>Content from <a href="quarto.html">Quartoを用いた再現可能なレポート</a></p>
 <hr>
-<p>最終更新日：2024-10-10 |
+<p>最終更新日：2024-11-19 |
 
         <a href="https://github.com/swcarpentry-ja/targets-workshop/edit/main/episodes/quarto.Rmd" class="external-link">ページの編集 <i aria-hidden="true" data-feather="edit"></i></a></p>
 <div class="text-end">
@@ -3617,8 +3617,8 @@ any links that you are not going to use.
   "url": "https://swcarpentry-ja.github.io/targets-workshop/aio.html",
   "identifier": "https://swcarpentry-ja.github.io/targets-workshop/aio.html",
   "dateCreated": "2024-10-24",
-  "dateModified": "2024-11-12",
-  "datePublished": "2024-11-12"
+  "dateModified": "2024-11-19",
+  "datePublished": "2024-11-19"
 }
 
   </script><script>
