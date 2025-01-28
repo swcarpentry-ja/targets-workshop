@@ -1,85 +1,142 @@
 ---
-title: 'First targets Workflow'
-teaching: 30
-exercises: 10
+title: '初めての targets ワークフロー'
+teaching: 10
+exercises: 2
 ---
 
 :::::::::::::::::::::::::::::::::::::: questions 
 
-- What are best practices for organizing analyses?
-- What is a `_targets.R` file for?
-- What is the content of the `_targets.R` file?
-- How do you run a workflow? 
+- 分析を整理するためのベストプラクティスは何ですか？
+- `_targets.R` ファイルは何のためのものですか？
+- `_targets.R` ファイルの内容は何ですか？
+- ワークフローを実行するにはどうしますか？ 
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
 ::::::::::::::::::::::::::::::::::::: objectives
 
-- Create a project in RStudio
-- Explain the purpose of the `_targets.R` file
-- Write a basic `_targets.R` file
-- Use a `_targets.R` file to run a workflow
+- RStudioでプロジェクトを作成する
+- `_targets.R` ファイルの目的を説明する
+- 基本的な `_targets.R` ファイルを書く
+- `_targets.R` ファイルを使用してワークフローを実行する
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
 ::::::::::::::::::::::::::::::::::::: {.instructor}
 
-Episode summary: First chance to get hands dirty by writing a very simple workflow
+エピソードの概要: 非常にシンプルなワークフローを書いて、初めて実際に手を動かしてみる機会
 
 :::::::::::::::::::::::::::::::::::::
 
 
 
-## Create a project
+## プロジェクトの作成
 
-### About projects
+### プロジェクトについて
 
-`targets` uses the "project" concept for organizing analyses: all of the files needed for a given project are put in a single folder, the project folder.
-The project folder has additional subfolders for organization, such as folders for data, code, and results.
+`targets` は分析を整理するために「プロジェクト」の概念を使用します。特定のプロジェクトに必要なすべてのファイルを1つのフォルダ、プロジェクトフォルダにまとめます。
 
-By using projects, it makes it straightforward to re-orient yourself if you return to an analysis after time spent elsewhere.
-This wouldn't be a problem if we only ever work on one thing at a time until completion, but that is almost never the case.
-It is hard to remember what you were doing when you come back to a project after working on something else (a phenomenon called "context switching").
-By using a standardized organization system, you will reduce confusion and lost time... in other words, you are increasing reproducibility!
+プロジェクトフォルダには、データ、コード、結果用のフォルダなど、整理のための追加のサブフォルダがあります。
 
-This workshop will use RStudio, since it also works well with the project organization concept.
+プロジェクトを使用することで、他の作業に時間を費やした後に分析に戻った際に、簡単に再び方向付けることができます。
 
-### Create a project in RStudio
+もし一度に1つの作業のみを完了させる場合は問題になりませんが、実際にはほとんどの場合そうではありません。
 
-Let's start a new project using RStudio.
+他の作業をした後にプロジェクトに戻るときに、何をしていたかを覚えておくのは難しいです（「コンテキストスイッチング」と呼ばれる現象）。
 
-Click "File", then select "New Project".
+標準化された整理システムを使用することで、混乱や時間の浪費を減らすことができます。つまり、再現性を高めることになります！
 
-This will open the New Project Wizard, a set of menus to help you set up the project.
+このワークショップでは、プロジェクトの整理概念ともうまく連携する RStudio を使用します。
 
-![The New Project Wizard](fig/basic-rstudio-wizard.png){alt="Screenshot of RStudio New Project Wizard menu"}
+### RStudioでプロジェクトを作成する
 
-In the Wizard, click the first option, "New Directory", since we are making a brand-new project from scratch.
-Click "New Project" in the next menu.
-In "Directory name", enter a name that helps you remember the purpose of the project, such as "targets-demo" (follow best practices for naming files and folders).
-Under "Create project as a subdirectory of...", click the "Browse" button to select a directory to put the project.
-We recommend putting it on your Desktop so you can easily find it.
+RStudioを使用して新しいプロジェクトを開始しましょう。
 
-You can leave "Create a git repository" and "Use renv with this project" unchecked, but these are both excellent tools to improve reproducibility, and you should consider learning them and using them in the future, if you don't already.
-They can be enabled at any later time, so you don't need to worry about trying to use them immediately.
+「ファイル」をクリックし、「新しいプロジェクト」を選択します。
 
-Once you work through these steps, your RStudio session should look like this:
+これにより、新しいプロジェクトウィザードが開き、プロジェクトの設定を手助けする一連のメニューが表示されます。
 
-![Your newly created project](fig/basic-rstudio-project.png){alt="Screenshot of RStudio with a newly created project called 'targets-demo' open containing a single file, 'targets-demo.Rproj'"}
+![新しいプロジェクトウィザード](fig/basic-rstudio-wizard.png){alt="RStudioの新しいプロジェクトウィザードメニューのスクリーンショット"}
 
-Our project now contains a single file, created by RStudio: `targets-demo.Rproj`. You should not edit this file by hand. Its purpose is to tell RStudio that this is a project folder and to store some RStudio settings (if you use version-control software, it is OK to commit this file). Also, you can open the project by double clicking on the `.Rproj` file in your file explorer (try it by quitting RStudio then navigating in your file browser to your Desktop, opening the "targets-demo" folder, and double clicking `targets-demo.Rproj`).
+ウィザードで最初のオプション「新しいディレクトリ」をクリックします。これは、新しいプロジェクトをゼロから作成するためです。
 
-OK, now that our project is set up, we are (almost) ready to start using `targets`!
+次のメニューで「新しいプロジェクト」をクリックします。
 
-## Background: non-`targets` version
+「ディレクトリ名」には、プロジェクトの目的を思い出しやすい名前を入力します。例えば「targets-demo」（ファイルやフォルダの命名のベストプラクティスに従ってください）。
 
-First though, to get familiar with the functions and packages we'll use, let's run the code like you would in a "normal" R script without using `targets`.
+「プロジェクトをサブディレクトリとして作成する...」の下で、「参照」ボタンをクリックしてプロジェクトを配置するディレクトリを選択します。
 
-Recall that we are using the `palmerpenguins` R package to obtain the data.
-This package actually includes two variations of the dataset: one is an external CSV file with the raw data, and another is the cleaned data loaded into R.
-In real life you are probably have externally stored raw data, so **let's use the raw penguin data** as the starting point for our analysis too.
+プロジェクトを簡単に見つけられるように、デスクトップに配置することをお勧めします。
 
-The `path_to_file()` function in `palmerpenguins` provides the path to the raw data CSV file (it is inside the `palmerpenguins` R package source code that you downloaded to your computer when you installed the package).
+「Gitリポジトリを作成」と「このプロジェクトで renv を使用する」はチェックを外したままにできますが、これらは再現性を向上させる優れたツールです。もしまだであれば、将来的に学習して使用することを検討してください。
+
+これらは後からでも有効にできるため、すぐに使用しようと心配する必要はありません。
+
+これらの手順を進めると、RStudioのセッションは次のようになります：
+
+![新しく作成したプロジェクト](fig/basic-rstudio-project.png){alt="新しく作成された 'targets-demo' プロジェクトが開かれ、1つのファイル 'targets-demo.Rproj' を含むRStudioのスクリーンショット"}
+
+プロジェクトには現在、RStudioによって作成された1つのファイル `targets-demo.Rproj` が含まれています。このファイルを手動で編集しないでください。その目的は、RStudioにこのフォルダがプロジェクトフォルダであることを伝え、いくつかのRStudio設定を保存することです（バージョン管理ソフトウェアを使用している場合は、このファイルをコミットしても構いません）。また、ファイルエクスプローラーで `.Rproj` ファイルをダブルクリックすることでプロジェクトを開くことができます（RStudioを終了してからファイルブラウザでデスクトップに移動し、「targets-demo」フォルダを開いて `targets-demo.Rproj` をダブルクリックして試してください）。
+
+さて、プロジェクトが設定されたので、`targets` の使用を開始する準備ができました！
+
+## `_targets.R` ファイルの作成
+
+すべての `targets` プロジェクトには、メインプロジェクトフォルダ（「プロジェクトルート」）にある特別なファイル `_targets.R` を含める必要があります。
+
+`_targets.R` ファイルにはワークフローの仕様が含まれており、Rに分析を実行する指示が記述されています。これはレシピのようなものです。
+
+`_targets.R` ファイルを使用することで、特定のスクリプトを特定の順序で実行することを覚えておく必要がなくなります。
+
+代わりに、Rがそれを自動的に実行してくれます（再現性が向上します）！
+
+### `_targets.R` ファイルの構成
+
+これから `_targets.R` ファイルの作成を開始します。幸い、`targets` にはこれを手助けする関数が用意されています。
+
+Rコンソールで、まず `library(targets)` で `targets` パッケージを読み込み、次に `tar_script()` コマンドを実行します。
+
+
+``` r
+library(targets)
+tar_script()
+```
+
+コンソールでは何も起こりませんが、ファイルビューアに新しいファイル `_targets.R` が表示されます。ファイルメニューを使用するか、クリックして開いてください。
+
+このデフォルトの `_targets.R` ファイルには3つの主要な部分が含まれています：
+
+- `library()` を使用したパッケージの読み込み
+- `function()` を使用したカスタム関数の定義
+- `list()` を使用したリストの定義
+
+最後の部分であるリストは、`_targets.R` ファイルの中で最も重要な部分です。
+
+ワークフローのステップを定義します。
+
+`_targets.R` ファイルは常にこのリストで終わらなければなりません。
+
+さらに、リスト内の各項目は `tar_target()` 関数の呼び出しです。
+
+`tar_target()` の最初の引数はビルドするターゲットの名前で、2番目の引数はそれをビルドするために使用するコマンドです。
+
+ターゲットの名前は**引用符なし**、つまり、引用符で囲まれていないことに注意してください。
+
+## 例示分析を実行するための `_targets.R` ファイルの設定
+
+### 背景: `targets` を使用しないバージョン
+
+このテンプレートを使用して、ペンギンのくちばしの形状の分析を構築し始めます。
+
+しかしまず、使用する関数やパッケージに慣れるために、`targets` を使用せずに「通常の」Rスクリプトでコードを実行してみましょう。
+
+データを取得するために `palmerpenguins` Rパッケージを使用していることを思い出してください。
+
+このパッケージには実際にデータセットの2つのバリエーションが含まれています。1つは生データを含む外部CSVファイルで、もう1つはRに読み込まれたクリーンなデータです。
+
+実際のところ、生データは外部に保存されていることが多いため、**生のペンギンデータ** を分析の出発点として使用しましょう。
+
+`palmerpenguins` の `path_to_file()` 関数は、生データCSVファイルへのパスを提供します（これは、パッケージをインストールしたときにコンピュータにダウンロードされた `palmerpenguins` Rパッケージのソースコード内にあります）。
 
 
 ``` r
@@ -95,9 +152,11 @@ penguins_csv_file
 [1] "/home/runner/.local/share/renv/cache/v5/linux-ubuntu-jammy/R-4.4/x86_64-pc-linux-gnu/palmerpenguins/0.1.1/6c6861efbc13c1d543749e9c7be4a592/palmerpenguins/extdata/penguins_raw.csv"
 ```
 
-We will use the `tidyverse` set of packages for loading and manipulating the data. We don't have time to cover all the details about using `tidyverse` now, but if you want to learn more about it, please see the ["Manipulating, analyzing and exporting data with tidyverse" lesson](https://datacarpentry.org/R-ecology-lesson/03-dplyr.html), or the Carpentry incubator lesson [R and the tidyverse for working with datasets](https://carpentries-incubator.github.io/r-tidyverse-4-datasets/).
+データの読み込みと操作には、`tidyverse` パッケージ群を使用します。
 
-Let's load the data with `read_csv()`.
+今は `tidyverse` の使用方法のすべての詳細をカバーする時間がありませんが、詳細を学びたい場合は、["tidyverse を使用したデータの操作、分析、およびエクスポート" レッスン](https://datacarpentry.org/R-ecology-lesson/03-dplyr.html) を参照してください。
+
+`read_csv()` を使用してデータを読み込みましょう。
 
 
 ``` r
@@ -143,14 +202,17 @@ date (1): Date Egg
 #   `Delta 15 N (o/oo)` <dbl>, `Delta 13 C (o/oo)` <dbl>, Comments <chr>
 ```
 
-We see the raw data has some awkward column names with spaces (these are hard to type out and can easily lead to mistakes in the code), and far more columns than we need.
-For the purposes of this analysis, we only need species name, bill length, and bill depth.
-In the raw data, the rather technical term "culmen" is used to refer to the bill.
+生データにはスペースを含む扱いにくい列名があり（これらはタイプミスしやすくコードのミスにつながりやすい）、必要なものよりもはるかに多くの列があります。
 
-![Illustration of bill (culmen) length and depth. Artwork by @allison_horst.](https://allisonhorst.github.io/palmerpenguins/reference/figures/culmen_depth.png)
+この分析の目的では、種名、くちばしの長さ、くちばしの深さのみが必要です。
 
-Let's clean up the data to make it easier to use for downstream analyses.
-We will also remove any rows with missing data, because this could cause errors for some functions later.
+生データでは、「culmen」というやや技術的な用語がくちばしを指すために使用されています。
+
+![くちばし（culmen）の長さと深さのイラスト。アートワーク：@allison_horst.](https://allisonhorst.github.io/palmerpenguins/reference/figures/culmen_depth.png)
+
+下流の分析で使用しやすくするためにデータを整理しましょう。
+
+後で一部の関数でエラーを引き起こす可能性があるため、欠損データを含む行も削除します。
 
 
 ``` r
@@ -164,7 +226,7 @@ penguins_data <- penguins_data_raw |>
     bill_depth_mm = `Culmen Depth (mm)`
   ) |>
   # Delete rows with missing data
-  drop_na()
+  remove_missing(na.rm = TRUE)
 
 penguins_data
 ```
@@ -186,136 +248,23 @@ penguins_data
 # ℹ 332 more rows
 ```
 
-We have not run the full analysis yet, but this is enough to get us started with the transition to using `targets`.
+これで良くなりました！
 
-## `targets` version
+### `targets` バージョン
 
-### About the `_targets.R` file
+`targets` を使用するとどのようになりますか？
 
-One major difference between a typical R data analysis and a `targets` project is that the latter must include a special file, called `_targets.R` in the main project folder (the "project root").
+最大の違いは、ワークフローの各ステップを最後のリストに**追加する必要がある**ことです。
 
-The `_targets.R` file includes the specification of the workflow: these are the directions for R to run your analysis, kind of like a recipe.
-By using the `_targets.R` file, **you won't have to remember to run specific scripts in a certain order**; instead, R will do it for you!
-This is a **huge win**, both for your future self and anybody else trying to reproduce your analysis.
+データクリーニングステップのためにカスタム関数も定義します。
 
-### Writing the initial `_targets.R` file
+これは、最後のターゲットのリストが**分析の高レベルな要約のように見えるべき**だからです。
 
-We will now start to write a `_targets.R` file. Fortunately, `targets` comes with a function to help us do this.
+ターゲットを定義するときに長いコードの塊を避けたいです。代わりに、そのコードをカスタム関数に入れます。
 
-In the R console, first load the `targets` package with `library(targets)`, then run the command `tar_script()`.
+他のステップ（ファイルパスの設定とデータの読み込み）はそれぞれ1つの関数呼び出しだけなので、それらを独自のカスタム関数に入れる意味はあまりありません。
 
-
-``` r
-library(targets)
-tar_script()
-```
-
-Nothing will happen in the console, but in the file viewer, you should see a new file, `_targets.R` appear. Open it using the File menu or by clicking on it.
-
-```{.r}
-library(targets)
-# This is an example _targets.R file. Every
-# {targets} pipeline needs one.
-# Use tar_script() to create _targets.R and tar_edit()
-# to open it again for editing.
-# Then, run tar_make() to run the pipeline
-# and tar_read(data_summary) to view the results.
-
-# Define custom functions and other global objects.
-# This is where you write source(\"R/functions.R\")
-# if you keep your functions in external scripts.
-summarize_data <- function(dataset) {
-  colMeans(dataset)
-}
-
-# Set target-specific options such as packages:
-# tar_option_set(packages = "utils") # nolint
-
-# End this file with a list of target objects.
-list(
-  tar_target(data, data.frame(x = sample.int(100), y = sample.int(100))),
-  tar_target(data_summary, summarize_data(data)) # Call your custom functions.
-)
-```
-
-Don't worry about the details of this file.
-Instead, notice that that it includes three main parts:
-
-- Loading packages with `library()`
-- Defining a custom function with `function()`
-- Defining a list with `list()`.
-
-You may not have used `function()` before.
-If not, that's OK; we will cover this in more detail in the [next episode](episodes/functions.Rmd), so we will ignore it for now.
-
-The last part, the list, is the **most important part** of the `_targets.R` file.
-It defines the steps in the workflow.
-The `_targets.R` file **must always end with this list**.
-
-Furthermore, each item in the list is a call of the `tar_target()` function.
-The first argument of `tar_target()` is name of the target to build, and the second argument is the command used to build it.
-Note that the name of the target is **unquoted**, that is, it is written without any surrounding quotation marks.
-
-## Modifying `_targets.R` to run the example analysis
-
-First, let's load all of the packages we need for our workflow.
-Add `library(tidyverse)` and `library(palmerpenguins)` to the top of `_targets.R` after `library(targets)`.
-
-Next, we can delete the `function()` statement since we won't be using that just yet (we will come back to custom functions soon!).
-
-The last, and trickiest, part is correctly defining the workflow in the list at the end of the file.
-
-From [the non-`targets` version](#background-non-targets-version), you can see we have three steps so far:
-
-1. Define the path to the CSV file with the raw penguins data.
-2. Read the CSV file.
-3. Clean the raw data.
-
-Each of these will be one item in the list.
-Furthermore, we need to write each item using the `tar_target()` function.
-Recall that we write the `tar_target()` function by writing the **name of the target to build** first and the **command to build it** second.
-
-::::::::::::::::::::::::::::::::::::: {.callout}
-
-## Choosing good target names
-
-The name of each target could be anything you like, but it is strongly recommended to **choose names that reflect what the target actually contains**.
-
-For example, `penguins_data_raw` for the raw data loaded from the CSV file and not `x`.
-
-Your future self will thank you!
-
-::::::::::::::::::::::::::::::::::::::::::
-
-::::::::::::::::::::::::::::::::::::: {.challenge}
-
-## Challenge: Use `tar_target()`
-
-Can you use `tar_target()` to define the first step in the workflow (setting the path  to the CSV file with the penguins data)?
-
-:::::::::::::::::::::::::::::::::: {.solution}
-
-
-``` r
-tar_target(name = penguins_csv_file, command = path_to_file("penguins_raw.csv"))
-```
-
-The first two arguments of `tar_target()` are the **name** of the target, followed by the **command** to build it.
-
-These arguments are used so frequently we will typically omit the argument names, instead writing it like this:
-
-
-``` r
-tar_target(penguins_csv_file, path_to_file("penguins_raw.csv"))
-```
-
-::::::::::::::::::::::::::::::::::
-
-::::::::::::::::::::::::::::::::::::::::::
-
-Now that we've seen how to define the first target, let's continue and add the rest.
-
-Once you've done that, this is how `_targets.R` should look:
+最後に、ワークフローの各ステップは `tar_target()` 関数で定義されます。
 
 
 ``` r
@@ -323,31 +272,31 @@ library(targets)
 library(tidyverse)
 library(palmerpenguins)
 
+clean_penguin_data <- function(penguins_data_raw) {
+  penguins_data_raw |>
+    select(
+      species = Species,
+      bill_length_mm = `Culmen Length (mm)`,
+      bill_depth_mm = `Culmen Depth (mm)`
+    ) |>
+    remove_missing(na.rm = TRUE)
+}
+
 list(
   tar_target(penguins_csv_file, path_to_file("penguins_raw.csv")),
-  tar_target(
-    penguins_data_raw,
-    read_csv(penguins_csv_file, show_col_types = FALSE)
-  ),
-  tar_target(
-    penguins_data,
-    penguins_data_raw |>
-      select(
-        species = Species,
-        bill_length_mm = `Culmen Length (mm)`,
-        bill_depth_mm = `Culmen Depth (mm)`
-      ) |>
-      drop_na()
-  )
+  tar_target(penguins_data_raw, read_csv(
+    penguins_csv_file, show_col_types = FALSE)),
+  tar_target(penguins_data, clean_penguin_data(penguins_data_raw))
 )
 ```
 
-I have set `show_col_types = FALSE` in `read_csv()` because we know from the earlier code that the column types were set correctly by default (character for species and numeric for bill length and depth), so we don't need to see the warning it would otherwise issue.
+`read_csv()` で `show_col_types = FALSE` に設定したのは、先ほどのコードから列の型がデフォルトで正しく設定されている（種には文字列、くちばしの長さと深さには数値）ことがわかっているためです。したがって、通常発生する警告を表示する必要はありません。
 
-## Run the workflow
+## ワークフローの実行
 
-Now that we have a workflow, we can run it with the `tar_make()` function.
-Try running it, and you should see something like this:
+ワークフローができたので、`tar_make()` 関数を使用して実行できます。
+
+それを実行してみてください。次のようなものが表示されるはずです：
 
 
 ``` r
@@ -356,43 +305,22 @@ tar_make()
 
 ``` output
 ▶ dispatched target penguins_csv_file
-● completed target penguins_csv_file [0.002 seconds, 190 bytes]
+● completed target penguins_csv_file [0.001 seconds]
 ▶ dispatched target penguins_data_raw
-● completed target penguins_data_raw [0.225 seconds, 10.403 kilobytes]
+● completed target penguins_data_raw [0.097 seconds]
 ▶ dispatched target penguins_data
-● completed target penguins_data [0.007 seconds, 1.614 kilobytes]
-▶ ended pipeline [0.314 seconds]
+● completed target penguins_data [0.007 seconds]
+▶ ended pipeline [0.204 seconds]
 ```
 
-Congratulations, you've run your first workflow with `targets`!
+おめでとうございます、`targets` を使って最初のワークフローを実行しました！
 
-::::::::::::::::::::::::::::::::::::: {.callout}
+::::::::::::::::::::::::::::::: keypoints 
 
-## The workflow cannot be run interactively
+- プロジェクトは分析を整理しておくのに役立ち、後で簡単に再実行できます
+- RStudioのプロジェクトウィザードを使用してプロジェクトを作成する
+- `_targets.R` ファイルはすべての `targets` プロジェクトに含める必要がある特別なファイルであり、ワークフローを定義します
+- `tar_script()` を使用してデフォルトの `_targets.R` ファイルを作成する
+- `tar_make()` を使用してワークフローを実行する
 
-You may be used to running R code interactively by selecting lines and pressing the "Run" button (or using the keyboard shortcut) in RStudio or your IDE of choice.
-
-You *could* run the list at the of `_targets.R` this way, but it will not execute the workflow (it will return a list instead).
-
-**The only way to run the workflow is with `tar_make()`.**
-
-You do not need to select and run anything interactively in `_targets.R`.
-In fact, you do not even need to have the `_targets.R` file open to run the workflow with `tar_make()`---try it for yourself!
-
-Similarly, **you must not write `tar_make()` in the `_targets.R` file**; you should only use `tar_make()` as a direct command at the R console.
-
-::::::::::::::::::::::::::::::::::::::::::
-
-Remember, now that we are using `targets`, **the only thing you need to do to replicate your analysis is run `tar_make()`**.
-
-This is true no matter how long or complicated your analysis becomes.
-
-::::::::::::::::::::::::::::::::::::: keypoints 
-
-- Projects help keep our analyses organized so we can easily re-run them later
-- Use the RStudio Project Wizard to create projects
-- The `_targets.R` file is a special file that must be included in all `targets` projects, and defines the worklow
-- Use `tar_script()` to create a default `_targets.R` file
-- Use `tar_make()` to run the workflow
-
-::::::::::::::::::::::::::::::::::::::::::::::::
+:::::::::::::::::::::::::::::::::

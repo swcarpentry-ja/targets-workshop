@@ -11,18 +11,19 @@ tar_plan(
   ),
   # Clean data
   penguins_data = clean_penguin_data(penguins_data_raw),
-  # Group data
-  tar_group_by(
-    penguins_data_grouped,
-    penguins_data,
-    species
+  # Build models
+  models = list(
+    combined_model = lm(
+      bill_depth_mm ~ bill_length_mm, data = penguins_data),
+    species_model = lm(
+      bill_depth_mm ~ bill_length_mm + species, data = penguins_data),
+    interaction_model = lm(
+      bill_depth_mm ~ bill_length_mm * species, data = penguins_data)
   ),
-  # Build combined model with all species together
-  combined_summary = model_glance(penguins_data),
-  # Build one model per species
+  # Get model summaries
   tar_target(
-    species_summary,
-    model_glance(penguins_data_grouped),
-    pattern = map(penguins_data_grouped)
+    model_summaries,
+    glance(models[[1]]),
+    pattern = map(models)
   )
 )
