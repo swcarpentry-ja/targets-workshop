@@ -1,45 +1,45 @@
 ---
-title: '外部ファイルの取り扱い'
+title: 'Working with External Files'
 teaching: 10
 exercises: 2
 ---
 
 :::::::::::::::::::::::::::::::::::::: questions 
 
-- 外部データをどのようにロードできますか？
+- How can we load external data?
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
 ::::::::::::::::::::::::::::::::::::: objectives
 
-- ワークフローに外部データをロードできるようにする
-- 外部データの内容が変更された場合にワークフローを再実行するように設定する
+- Be able to load external data into a workflow
+- Configure the workflow to rerun if the contents of the external data change
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
 ::::::::::::::::::::::::::::::::::::: instructor
 
-エピソードの概要: 外部ファイルの読み書き方法を示す
+Episode summary: Show how to read and write external files
 
 :::::::::::::::::::::::::::::::::::::
 
 
 
-## 外部ファイルを依存関係として扱う
+## Treating external files as a dependency
 
-ほとんどすべてのワークフローはデータのインポートから始まります。データは通常、外部ファイルとして保存されています。
+Almost all workflows will start by importing data, which is typically stored as an external file.
 
-簡単な例として、RStudioの「新しいファイル」メニューオプションを使用して外部データファイルを作成しましょう。「Hello World」という一行のテキストを入力し、`_targets/user/data/` に "hello.txt" テキストファイルとして保存します。
+As a simple example, let's create an external data file in RStudio with the "New File" menu option. Enter a single line of text, "Hello World" and save it as "hello.txt" text file in `_targets/user/data/`.
 
-次に、このファイルの内容を読み込み、ワークフロー内で `some_data` として保存するために、以下のプランを書いて `tar_make()` を実行します：
+We will read in the contents of this file and store it as `some_data` in the workflow by writing the following plan and running `tar_make()`:
 
 ::::::::::::::::::::::::::::::::::::: {.callout}
 
-## 進捗の保存
+## Save your progress
 
-1つのプロジェクト内でアクティブな `_targets.R` ファイルは1つだけです。
+You can only have one active `_targets.R` file at a time in a given project.
 
-新しい `_targets.R` ファイルを作成しようとしていますが、これまで作業してきたもの（ペンギンのくちばし分析）の進捗を失いたくないでしょう。そのファイルを一時的に `_targets_old.R` のような名前に変更することで、以下の新しい例の `_targets.R` ファイルを上書きしないようにできます。再び作業を再開するときに名前を戻してください。
+We are about to create a new `_targets.R` file, but you probably don't want to lose your progress in the one we have been working on so far (the penguins bill analysis). You can temporarily rename that one to something like `_targets_old.R` so that you don't overwrite it with the new example `_targets.R` file below. Then, rename them when you are ready to work on it again.
 
 :::::::::::::::::::::::::::::::::::::
 
@@ -56,13 +56,13 @@ tar_plan(
 
 ``` output
 ▶ dispatched target some_data
-● completed target some_data [0.001 seconds]
-▶ ended pipeline [0.086 seconds]
+● completed target some_data [0.001 seconds, 64 bytes]
+▶ ended pipeline [0.079 seconds]
 ```
 
-`tar_read(some_data)` を使用して `some_data` の内容を検査すると、期待通り `"Hello World"` という文字列が含まれていることがわかります。
+If we inspect the contents of `some_data` with `tar_read(some_data)`, it will contain the string `"Hello World"` as expected.
 
-次に、"hello.txt" を編集して、テキストを追加します。例えば、「Hello World. How are you?」としましょう。これをRStudioのテキストエディタで編集して保存します。次にパイプラインを再実行します。
+Now say we edit "hello.txt", perhaps add some text: "Hello World. How are you?". Edit this in the RStudio text editor and save it. Now run the pipeline again.
 
 
 ``` r
@@ -77,12 +77,12 @@ tar_plan(
 
 ``` output
 ✔ skipped target some_data
-✔ skipped pipeline [0.086 seconds]
+✔ skipped pipeline [0.073 seconds]
 ```
 
-ターゲット `some_data` がスキップされましたが、これはファイルの内容が変更されたにもかかわらずです。
+The target `some_data` was skipped, even though the contents of the file changed.
 
-これは、現在のところ `targets` がファイルの**名前のみ**を追跡しており、その内容を追跡していないためです。これを行うには、`tarchetypes` パッケージの `tar_file()` 関数を使用する必要があります。`tar_file()` はファイルの「ハッシュ」を計算します。これはファイルの内容によって決定される一意のデジタル署名です。内容が変更されると、ハッシュも変更され、`targets` によって検出されます。
+That is because right now, targets is only tracking the **name** of the file, not its contents. We need to use a special function for that, `tar_file()` from the `tarchetypes` package. `tar_file()` will calculate the "hash" of a file---a unique digital signature that is determined by the file's contents. If the contents change, the hash will change, and this will be detected by `targets`.
 
 
 ``` r
@@ -98,19 +98,19 @@ tar_plan(
 
 ``` output
 ▶ dispatched target data_file
-● completed target data_file [0.001 seconds]
+● completed target data_file [0 seconds, 26 bytes]
 ▶ dispatched target some_data
-● completed target some_data [0 seconds]
-▶ ended pipeline [0.129 seconds]
+● completed target some_data [0 seconds, 78 bytes]
+▶ ended pipeline [0.095 seconds]
 ```
 
-今回は、`targets` が期待通りに `some_data` を再構築するのが確認できます。
+This time we see that `targets` does successfully re-build `some_data` as expected.
 
-## ショートカット（または、ターゲットファクトリーについて）
+## A shortcut (or, About target factories)
 
-しかし、これにより、一つのターゲットではなく二つのターゲットを書く必要があることにも気づきます。ファイルの内容を追跡するターゲット（`data_file`）と、ファイルからロードした内容を保存するターゲット（`some_data`）です。
+However, also notice that this means we need to write two targets instead of one: one target to track the contents of the file (`data_file`), and one target to store what we load from the file (`some_data`).
 
-これは `targets` ワークフローでは一般的なパターンであるため、`tarchetypes` はこれをより簡潔に表現するショートカット、`tar_file_read()` を提供しています。
+It turns out that this is a common pattern in `targets` workflows, so `tarchetypes` provides a shortcut to express this more concisely, `tar_file_read()`.
 
 
 ``` r
@@ -126,7 +126,7 @@ tar_plan(
 )
 ```
 
-このプランを `tar_manifest()` で検査してみましょう：
+Let's inspect this pipeline with `tar_manifest()`:
 
 
 ``` r
@@ -142,27 +142,27 @@ tar_manifest()
 2 hello      "readLines(hello_file)"           
 ```
 
-`tar_file_read()` を使用してパイプラインに一つのターゲット（`hello`）のみを指定しましたが、実際には **二つ** のターゲット、`hello_file` と `hello` が含まれていることに気づきます。
+Notice that even though we only specified one target in the pipeline (`hello`, with `tar_file_read()`), the pipeline actually includes **two** targets, `hello_file` and `hello`.
 
-これは `tar_file_read()` が **ターゲットファクトリー** と呼ばれる特別な関数だからです。ターゲットファクトリーは一度に**複数**のターゲットを作成します。`tarchetypes` パッケージの主な目的の一つは、パイプラインの記述を容易にし、エラーを減らすためにターゲットファクトリーを提供することです。
+That is because `tar_file_read()` is a special function called a **target factory**, so-called because it makes **multiple** targets at once. One of the main purposes of the `tarchetypes` package is to provide target factories to make writing pipelines easier and less error-prone.
 
-## 非標準評価
+## Non-standard evaluation
 
-`!!.x` の意味は何でしょうか？これはRの使用に慣れていても馴染みがないかもしれません。これは「非標準評価」として知られ、特定のコンテキストで使用されます。詳細については時間がありませんが、`tar_file_read()` を使用する際にはこの特別な記法を使用する必要があることを覚えておいてください。書き方を忘れた場合（これは頻繁に起こります！）、`?tar_file_read` を実行してヘルプファイルの例を参照してください。
+What is the deal with the `!!.x`? That may look unfamiliar even if you are used to using R. It is known as "non-standard evaluation," and gets used in some special contexts. We don't have time to go into the details now, but just remember that you will need to use this special notation with `tar_file_read()`. If you forget how to write it (this happens frequently!) look at the examples in the help file by running `?tar_file_read`.
 
-## 他のデータ読み込み関数
+## Other data loading functions
 
-ここでは `readLines()` を例として使用しましたが、`readr::read_csv()`、`xlsx::read_excel()` など、外部ファイルからデータを読み込む他の関数でも同じパターンを使用できます（例えば、`read_csv(!!.x)`、`read_excel(!!.x)` など）。
-    
-これは一般的に推奨されます。そうすることで、入力データとパイプラインが同期し、常に最新の状態に保たれます。
+Although we used `readLines()` as an example here, you can use the same pattern for other functions that load data from external files, such as `readr::read_csv()`, `xlsx::read_excel()`, and others (for example, `read_csv(!!.x)`, `read_excel(!!.x)`, etc.).
+
+This is generally recommended so that your pipeline stays up to date with your input data.
 
 ::::::::::::::::::::::::::::::::::::: {.challenge}
 
-## Challenge: penguins の例で `tar_file_read()` を使用する
+## Challenge: Use `tar_file_read()` with the penguins example
 
-ペンギンのくちばし分析を開始したとき、まだ `tar_file_read()` を知りませんでした。
+We didn't know about `tar_file_read()` yet when we started on the penguins bill analysis.
 
-`tar_file_read()` を使用してCSVファイルを読み込み、その内容を追跡するにはどうすればよいですか？
+How can you use `tar_file_read()` to load the CSV file while tracking its contents?
 
 :::::::::::::::::::::::::::::::::: {.solution}
 
@@ -184,21 +184,23 @@ tar_plan(
 
 ``` output
 ▶ dispatched target penguins_data_raw_file
-● completed target penguins_data_raw_file [0.001 seconds]
+● completed target penguins_data_raw_file [0.001 seconds, 53.098 kilobytes]
 ▶ dispatched target penguins_data_raw
-● completed target penguins_data_raw [0.102 seconds]
+● completed target penguins_data_raw [0.18 seconds, 10.403 kilobytes]
 ▶ dispatched target penguins_data
-● completed target penguins_data [0.015 seconds]
-▶ ended pipeline [0.382 seconds]
+● completed target penguins_data [0.016 seconds, 1.495 kilobytes]
+▶ ended pipeline [0.343 seconds]
 ```
 
 ::::::::::::::::::::::::::::::::::
 
 :::::::::::::::::::::::::::::::::::::
 
-## データの書き出し
+## Writing out data
 
-ファイルへの書き出しは、ファイルの読み込みと似ています。`tar_file()` 関数を使用します。ただし、重要な注意点があります：この場合、`tar_file()` の第二引数（ターゲットをビルドするためのコマンド）は**ファイルへのパスを返さなければなりません**。すべてのファイルを書き出す関数がこれを行うわけではありません（一部は何も返さず、ファイルの出力を関数の副作用として扱います）。そのため、ファイルを書き出し、そのパスを返すカスタム関数を定義する必要があるかもしれません。
+Writing to files is similar to loading in files: we will use the `tar_file()` function. There is one important caveat: in this case, the second argument of `tar_file()` (the command to build the target) **must return the path to the file**. Not all functions that write files do this (some return nothing; these treat the output file is a side-effect of running the function), so you may need to define a custom function that writes out the file and then returns its path.
+
+Let's do this for `writeLines()`, the R function that writes character data to a file. Normally, its output would be `NULL` (nothing), as we can see here:
 
 
 ``` r
@@ -211,7 +213,7 @@ x
 NULL
 ```
 
-ここでは、文字データをファイルに書き出し、そのファイル名を返す修正済み関数を作成します（`...` は「これらの引数の残りを `writeLines()` に渡す」を意味します）：
+Here is our modified function that writes character data to a file and returns the name of the file (the `...` means "pass the rest of these arguments to `writeLines()`"):
 
 
 ``` r
@@ -221,7 +223,7 @@ write_lines_file <- function(text, file, ...) {
 }
 ```
 
-これを試してみましょう：
+Let's try it out:
 
 
 ``` r
@@ -234,7 +236,7 @@ x
 [1] "test.txt"
 ```
 
-これで、この関数をパイプラインで使用できます。例えば、テキストを大文字に変換して再度書き出してみましょう：
+We can now use this in a pipeline. For example let's change the text to upper case then write it out again:
 
 
 ``` r
@@ -260,17 +262,17 @@ tar_plan(
 
 ``` output
 ▶ dispatched target hello_file
-● completed target hello_file [0 seconds]
+● completed target hello_file [0.001 seconds, 26 bytes]
 ▶ dispatched target hello
-● completed target hello [0 seconds]
+● completed target hello [0 seconds, 78 bytes]
 ▶ dispatched target hello_caps
-● completed target hello_caps [0 seconds]
+● completed target hello_caps [0 seconds, 78 bytes]
 ▶ dispatched target hello_caps_out
-● completed target hello_caps_out [0 seconds]
-▶ ended pipeline [0.109 seconds]
+● completed target hello_caps_out [0 seconds, 26 bytes]
+▶ ended pipeline [0.101 seconds]
 ```
 
-`results` フォルダ内の `hello_caps.txt` を見て、期待通りであることを確認してください。
+Take a look at `hello_caps.txt` in the `results` folder and verify it is as you expect.
 
 ::::::::::::::::::::::::::::::::::::: {.challenge}
 
@@ -282,9 +284,9 @@ Try it and see.
 
 :::::::::::::::::::::::::::::::::: {.solution}
 
-`targets` は `hello_caps_out` が変更された（「無効化された」）ことを検出し、再構築のためにコードを再実行します。これにより、`hello_caps.txt` が再度 `results` に書き出されます。
+`targets` detects that `hello_caps_out` has changed (is "invalidated"), and re-runs the code to make it, thus writing out `hello_caps.txt` to `results` again.
 
-この方法で結果を出力することで、パイプラインがより堅牢になります。つまり、`results` 内のファイルの内容がプラン内のコードによってのみ生成されることが保証されます。
+So this way of writing out results makes your pipeline more robust: we have a guarantee that the contents of the file in `results` are generated solely by the code in your plan.
 
 ::::::::::::::::::::::::::::::::::
 
@@ -292,8 +294,8 @@ Try it and see.
 
 ::::::::::::::::::::::::::::::::::::: keypoints 
 
-- `tarchetypes::tar_file()` はファイルの内容を追跡します
-- `tarchetypes::tar_file_read()` をデータ読み込み関数（例えば `read_csv()`）と組み合わせて使用し、入力データとパイプラインを同期させる
-- `tarchetypes::tar_file()` をファイルに書き出す関数（ファイルに書き込んでパスを返す関数）と組み合わせてデータを書き出す
+- `tarchetypes::tar_file()` tracks the contents of a file
+- Use `tarchetypes::tar_file_read()` in combination with data loading functions like `read_csv()` to keep the pipeline in sync with your input data
+- Use `tarchetypes::tar_file()` in combination with a function that writes to a file and returns its path to write out data
 
 ::::::::::::::::::::::::::::::::::::::::::::::::

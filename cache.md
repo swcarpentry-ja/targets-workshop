@@ -1,5 +1,5 @@
 ---
-title: 'ワークフローオブジェクトの読み込み'
+title: 'Loading Workflow Objects'
 teaching: 10
 exercises: 2
 ---
@@ -8,57 +8,57 @@ exercises: 2
 
 :::::::::::::::::::::::::::::::::::::: questions 
 
-- ワークフローはどこで実行されますか？
-- ワークフローによって作成されたオブジェクトをどのように検査できますか？
+- Where does the workflow happen?
+- How can we inspect the objects built by the workflow?
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
 ::::::::::::::::::::::::::::::::::::: objectives
 
-- `targets` がワークフローを実行する場所とその理由を説明する
-- ワークフローによって作成されたオブジェクトをRセッションにロードできるようにする
+- Explain where `targets` runs the workflow and why
+- Be able to load objects built by the workflow into your R session
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
 ::::::::::::::::::::::::::::::::::::: instructor
 
-エピソードの概要: 作成したオブジェクトにアクセスする方法を示す
+Episode summary: Show how to get at the objects that we built
 
 :::::::::::::::::::::::::::::::::::::
 
-## ワークフローはどこで実行されますか？
+## Where does the workflow happen?
 
-私たちはちょうど最初のワークフローを実行しました。
-今、出力を見たいと思うでしょう。
-しかし、オブジェクトの名前（例えば `penguins_data`）を呼び出すだけではエラーが発生します。
+So we just finished running our workflow.
+Now you probably want to look at its output.
+But, if we just call the name of the object (for example, `penguins_data`), we get an error.
 
 ``` r
 penguins_data
 ```
 
 ``` error
-Error in eval(expr, envir, enclos): object 'penguins_data' not found
+Error: object 'penguins_data' not found
 ```
 
-ワークフローの結果はどこにありますか？
+Where are the results of our workflow?
 
 ::::::::::::::::::::::::::::::::::::: instructor
 
-- `targets` が別のRセッションで実行されるという概念を強調するために、`penguins_data` を実行しようとしてエラーになるふりをして驚きを装い、それを教育的な瞬間として使用することができます（エラーは教育の一部です！）。
+- To reinforce the concept of `targets` running in a separate R session, you may want to pretend trying to run `penguins_data`, then feigning surprise when it doesn't work and using it as a teaching moment (errors are pedagogy!).
 
-::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::
 
-ワークフローの結果が見えないのは、`targets` が**ワークフローを別のRセッションで実行する**ためであり、そのセッションと対話することができないからです。
-これは再現性のためです---ワークフローによって作成されたオブジェクトは、プロジェクト内のコードのみに依存すべきであり、Rに対してインタラクティブに与えたコマンドには依存すべきではありません。
+We don't see the workflow results because `targets` **runs the workflow in a separate R session** that we can't interact with.
+This is for reproducibility---the objects built by the workflow should only depend on the code in your project, not any commands you may have interactively given to R.
 
-幸いにも、`targets` にはワークフローによって作成されたオブジェクトを現在のセッションにロードするために使用できる2つの関数、`tar_load()` と `tar_read()` があります。
-これらがどのように機能するか見てみましょう。
+Fortunately, `targets` has two functions that can be used to load objects built by the workflow into our current session, `tar_load()` and `tar_read()`.
+Let's see how these work.
 
 ## tar_load()
 
-`tar_load()` は、ワークフローによって作成されたオブジェクトを現在のセッションにロードします。
-最初の引数はロードしたいオブジェクトの名前です。
-これを使用して `penguins_data` をロードし、`summary()` でデータの概要を取得しましょう。
+`tar_load()` loads an object built by the workflow into the current session.
+Its first argument is the name of the object you want to load.
+Let's use this to load `penguins_data` and get an overview of the data with `summary()`.
 
 
 
@@ -78,14 +78,14 @@ summary(penguins_data)
                     Max.   :59.60   Max.   :21.50  
 ```
 
-`tar_load()` は**副作用**---望むオブジェクトを現在のRセッションにロードするために使用されます。
-実際には値を返しません。
+Note that `tar_load()` is used for its **side-effect**---loading the desired object into the current R session.
+It doesn't actually return a value.
 
 ## tar_read()
 
-`tar_read()` は、ワークフローによって作成されたオブジェクトを取得するために使用される点では `tar_load()` と似ていますが、`tar_load()` とは異なり、それらを直接出力として返します。
+`tar_read()` is similar to `tar_load()` in that it is used to retrieve objects built by the workflow, but unlike `tar_load()`, it returns them directly as output.
 
-`penguins_csv_file` で試してみましょう。
+Let's try it with `penguins_csv_file`.
 
 
 ``` r
@@ -96,9 +96,9 @@ tar_read(penguins_csv_file)
 [1] "/home/runner/.local/share/renv/cache/v5/linux-ubuntu-jammy/R-4.4/x86_64-pc-linux-gnu/palmerpenguins/0.1.1/6c6861efbc13c1d543749e9c7be4a592/palmerpenguins/extdata/penguins_raw.csv"
 ```
 
-`penguins_csv_file` の内容がすぐに表示されます。
-しかし、それは環境にロードされていません。
-今 `penguins_csv_file` を実行しようとすると、エラーが発生します：
+We immediately see the contents of `penguins_csv_file`.
+But it has not been loaded into the environment.
+If you try to run `penguins_csv_file` now, you will get an error:
 
 
 ``` r
@@ -106,41 +106,40 @@ penguins_csv_file
 ```
 
 ``` error
-Error in eval(expr, envir, enclos): object 'penguins_csv_file' not found
+Error: object 'penguins_csv_file' not found
 ```
 
-## どの関数をいつ使用するか
+## When to use which function
 
-`tar_load()` はオブジェクトをロードしてそれらを操作したいときにより便利です。
-`tar_read()` はオブジェクトを即座に検査したいときにより便利です。
+`tar_load()` tends to be more useful when you want to load objects and do things with them.
+`tar_read()` is more useful when you just want to immediately inspect an object.
 
-## targets キャッシュ
+## The targets cache
 
-Rセッションを終了し、再起動して `tar_load()` または `tar_read()` を使用すると、ワークフローオブジェクトをまだロードできることに気づくでしょう。
-言い換えれば、ワークフローの出力は**Rセッション間で保存**されています。
-これはどのように可能なのでしょうか？
+If you close your R session, then re-start it and use `tar_load()` or `tar_read()`, you will notice that it can still load the workflow objects.
+In other words, the workflow output is **saved across R sessions**.
+How is this possible?
 
-プロジェクトに新しいフォルダ `_targets` が現れたことに気づいたかもしれません。
-これは**targets キャッシュ**です。
-ワークフローの出力すべてが含まれています。これにより、Rを終了して再起動した後でもワークフローによって作成されたターゲットをロードできるのです。
+You may have noticed a new folder has appeared in your project, called `_targets`.
+This is the **targets cache**.
+It contains all of the workflow output; that is how we can load the targets built by the workflow even after quitting then restarting R.
 
-**キャッシュの内容を手動で編集してはいけません**（1つの例外を除く）。
-そうすると、分析の再現性が失われます。
+**You should not edit the contents of the cache by hand** (with one exception).
+Doing so would make your analysis non-reproducible.
 
-このルールの唯一の例外は、`_targets/user` という特別なサブフォルダです。
-このフォルダはデフォルトでは存在しません。
-必要であれば作成し、任意のものを中に入れることができます。
+The one exception to this rule is a special subfolder called `_targets/user`.
+This folder does not exist by default.
+You can create it if you want, and put whatever you want inside.
 
-一般的に、`_targets/user` はデータや出力のようなコードではないファイルを保存するのに適しています。
+Generally, `_targets/user` is a good place to store files that are not code, like data and output.
 
-もし `_targets/user` に保持する必要があるものが何もない場合、単に `_targets` フォルダ全体を削除することでワークフローを「リセット」することが可能です。
-もちろん、これはすべてを再実行する必要があることを意味するため、軽率に行わないでください！
+Note that if you don't have anything in `_targets/user` that you need to keep around, it is possible to "reset" your workflow by simply deleting the entire `_targets` folder. Of course, this means you will need to run everything over again, so don't do this lightly!
 
 ::::::::::::::::::::::::::::::::::::: keypoints 
 
-- `targets` のワークフローは別の非対話型Rセッションで実行されます
-- `tar_load()` はワークフローオブジェクトを現在のRセッションにロードします
-- `tar_read()` はワークフローオブジェクトを読み取り、その値を返します
-- `_targets` フォルダはキャッシュであり、一般的には手動で編集すべきではありません
+- `targets` workflows are run in a separate, non-interactive R session
+- `tar_load()` loads a workflow object into the current R session
+- `tar_read()` reads a workflow object and returns its value
+- The `_targets` folder is the cache and generally should not be edited by hand
 
-::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::

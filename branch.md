@@ -1,57 +1,57 @@
 ---
-title: 'ブランチング'
-teaching: 10
+title: 'Branching'
+teaching: 30
 exercises: 2
 ---
 
 :::::::::::::::::::::::::::::::::::::: questions 
 
-- すべてを入力せずに多くのターゲットをどのように指定できますか？
+- How can we specify many targets without typing everything out?
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
 ::::::::::::::::::::::::::::::::::::: objectives
 
-- ブランチングを使用してターゲットを指定できるようにする
+- Be able to specify targets using branching
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
 ::::::::::::::::::::::::::::::::::::: instructor
 
-エピソードの概要: ブランチングの使用方法を示す
+Episode summary: Show how to use branching
 
 :::::::::::::::::::::::::::::::::::::
 
 
 
-## なぜブランチングなのか？
+## Why branching?
 
-`targets` の大きな強みの一つは、**ブランチング**と呼ばれる、単一のコード行から多くのターゲットを定義できる能力です。
-これは入力を省くだけでなく、タイプミスの可能性が減るため、**エラーのリスクも低減**します。
+One of the major strengths of `targets` is the ability to define many targets from a single line of code ("branching").
+This not only saves you typing, it also **reduces the risk of errors** since there is less chance of making a typo.
 
-## ブランチングの種類
+## Types of branching
 
-ブランチングには、**動的ブランチング**と**静的ブランチング**の二種類があります。
-「ブランチング」とは、ターゲットを作成する方法（「パターン」）を単一に指定し、`targets` がそれから複数のターゲット（「ブランチ」）を生成するという考え方を指します。
-「動的」とは、パターンから生成されるブランチが事前に定義されている必要がなく、コードの結果として動的に生成されることを意味します。
+There are two types of branching, **dynamic branching** and **static branching**.
+"Branching" refers to the idea that you can provide a single specification for how to make targets (the "pattern"), and `targets` generates multiple targets from it ("branches").
+"Dynamic" means that the branches that result from the pattern do not have to be defined ahead of time---they are a dynamic result of the code.
 
-このワークショップでは、**動的ブランチングのみ**を扱います。静的ブランチングは[メタプログラミング](https://books.ropensci.org/targets/static.html#metaprogramming)の使用を必要とするため、これは高度なトピックです。どちらをいつ使用するか（または両方の組み合わせ）についての詳細は、[`targets` パッケージマニュアル](https://books.ropensci.org/targets/dynamic.html)を参照してください。
+In this workshop, we will only cover dynamic branching since it is generally easier to write (static branching requires use of [meta-programming](https://books.ropensci.org/targets/static.html#metaprogramming), an advanced topic). For more information about each and when you might want to use one or the other (or some combination of the two), [see the `targets` package manual](https://books.ropensci.org/targets/dynamic.html).
 
-## ブランチングなしの例
+## Example without branching
 
-これがどのように機能するかを理解するために、`palmerpenguins` データセットの分析を続けましょう。
+To see how this works, let's continue our analysis of the `palmerpenguins` dataset.
 
-**私たちの仮説は、くちばしの深さがくちばしの長さとともに減少するということです。**
-この仮説を線形モデルで検証します。
+**Our hypothesis is that bill depth decreases with bill length.**
+We will test this hypothesis with a linear model.
 
-例えば、これはくちばしの長さに依存するくちばしの深さのモデルです：
+For example, this is a model of bill depth dependent on bill length:
 
 
 ``` r
 lm(bill_depth_mm ~ bill_length_mm, data = penguins_data)
 ```
 
-これをパイプラインに追加できます。すべての種を区別せずに結合しているため、`combined_model` と呼びます：
+We can add this to our pipeline. We will call it the `combined_model` because it combines all the species together without distinction:
 
 
 ``` r
@@ -81,11 +81,11 @@ tar_plan(
 ✔ skipped target penguins_data_raw
 ✔ skipped target penguins_data
 ▶ dispatched target combined_model
-● completed target combined_model [0.01 seconds]
-▶ ended pipeline [0.276 seconds]
+● completed target combined_model [0.02 seconds, 11.201 kilobytes]
+▶ ended pipeline [0.26 seconds]
 ```
 
-モデルを見てみましょう。`broom` パッケージの `glance()` 関数を使用します。これは base R の `summary()` とは異なり、出力をティブル（データフレームの tidyverse 相当）として返します。後で見るように、これは下流の分析に非常に便利です。
+Let's have a look at the model. We will use the `glance()` function from the `broom` package. Unlike base R `summary()`, this function returns output as a tibble (the tidyverse equivalent of a dataframe), which as we will see later is quite useful for downstream analyses.
 
 
 ``` r
@@ -101,14 +101,14 @@ glance(combined_model)
 1    0.0552        0.0525  1.92      19.9 0.0000112     1  -708. 1422. 1433.    1256.         340   342
 ```
 
-小さな *P*-値に注目してください。
-これはモデルが非常に有意であることを示しているようです。
+Notice the small *P*-value.
+This seems to indicate that the model is highly significant.
 
-しかし、ちょっと待ってください... これは本当に適切なモデルでしょうか？ データセットには3種類のペンギンがいることを思い出してください。くちばしの深さと長さの関係が**種によって異なる**可能性があります。
+But wait a moment... is this really an appropriate model? Recall that there are three species of penguins in the dataset. It is possible that the relationship between bill depth and length **varies by species**.
 
-おそらく、種に対するパラメータを追加するモデルや、種とくちばしの長さの相互作用効果を追加するモデルなど、いくつかの代替モデルをテストする必要があります。
+Let's try making one model *per* species (three models total) to see how that does (this is technically not the correct statistical approach, but our focus here is to learn `targets`, not statistics).
 
-これでワークフローがより複雑になっています。これは**ブランチングなし**でのそのような分析のワークフローの例です（`packages.R` に `library(broom)` を追加することを忘れないでください）：
+Now our workflow is getting more complicated. This is what a workflow for such an analysis might look like **without branching** (make sure to add `library(broom)` to `packages.R`):
 
 
 ``` r
@@ -129,18 +129,23 @@ tar_plan(
     bill_depth_mm ~ bill_length_mm,
     data = penguins_data
   ),
-  species_model = lm(
-    bill_depth_mm ~ bill_length_mm + species,
-    data = penguins_data
+  adelie_model = lm(
+    bill_depth_mm ~ bill_length_mm,
+    data = filter(penguins_data, species == "Adelie")
   ),
-  interaction_model = lm(
-    bill_depth_mm ~ bill_length_mm * species,
-    data = penguins_data
+  chinstrap_model = lm(
+    bill_depth_mm ~ bill_length_mm,
+    data = filter(penguins_data, species == "Chinstrap")
+  ),
+  gentoo_model = lm(
+    bill_depth_mm ~ bill_length_mm,
+    data = filter(penguins_data, species == "Gentoo")
   ),
   # Get model summaries
   combined_summary = glance(combined_model),
-  species_summary = glance(species_model),
-  interaction_summary = glance(interaction_model)
+  adelie_summary = glance(adelie_model),
+  chinstrap_summary = glance(chinstrap_model),
+  gentoo_summary = glance(gentoo_model)
 )
 ```
 
@@ -150,20 +155,234 @@ tar_plan(
 ✔ skipped target penguins_data_raw
 ✔ skipped target penguins_data
 ✔ skipped target combined_model
-▶ dispatched target interaction_model
-● completed target interaction_model [0.003 seconds]
-▶ dispatched target species_model
-● completed target species_model [0.001 seconds]
+▶ dispatched target adelie_model
+● completed target adelie_model [0.008 seconds, 6.475 kilobytes]
+▶ dispatched target gentoo_model
+● completed target gentoo_model [0.002 seconds, 5.88 kilobytes]
+▶ dispatched target chinstrap_model
+● completed target chinstrap_model [0.001 seconds, 4.535 kilobytes]
 ▶ dispatched target combined_summary
-● completed target combined_summary [0.007 seconds]
-▶ dispatched target interaction_summary
-● completed target interaction_summary [0.004 seconds]
-▶ dispatched target species_summary
-● completed target species_summary [0.003 seconds]
+● completed target combined_summary [0.006 seconds, 348 bytes]
+▶ dispatched target adelie_summary
+● completed target adelie_summary [0.003 seconds, 348 bytes]
+▶ dispatched target gentoo_summary
+● completed target gentoo_summary [0.002 seconds, 348 bytes]
+▶ dispatched target chinstrap_summary
+● completed target chinstrap_summary [0.002 seconds, 348 bytes]
+▶ ended pipeline [0.29 seconds]
+```
+
+Let's look at the summary of one of the models:
+
+
+``` r
+tar_read(adelie_summary)
+```
+
+``` output
+# A tibble: 1 × 12
+  r.squared adj.r.squared sigma statistic     p.value    df logLik   AIC   BIC deviance df.residual  nobs
+      <dbl>         <dbl> <dbl>     <dbl>       <dbl> <dbl>  <dbl> <dbl> <dbl>    <dbl>       <int> <int>
+1     0.153         0.148  1.12      27.0 0.000000667     1  -231.  468.  477.     188.         149   151
+```
+
+So this way of writing the pipeline works, but is repetitive: we have to call `glance()` each time we want to obtain summary statistics for each model.
+Furthermore, each summary target (`adelie_summary`, etc.) is explicitly named and typed out manually.
+It would be fairly easy to make a typo and end up with the wrong model being summarized.
+
+Before moving on, let's define another **custom function** function: `model_glance()`.
+You will need to write custom functions frequently when using `targets`, so it's good to get used to it!
+
+As the name `model_glance()` suggests (it is good to write functions with names that indicate their purpose), this will build a model then immediately run `glance()` on it.
+The reason for doing so is that we get a **dataframe as a result**, which is very helpful for branching, as we will see in the next section.
+Save this in `R/functions.R`:
+
+
+``` r
+model_glance_orig <- function(penguins_data) {
+  model <- lm(
+    bill_depth_mm ~ bill_length_mm,
+    data = penguins_data)
+  broom::glance(model)
+}
+```
+
+## Example with branching
+
+### First attempt
+
+Let's see how to write the same plan using **dynamic branching** (after running it, we will go through the new version in detail to understand each step):
+
+
+``` r
+source("R/packages.R")
+source("R/functions.R")
+
+tar_plan(
+  # Load raw data
+  tar_file_read(
+    penguins_data_raw,
+    path_to_file("penguins_raw.csv"),
+    read_csv(!!.x, show_col_types = FALSE)
+  ),
+  # Clean data
+  penguins_data = clean_penguin_data(penguins_data_raw),
+  # Group data
+  tar_group_by(
+    penguins_data_grouped,
+    penguins_data,
+    species
+  ),
+  # Build combined model with all species together
+  combined_summary = model_glance(penguins_data),
+  # Build one model per species
+  tar_target(
+    species_summary,
+    model_glance(penguins_data_grouped),
+    pattern = map(penguins_data_grouped)
+  )
+)
+NA
+```
+
+What is going on here?
+
+First, let's look at the messages provided by `tar_make()`.
+
+
+``` output
+✔ skipped target penguins_data_raw_file
+✔ skipped target penguins_data_raw
+✔ skipped target penguins_data
+▶ dispatched target combined_summary
+● completed target combined_summary [0.008 seconds, 348 bytes]
+▶ dispatched target penguins_data_grouped
+● completed target penguins_data_grouped [0.009 seconds, 1.527 kilobytes]
+▶ dispatched branch species_summary_7fe6634f7c7f6a77
+● completed branch species_summary_7fe6634f7c7f6a77 [0.005 seconds, 348 bytes]
+▶ dispatched branch species_summary_c580675a85977909
+● completed branch species_summary_c580675a85977909 [0.004 seconds, 348 bytes]
+▶ dispatched branch species_summary_af3bb92d1b0f36d3
+● completed branch species_summary_af3bb92d1b0f36d3 [0.004 seconds, 348 bytes]
+● completed pattern species_summary 
+▶ ended pipeline [0.289 seconds]
+```
+
+There is a series of smaller targets (branches) that are each named like species_summary_7fe6634f7c7f6a77, then one overall `species_summary` target.
+That is the result of specifying targets using branching: each of the smaller targets are the "branches" that comprise the overall target.
+Since `targets` has no way of knowing ahead of time how many branches there will be or what they represent, it names each one using this series of numbers and letters (the "hash").
+`targets` builds each branch one at a time, then combines them into the overall target.
+
+Next, let's look in more detail about how the workflow is set up, starting with how we set up the data:
+
+
+``` r
+  # Group data
+  tar_group_by(
+    penguins_data_grouped,
+    penguins_data,
+    species
+  ),
+```
+
+Unlike the non-branching version, we added a step that **groups the data**.
+This is because dynamic branching is similar to the [`tidyverse` approach](https://dplyr.tidyverse.org/articles/grouping.html) of applying the same function to a grouped dataframe.
+So we use the `tar_group_by()` function to specify the groups in our input data: one group per species.
+
+Next, take a look at the command to build the target `species_summary`.
+
+
+``` r
+  # Build one model per species
+  tar_target(
+    species_summary,
+    model_glance(penguins_data_grouped),
+    pattern = map(penguins_data_grouped)
+  )
+```
+
+As before, the first argument to `tar_target()` is the name of the target to build, and the second is the command to build it.
+
+Here, we apply our custom `model_glance()` function to each group (in other words, each species) in `penguins_data_grouped`.
+
+Finally, there is an argument we haven't seen before, `pattern`, which indicates that this target should be built using dynamic branching.
+`map` means to apply the function to each group of the input data (`penguins_data_grouped`) sequentially.
+
+Now that we understand how the branching workflow is constructed, let's inspect the output:
+
+
+``` r
+tar_read(species_summary)
+```
+
+
+``` output
+# A tibble: 3 × 12
+  r.squared adj.r.squared sigma statistic  p.value    df logLik   AIC   BIC deviance df.residual  nobs
+      <dbl>         <dbl> <dbl>     <dbl>    <dbl> <dbl>  <dbl> <dbl> <dbl>    <dbl>       <int> <int>
+1     0.153         0.148 1.12       27.0 6.67e- 7     1 -231.   468.  477.    188.          149   151
+2     0.427         0.418 0.866      49.2 1.53e- 9     1  -85.7  177.  184.     49.5          66    68
+3     0.414         0.409 0.754      85.5 1.02e-15     1 -139.   284.  292.     68.8         121   123
+```
+
+The model summary statistics are all included in a single dataframe.
+
+But there's one problem: **we can't tell which row came from which species!** It would be unwise to assume that they are in the same order as the input data.
+
+This is due to the way dynamic branching works: by default, there is no information about the provenance of each target preserved in the output.
+
+How can we fix this?
+
+### Second attempt
+
+The key to obtaining useful output from branching pipelines is to include the necessary information in the output of each individual branch.
+Here, we want to know the species that corresponds to each row of the model summaries.
+
+We can achieve this by modifying our `model_glance` function. Be sure to save it after modifying it to include a column for species:
+
+
+``` r
+model_glance <- function(penguins_data) {
+  # Make model
+  model <- lm(
+    bill_depth_mm ~ bill_length_mm,
+    data = penguins_data)
+  # Get species name
+  species_name <- unique(penguins_data$species)
+  # If this is the combined dataset with multiple
+  # species, changed name to 'combined'
+  if (length(species_name) > 1) {
+    species_name <- "combined"
+  }
+  # Get model summary and add species name
+  glance(model) |>
+    mutate(species = species_name, .before = 1)
+}
+```
+
+Our new pipeline looks exactly the same as before; we have made a modification, but to a **function**, not the pipeline.
+
+Since `targets` tracks the contents of each custom function, it realizes that it needs to recompute `species_summary` and runs this target again with the newly modified function.
+
+
+``` output
+✔ skipped target penguins_data_raw_file
+✔ skipped target penguins_data_raw
+✔ skipped target penguins_data
+▶ dispatched target combined_summary
+● completed target combined_summary [0.019 seconds, 371 bytes]
+✔ skipped target penguins_data_grouped
+▶ dispatched branch species_summary_7fe6634f7c7f6a77
+● completed branch species_summary_7fe6634f7c7f6a77 [0.009 seconds, 368 bytes]
+▶ dispatched branch species_summary_c580675a85977909
+● completed branch species_summary_c580675a85977909 [0.005 seconds, 372 bytes]
+▶ dispatched branch species_summary_af3bb92d1b0f36d3
+● completed branch species_summary_af3bb92d1b0f36d3 [0.007 seconds, 369 bytes]
+● completed pattern species_summary 
 ▶ ended pipeline [0.301 seconds]
 ```
 
-モデルの一つのサマリーを見てみましょう：
+And this time, when we load the `model_summaries`, we can tell which model corresponds to which row (the `.before = 1` in `mutate()` ensures that it shows up before the other columns).
 
 
 ``` r
@@ -171,275 +390,49 @@ tar_read(species_summary)
 ```
 
 ``` output
-# A tibble: 1 × 12
-  r.squared adj.r.squared sigma statistic   p.value    df logLik   AIC   BIC deviance df.residual  nobs
-      <dbl>         <dbl> <dbl>     <dbl>     <dbl> <dbl>  <dbl> <dbl> <dbl>    <dbl>       <int> <int>
-1     0.769         0.767 0.953      375. 3.65e-107     3  -467.  944.  963.     307.         338   342
-```
-
-この方法でパイプラインを書くと機能しますが、繰り返しが多くなります。各モデルのサマリー統計量を取得するたびに `glance()` を呼び出さなければなりません。
-さらに、各サマリータゲット（`combined_summary` など）は明示的に名前が付けられ、手動で入力されています。
-タイプミスをして間違ったモデルがサマリーされるのはかなり簡単です。
-
-## ブランチングを使用した例
-
-### 最初の試み
-
-**動的ブランチング**を使用して同じプランを書く方法を見てみましょう：
-
-
-``` r
-source("R/packages.R")
-source("R/functions.R")
-
-tar_plan(
-  # Load raw data
-  tar_file_read(
-    penguins_data_raw,
-    path_to_file("penguins_raw.csv"),
-    read_csv(!!.x, show_col_types = FALSE)
-  ),
-  # Clean data
-  penguins_data = clean_penguin_data(penguins_data_raw),
-  # Build models
-  models = list(
-    combined_model = lm(
-      bill_depth_mm ~ bill_length_mm, data = penguins_data),
-    species_model = lm(
-      bill_depth_mm ~ bill_length_mm + species, data = penguins_data),
-    interaction_model = lm(
-      bill_depth_mm ~ bill_length_mm * species, data = penguins_data)
-  ),
-  # Get model summaries
-  tar_target(
-    model_summaries,
-    glance(models[[1]]),
-    pattern = map(models)
-  )
-)
-```
-
-ここで何が起こっているのでしょうか？
-
-まず、`tar_make()` が提供するメッセージを見てみましょう。
-
-
-``` output
-✔ skipped target penguins_data_raw_file
-✔ skipped target penguins_data_raw
-✔ skipped target penguins_data
-▶ dispatched target models
-● completed target models [0.005 seconds]
-▶ dispatched branch model_summaries_812e3af782bee03f
-● completed branch model_summaries_812e3af782bee03f [0.009 seconds]
-▶ dispatched branch model_summaries_2b8108839427c135
-● completed branch model_summaries_2b8108839427c135 [0.004 seconds]
-▶ dispatched branch model_summaries_533cd9a636c3e05b
-● completed branch model_summaries_533cd9a636c3e05b [0.003 seconds]
-● completed pattern model_summaries
-▶ ended pipeline [0.298 seconds]
-```
-
-一連の小さなターゲット（ブランチ）があり、それぞれが model_summaries_812e3af782bee03f のように名前付けされ、その後に全体の `model_summaries` ターゲットがあります。
-これはブランチングを使用してターゲットを指定した結果です：小さなターゲットそれぞれが全体のターゲットを構成する「ブランチ」です。
-`targets` は、事前にどれだけのブランチが存在するか、またそれらが何を表しているかを知らないため、数字と文字の一連（「ハッシュ」）を使用して各ブランチに名前を付けます。
-`targets` は各ブランチを一つずつビルドし、それらを全体のターゲットに結合します。
-
-次に、ワークフローがどのように設定されているか、モデルの定義から詳しく見てみましょう：
-
-
-``` r
-  # Build models
-  models = list(
-    combined_model = lm(
-      bill_depth_mm ~ bill_length_mm, data = penguins_data),
-    species_model = lm(
-      bill_depth_mm ~ bill_length_mm + species, data = penguins_data),
-    interaction_model = lm(
-      bill_depth_mm ~ bill_length_mm * species, data = penguins_data)
-  ),
-```
-
-ブランチングなしのバージョンとは異なり、モデルを**リスト内**で定義しました（モデルごとに一つのターゲットではなく）。
-これは動的ブランチングが `base::apply()` や [`purrrr::map()`](https://purrr.tidyverse.org/reference/map.html) のループ方法に似ているためです：リストの各要素に関数を適用します。
-したがって、ループの入力としてリストを準備する必要があります。
-
-次に、ターゲット `model_summaries` をビルドするコマンドを見てみましょう。
-
-
-``` r
-  # Get model summaries
-  tar_target(
-    model_summaries,
-    glance(models[[1]]),
-    pattern = map(models)
-  )
-```
-
-以前と同様に、最初の引数はビルドするターゲットの名前で、二つ目の引数はそれをビルドするコマンドです。
-
-ここでは、`glance()` 関数を `models` の各要素に適用しています（`[[1]]` が必要なのは、関数が適用されるとき、各要素が実際にはネストされたリストであり、ネストを一層取り除く必要があるためです）。
-
-最後に、これまで見たことのない引数 `pattern` があります。これは、このターゲットが動的ブランチングを使用してビルドされるべきことを示します。
-`map` は、入力リスト（`models`）の各要素に対して関数を順次適用することを意味します。
-
-ブランチングワークフローの構築方法を理解したので、出力を検査してみましょう：
-
-
-``` r
-tar_read(model_summaries)
-```
-
-
-``` output
-# A tibble: 3 × 12
-  r.squared adj.r.squared sigma statistic   p.value    df logLik   AIC   BIC deviance df.residual  nobs
-      <dbl>         <dbl> <dbl>     <dbl>     <dbl> <dbl>  <dbl> <dbl> <dbl>    <dbl>       <int> <int>
-1    0.0552        0.0525 1.92       19.9 1.12e-  5     1  -708. 1422. 1433.    1256.         340   342
-2    0.769         0.767  0.953     375.  3.65e-107     3  -467.  944.  963.     307.         338   342
-3    0.770         0.766  0.955     225.  8.52e-105     5  -466.  947.  974.     306.         336   342
-```
-
-モデルのサマリー統計量がすべて一つのデータフレームに含まれています。
-
-しかし、一つ問題があります：**どの行がどのモデルから来たのか分かりません！** モデルのリストと同じ順序であると仮定するのは賢明ではありません。
-
-これは動的ブランチングの動作方法によるものです：デフォルトでは、各ターゲットの由来に関する情報が出力に保持されません。
-
-これをどう修正すれば良いでしょうか？
-
-### 第二の試み
-
-ブランチングパイプラインから有用な出力を得るための鍵は、各ブランチの出力に必要な情報を含めることです。
-ここでは、モデルサマリーの各行に対応するモデルの種類を知りたいと考えています。
-これを行うために、**カスタム関数**を書く必要があります。
-`targets` を使用する際にはカスタム関数を頻繁に書く必要があるため、慣れておくと良いでしょう！
-
-以下がその関数です。これを `R/functions.R` に保存してください：
-
-
-``` r
-glance_with_mod_name <- function(model_in_list) {
-  model_name <- names(model_in_list)
-  model <- model_in_list[[1]]
-  glance(model) |>
-    mutate(model_name = model_name)
-}
-```
-
-新しいパイプラインは以前とほぼ同じですが、今回は `glance()` の代わりにカスタム関数を使用しています。
-
-
-``` r
-source("R/functions.R")
-source("R/packages.R")
-
-tar_plan(
-  # Load raw data
-  tar_file_read(
-    penguins_data_raw,
-    path_to_file("penguins_raw.csv"),
-    read_csv(!!.x, show_col_types = FALSE)
-  ),
-  # Clean data
-  penguins_data = clean_penguin_data(penguins_data_raw),
-  # Build models
-  models = list(
-    combined_model = lm(
-      bill_depth_mm ~ bill_length_mm, data = penguins_data),
-    species_model = lm(
-      bill_depth_mm ~ bill_length_mm + species, data = penguins_data),
-    interaction_model = lm(
-      bill_depth_mm ~ bill_length_mm * species, data = penguins_data)
-  ),
-  # Get model summaries
-  tar_target(
-    model_summaries,
-    glance_with_mod_name(models),
-    pattern = map(models)
-  )
-)
-```
-
-
-``` output
-✔ skipped target penguins_data_raw_file
-✔ skipped target penguins_data_raw
-✔ skipped target penguins_data
-✔ skipped target models
-▶ dispatched branch model_summaries_812e3af782bee03f
-● completed branch model_summaries_812e3af782bee03f [0.014 seconds]
-▶ dispatched branch model_summaries_2b8108839427c135
-● completed branch model_summaries_2b8108839427c135 [0.007 seconds]
-▶ dispatched branch model_summaries_533cd9a636c3e05b
-● completed branch model_summaries_533cd9a636c3e05b [0.004 seconds]
-● completed pattern model_summaries
-▶ ended pipeline [0.3 seconds]
-```
-
-今回は、`model_summaries` をロードすると、各行がどのモデルに対応しているかを知ることができます（右にスクロールする必要があるかもしれません）。
-
-
-``` r
-tar_read(model_summaries)
-```
-
-``` output
 # A tibble: 3 × 13
-  r.squared adj.r.squared sigma statistic   p.value    df logLik   AIC   BIC deviance df.residual  nobs model_name       
-      <dbl>         <dbl> <dbl>     <dbl>     <dbl> <dbl>  <dbl> <dbl> <dbl>    <dbl>       <int> <int> <chr>            
-1    0.0552        0.0525 1.92       19.9 1.12e-  5     1  -708. 1422. 1433.    1256.         340   342 combined_model   
-2    0.769         0.767  0.953     375.  3.65e-107     3  -467.  944.  963.     307.         338   342 species_model    
-3    0.770         0.766  0.955     225.  8.52e-105     5  -466.  947.  974.     306.         336   342 interaction_model
+  species   r.squared adj.r.squared sigma statistic  p.value    df logLik   AIC   BIC deviance df.residual  nobs
+  <chr>         <dbl>         <dbl> <dbl>     <dbl>    <dbl> <dbl>  <dbl> <dbl> <dbl>    <dbl>       <int> <int>
+1 Adelie        0.153         0.148 1.12       27.0 6.67e- 7     1 -231.   468.  477.    188.          149   151
+2 Chinstrap     0.427         0.418 0.866      49.2 1.53e- 9     1  -85.7  177.  184.     49.5          66    68
+3 Gentoo        0.414         0.409 0.754      85.5 1.02e-15     1 -139.   284.  292.     68.8         121   123
 ```
 
-次に、モデルに基づくくちばしの深さの予測を追加します。これはレポートでモデルをプロットする際に必要になります。
-この予測は `broom` パッケージの `augment()` 関数を使用して取得できます。
+Next we will add one more target, a prediction of bill depth based on each model. These will be needed for plotting the models in the report.
+Such a prediction can be obtained with the `augment()` function of the `broom` package, and we create a custom function that outputs predicted points as a dataframe much like we did for the model summaries.
 
-
-``` r
-tar_load(models)
-augment(models[[1]])
-```
-
-``` output
-# A tibble: 342 × 8
-   bill_depth_mm bill_length_mm .fitted .resid    .hat .sigma   .cooksd .std.resid
-           <dbl>          <dbl>   <dbl>  <dbl>   <dbl>  <dbl>     <dbl>      <dbl>
- 1          18.7           39.1    17.6  1.14  0.00521   1.92 0.000924      0.594 
- 2          17.4           39.5    17.5 -0.127 0.00485   1.93 0.0000107    -0.0663
- 3          18             40.3    17.5  0.541 0.00421   1.92 0.000168      0.282 
- 4          19.3           36.7    17.8  1.53  0.00806   1.92 0.00261       0.802 
- 5          20.6           39.3    17.5  3.06  0.00503   1.92 0.00641       1.59  
- 6          17.8           38.9    17.6  0.222 0.00541   1.93 0.0000364     0.116 
- 7          19.6           39.2    17.6  2.05  0.00512   1.92 0.00293       1.07  
- 8          18.1           34.1    18.0  0.114 0.0124    1.93 0.0000223     0.0595
- 9          20.2           42      17.3  2.89  0.00329   1.92 0.00373       1.50  
-10          17.1           37.8    17.7 -0.572 0.00661   1.92 0.000296     -0.298 
-# ℹ 332 more rows
-```
 
 ::::::::::::::::::::::::::::::::::::: {.challenge}
 
-## チャレンジ: ワークフローにモデル予測を追加する
+## Challenge: Add model predictions to the workflow
 
-`augment()` を使用してモデル予測を追加できますか？ `glance()` と同様にカスタム関数を定義する必要があります。
+Can you add the model predictions using `augment()`? You will need to define a custom function just like we did for `glance()`.
 
 :::::::::::::::::::::::::::::::::: {.solution}
 
-新しい関数を `augment_with_mod_name()` として定義します。これは `glance_with_mod_name()` と同じですが、`glance()` の代わりに `augment()` を使用します：
+Define the new function as `model_augment()`. It is the same as `model_glance()`, but use `augment()` instead of `glance()`:
 
 
 ``` r
-augment_with_mod_name <- function(model_in_list) {
-  model_name <- names(model_in_list)
-  model <- model_in_list[[1]]
+model_augment <- function(penguins_data) {
+  # Make model
+  model <- lm(
+    bill_depth_mm ~ bill_length_mm,
+    data = penguins_data)
+  # Get species name
+  species_name <- unique(penguins_data$species)
+  # If this is the combined dataset with multiple
+  # species, changed name to 'combined'
+  if (length(species_name) > 1) {
+    species_name <- "combined"
+  }
+  # Get model summary and add species name
   augment(model) |>
-    mutate(model_name = model_name)
+    mutate(species = species_name, .before = 1)
 }
 ```
 
-ワークフローにステップを追加します：
+Add the step to the workflow:
 
 
 ``` r
@@ -455,26 +448,27 @@ tar_plan(
   ),
   # Clean data
   penguins_data = clean_penguin_data(penguins_data_raw),
-  # Build models
-  models = list(
-    combined_model = lm(
-      bill_depth_mm ~ bill_length_mm, data = penguins_data),
-    species_model = lm(
-      bill_depth_mm ~ bill_length_mm + species, data = penguins_data),
-    interaction_model = lm(
-      bill_depth_mm ~ bill_length_mm * species, data = penguins_data)
+  # Group data
+  tar_group_by(
+    penguins_data_grouped,
+    penguins_data,
+    species
   ),
-  # Get model summaries
+  # Get summary of combined model with all species together
+  combined_summary = model_glance(penguins_data),
+  # Get summary of one model per species
   tar_target(
-    model_summaries,
-    glance_with_mod_name(models),
-    pattern = map(models)
+    species_summary,
+    model_glance(penguins_data_grouped),
+    pattern = map(penguins_data_grouped)
   ),
-  # Get model predictions
+  # Get predictions of combined model with all species together
+  combined_predictions = model_augment(penguins_data_grouped),
+  # Get predictions of one model per species
   tar_target(
-    model_predictions,
-    augment_with_mod_name(models),
-    pattern = map(models)
+    species_predictions,
+    model_augment(penguins_data_grouped),
+    pattern = map(penguins_data_grouped)
   )
 )
 ```
@@ -483,33 +477,106 @@ tar_plan(
 
 :::::::::::::::::::::::::::::::::::::
 
+### Further simplify the workflow
+
+You may have noticed that we can further simplify the workflow: there is no need to have separate `penguins_data` and `penguins_data_grouped` dataframes.
+In general it is best to keep the number of named objects as small as possible to make it easier to reason about your code.
+Let's combine the cleaning and grouping step into a single command:
+
+
+``` r
+source("R/functions.R")
+source("R/packages.R")
+
+tar_plan(
+  # Load raw data
+  tar_file_read(
+    penguins_data_raw,
+    path_to_file("penguins_raw.csv"),
+    read_csv(!!.x, show_col_types = FALSE)
+  ),
+  # Clean and group data
+  tar_group_by(
+    penguins_data,
+    clean_penguin_data(penguins_data_raw),
+    species
+  ),
+  # Get summary of combined model with all species together
+  combined_summary = model_glance(penguins_data),
+  # Get summary of one model per species
+  tar_target(
+    species_summary,
+    model_glance(penguins_data),
+    pattern = map(penguins_data)
+  ),
+  # Get predictions of combined model with all species together
+  combined_predictions = model_augment(penguins_data),
+  # Get predictions of one model per species
+  tar_target(
+    species_predictions,
+    model_augment(penguins_data),
+    pattern = map(penguins_data)
+  )
+)
+NA
+```
+
+And run it once more:
+
+
+``` output
+✔ skipped target penguins_data_raw_file
+✔ skipped target penguins_data_raw
+▶ dispatched target penguins_data
+● completed target penguins_data [0.116 seconds, 1.527 kilobytes]
+▶ dispatched target combined_summary
+● completed target combined_summary [0.013 seconds, 371 bytes]
+▶ dispatched branch species_summary_1598bb4431372f32
+● completed branch species_summary_1598bb4431372f32 [0.009 seconds, 368 bytes]
+▶ dispatched branch species_summary_6b9109ba2e9d27fd
+● completed branch species_summary_6b9109ba2e9d27fd [0.005 seconds, 372 bytes]
+▶ dispatched branch species_summary_625f9fbc7f62298a
+● completed branch species_summary_625f9fbc7f62298a [0.006 seconds, 369 bytes]
+● completed pattern species_summary 
+▶ dispatched target combined_predictions
+● completed target combined_predictions [0.007 seconds, 25.908 kilobytes]
+▶ dispatched branch species_predictions_1598bb4431372f32
+● completed branch species_predictions_1598bb4431372f32 [0.01 seconds, 11.581 kilobytes]
+▶ dispatched branch species_predictions_6b9109ba2e9d27fd
+● completed branch species_predictions_6b9109ba2e9d27fd [0.005 seconds, 6.248 kilobytes]
+▶ dispatched branch species_predictions_625f9fbc7f62298a
+● completed branch species_predictions_625f9fbc7f62298a [0.005 seconds, 9.626 kilobytes]
+● completed pattern species_predictions 
+▶ ended pipeline [0.372 seconds]
+```
+
 ::::::::::::::::::::::::::::::::::::: {.callout}
 
-## ブランチングのベストプラクティス
+## Best practices for branching
 
-動的ブランチングは**データフレーム**（ティブル）と相性が良いように設計されています。
+Dynamic branching is designed to work well with **dataframes** (it can also use [lists](https://books.ropensci.org/targets/dynamic.html#list-iteration), but that is more advanced, so we recommend using dataframes when possible).
 
-可能であれば、カスタム関数をデータフレームを入力として受け取り、データフレームを出力として返すように書き、必要なメタデータを列として常に含めるようにしてください。
+It is recommended to write your custom functions to accept dataframes as input and return them as output, and always include any necessary metadata as a column or columns.
 
 :::::::::::::::::::::::::::::::::::::
 
 ::::::::::::::::::::::::::::::::::::: {.challenge}
 
-## チャレンジ: 他にどんな種類のパターンがありますか？
+## Challenge: What other kinds of patterns are there?
 
-これまで、`pattern` 引数と組み合わせて `map()` を使用し、入力の各要素に対して関数を順次適用する単一の関数のみを使用しました。
+So far, we have only used a single function in conjunction with the `pattern` argument, `map()`, which applies the function to each element of its input in sequence.
 
-ブランチングパターンを適用する他の方法を考えてみてください。
+Can you think of any other ways you might want to apply a branching pattern?
 
 :::::::::::::::::::::::::::::::::: {.solution}
 
-ブランチングパターンを適用する他の方法には以下のようなものがあります：
+Some other ways of applying branching patterns include:
 
-- crossing: 要素の組み合わせごとに一つのブランチを作成する（`cross()` 関数）
-- slicing: 手動で選択した要素ごとに一つのブランチを作成する（`slice()` 関数）
-- sampling: ランダムに選択した要素ごとに一つのブランチを作成する（`sample()` 関数）
+- crossing: one branch per combination of elements (`cross()` function)
+- slicing: one branch for each of a manually selected set of elements (`slice()` function)
+- sampling: one branch for each of a randomly selected set of elements (`sample()` function)
 
-ブランチングパターンの詳細については [`targets` マニュアル](https://books.ropensci.org/targets/dynamic.html#patterns) を参照してください。
+You can [find out more about different branching patterns in the `targets` manual](https://books.ropensci.org/targets/dynamic.html#patterns).
 
 ::::::::::::::::::::::::::::::::::
 
@@ -517,8 +584,7 @@ tar_plan(
 
 ::::::::::::::::::::::::::::::::::::: keypoints 
 
-- 動的ブランチングは単一のコマンドで複数のターゲットを作成します
-
-- ブランチの出力に必要なメタデータを含めるために、通常カスタム関数を書く必要があります 
+- Dynamic branching creates multiple targets with a single command
+- You usually need to write custom functions so that the output of the branches includes necessary metadata 
 
 ::::::::::::::::::::::::::::::::::::::::::::::::

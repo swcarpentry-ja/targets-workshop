@@ -1,50 +1,50 @@
 ---
-title: '並列処理'
-teaching: 10
+title: 'Parallel Processing'
+teaching: 15
 exercises: 2
 ---
 
 :::::::::::::::::::::::::::::::::::::: questions 
 
-- `targets` のターゲットを並列でビルドするにはどうすればよいですか？
+- How can we build targets in parallel?
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
 ::::::::::::::::::::::::::::::::::::: objectives
 
-- ターゲットを並列でビルドできるようにする
+- Be able to build targets in parallel
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
 ::::::::::::::::::::::::::::::::::::: instructor
 
-エピソードの概要: 並列処理の使用方法を示す
+Episode summary: Show how to use parallel processing
 
 :::::::::::::::::::::::::::::::::::::
 
 
 
-パイプラインに多くのターゲットが含まれ始めたら、並列処理を考えるかもしれません。
-これはコンピュータの複数のプロセッサを活用して、同時に複数のターゲットをビルドします。
+Once a pipeline starts to include many targets, you may want to think about parallel processing.
+This takes advantage of multiple processors in your computer to build multiple targets at the same time.
 
 ::::::::::::::::::::::::::::::::::::: {.callout}
 
-## 並列処理を使用するタイミング
+## When to use parallel processing
 
-並列処理は、ワークフローに独立したタスクがある場合にのみ使用すべきです---ワークフローがターゲットの線形シーケンスのみで構成されている場合、並列化するものはありません。
-ブランチングを使用するほとんどのワークフローは並列処理の恩恵を受けることができます。
+Parallel processing should only be used if your workflow has independent tasks---if your workflow only consists of a linear sequence of targets, then there is nothing to parallelize.
+Most workflows that use branching can benefit from parallelism.
 
 :::::::::::::::::::::::::::::::::::::
 
-`targets` は高性能コンピューティング、クラウドコンピューティング、およびさまざまな並列バックエンドをサポートしています。
-ここでは、この分析をラップトップで実行していると仮定し、比較的シンプルなバックエンドを使用します。
-高性能コンピューティングに興味がある場合は、[`targets` マニュアル](https://books.ropensci.org/targets/hpc.html) を参照してください。
+`targets` includes support for high-performance computing, cloud computing, and various parallel backends.
+Here, we assume you are running this analysis on a laptop and so will use a relatively simple backend.
+If you are interested in high-performance computing, [see the `targets` manual](https://books.ropensci.org/targets/hpc.html).
 
-### ワークフローのセットアップ
+### Set up workflow
 
-`crew` を使用して並列処理を有効にするには、`crew` パッケージをロードし、`tar_option_set` を使用して `targets` にそれを使用するように指示するだけです。
-具体的には、以下の行が `crew` を有効にし、2つの並列ワーカーを使用するように指示します。
-より強力なマシンでは、この数を増やすことができます：
+To enable parallel processing with `crew` you only need to load the `crew` package, then tell `targets` to use it using `tar_option_set`.
+Specifically, the following lines enable crew, and tells it to use 2 parallel workers.
+You can increase this number on more powerful machines:
 
 ```r
 library(crew)
@@ -53,8 +53,8 @@ tar_option_set(
 )
 ```
 
-ペンギンの分析にこれらの変更を加えましょう。
-現在は次のようになっているはずです：
+Make these changes to the penguins analysis.
+It should now look like this:
 
 
 ``` r
@@ -74,58 +74,78 @@ tar_plan(
     path_to_file("penguins_raw.csv"),
     read_csv(!!.x, show_col_types = FALSE)
   ),
-  # Clean data
-  penguins_data = clean_penguin_data(penguins_data_raw),
-  # Build models
-  models = list(
-    combined_model = lm(
-      bill_depth_mm ~ bill_length_mm, data = penguins_data),
-    species_model = lm(
-      bill_depth_mm ~ bill_length_mm + species, data = penguins_data),
-    interaction_model = lm(
-      bill_depth_mm ~ bill_length_mm * species, data = penguins_data)
+  # Clean and group data
+  tar_group_by(
+    penguins_data,
+    clean_penguin_data(penguins_data_raw),
+    species
   ),
-  # Get model summaries
+  # Get summary of combined model with all species together
+  combined_summary = model_glance(penguins_data),
+  # Get summary of one model per species
   tar_target(
-    model_summaries,
-    glance_with_mod_name(models),
-    pattern = map(models)
+    species_summary,
+    model_glance(penguins_data),
+    pattern = map(penguins_data)
   ),
-  # Get model predictions
+  # Get predictions of combined model with all species together
+  combined_predictions = model_augment(penguins_data),
+  # Get predictions of one model per species
   tar_target(
-    model_predictions,
-    augment_with_mod_name(models),
-    pattern = map(models)
+    species_predictions,
+    model_augment(penguins_data),
+    pattern = map(penguins_data)
   )
 )
+NA
 ```
 
-このデモの目的のためにまだ1つだけ変更する必要があります：今、分析を並列で実行しても、関数が非常に高速であるため、計算時間の違いに気付かないでしょう。
+There is still one more thing we need to modify only for the purposes of this demo: if we ran the analysis in parallel now, you wouldn't notice any difference in compute time because the functions are so fast.
 
-そこで、`Sys.sleep()` 関数を使用して、`glance_with_mod_name()` と `augment_with_mod_name()` の「遅い」バージョンを作成しましょう。これはコンピュータに数秒待つよう指示します。
-これにより、長時間実行される計算をシミュレートし、順次実行と並列実行の違いを確認できます。
+So let's make "slow" versions of `model_glance()` and `model_augment()` using the `Sys.sleep()` function, which just tells the computer to wait some number of seconds.
+This will simulate a long-running computation and enable us to see the difference between running sequentially and in parallel.
 
-これらの関数を `functions.R` に追加します（元のものをコピー＆ペーストしてから修正しても構いません）：
+Add these functions to `functions.R` (you can copy-paste the original ones, then modify them):
 
 
 ``` r
-glance_with_mod_name_slow <- function(model_in_list) {
+model_glance_slow <- function(penguins_data) {
   Sys.sleep(4)
-  model_name <- names(model_in_list)
-  model <- model_in_list[[1]]
-  broom::glance(model) |>
-    mutate(model_name = model_name)
+  # Make model
+  model <- lm(
+    bill_depth_mm ~ bill_length_mm,
+    data = penguins_data)
+  # Get species name
+  species_name <- unique(penguins_data$species)
+  # If this is the combined dataset with multiple
+  # species, changed name to 'combined'
+  if (length(species_name) > 1) {
+    species_name <- "combined"
+  }
+  # Get model summary and add species name
+  glance(model) |>
+    mutate(species = species_name, .before = 1)
 }
-augment_with_mod_name_slow <- function(model_in_list) {
+model_augment_slow <- function(penguins_data) {
   Sys.sleep(4)
-  model_name <- names(model_in_list)
-  model <- model_in_list[[1]]
-  broom::augment(model) |>
-    mutate(model_name = model_name)
+  # Make model
+  model <- lm(
+    bill_depth_mm ~ bill_length_mm,
+    data = penguins_data)
+  # Get species name
+  species_name <- unique(penguins_data$species)
+  # If this is the combined dataset with multiple
+  # species, changed name to 'combined'
+  if (length(species_name) > 1) {
+    species_name <- "combined"
+  }
+  # Get model summary and add species name
+  augment(model) |>
+    mutate(species = species_name, .before = 1)
 }
 ```
 
-次に、プランを「遅い」バージョンの関数を使用するように変更します：
+Then, change the plan to use the "slow" version of the functions:
 
 
 ``` r
@@ -145,67 +165,70 @@ tar_plan(
     path_to_file("penguins_raw.csv"),
     read_csv(!!.x, show_col_types = FALSE)
   ),
-  # Clean data
-  penguins_data = clean_penguin_data(penguins_data_raw),
-  # Build models
-  models = list(
-    combined_model = lm(
-      bill_depth_mm ~ bill_length_mm, data = penguins_data),
-    species_model = lm(
-      bill_depth_mm ~ bill_length_mm + species, data = penguins_data),
-    interaction_model = lm(
-      bill_depth_mm ~ bill_length_mm * species, data = penguins_data)
+  # Clean and group data
+  tar_group_by(
+    penguins_data,
+    clean_penguin_data(penguins_data_raw),
+    species
   ),
-  # Get model summaries
+  # Get summary of combined model with all species together
+  combined_summary = model_glance_slow(penguins_data),
+  # Get summary of one model per species
   tar_target(
-    model_summaries,
-    glance_with_mod_name_slow(models),
-    pattern = map(models)
+    species_summary,
+    model_glance_slow(penguins_data),
+    pattern = map(penguins_data)
   ),
-  # Get model predictions
+  # Get predictions of combined model with all species together
+  combined_predictions = model_augment_slow(penguins_data),
+  # Get predictions of one model per species
   tar_target(
-    model_predictions,
-    augment_with_mod_name_slow(models),
-    pattern = map(models)
+    species_predictions,
+    model_augment_slow(penguins_data),
+    pattern = map(penguins_data)
   )
 )
+NA
 ```
 
-最後に、通常どおり `tar_make()` を使用してパイプラインを実行します。
+Finally, run the pipeline with `tar_make()` as normal.
 
 
 ``` output
-✔ skip target penguins_data_raw_file
-✔ skip target penguins_data_raw
-✔ skip target penguins_data
-✔ skip target models
-• start branch model_predictions_5ad4cec5
-• start branch model_predictions_c73912d5
-• start branch model_predictions_91696941
-• start branch model_summaries_5ad4cec5
-• start branch model_summaries_c73912d5
-• start branch model_summaries_91696941
-• built branch model_predictions_5ad4cec5 [4.884 seconds]
-• built branch model_predictions_c73912d5 [4.896 seconds]
-• built branch model_predictions_91696941 [4.006 seconds]
-• built pattern model_predictions
-• built branch model_summaries_5ad4cec5 [4.011 seconds]
-• built branch model_summaries_c73912d5 [4.011 seconds]
-• built branch model_summaries_91696941 [4.011 seconds]
-• built pattern model_summaries
-• end pipeline [15.153 seconds]
+✔ skipped target penguins_data_raw_file
+✔ skipped target penguins_data_raw
+✔ skipped target penguins_data
+▶ dispatched target combined_summary
+▶ dispatched branch species_summary_1598bb4431372f32
+● completed target combined_summary [4.618 seconds, 371 bytes]
+▶ dispatched branch species_summary_6b9109ba2e9d27fd
+● completed branch species_summary_1598bb4431372f32 [4.593 seconds, 368 bytes]
+▶ dispatched branch species_summary_625f9fbc7f62298a
+● completed branch species_summary_6b9109ba2e9d27fd [4.01 seconds, 372 bytes]
+▶ dispatched target combined_predictions
+● completed branch species_summary_625f9fbc7f62298a [4.01 seconds, 369 bytes]
+● completed pattern species_summary 
+▶ dispatched branch species_predictions_1598bb4431372f32
+● completed target combined_predictions [4.018 seconds, 25.911 kilobytes]
+▶ dispatched branch species_predictions_6b9109ba2e9d27fd
+● completed branch species_predictions_1598bb4431372f32 [4.018 seconds, 11.585 kilobytes]
+▶ dispatched branch species_predictions_625f9fbc7f62298a
+● completed branch species_predictions_6b9109ba2e9d27fd [4.009 seconds, 6.252 kilobytes]
+● completed branch species_predictions_625f9fbc7f62298a [4.01 seconds, 9.629 kilobytes]
+● completed pattern species_predictions 
+▶ ended pipeline [18.841 seconds]
 ```
 
-各個別ターゲットをビルドするのに約4秒かかるにもかかわらず、ワークフロー全体を実行するのにかかる総時間は、個々のターゲットの合計時間よりも短いことに注目してください！ これはプロセスが並列で実行されており、**時間を節約している** ことの証明です。
+Notice that although the time required to build each individual target is about 4 seconds, the total time to run the entire workflow is less than the sum of the individual target times! That is proof that processes are running in parallel **and saving you time**.
 
-`targets` の独自で強力な点は、**並列で実行するためにカスタム関数を変更する必要がなかった** ことです。ワークフローを*調整*しただけです。これは、ワークフローを順次にローカルで実行するか、高性能なコンテキストで並列に実行するようにリファクタリング（修正）するのが比較的簡単であることを意味します。
+The unique and powerful thing about targets is that **we did not need to change our custom function to run it in parallel**. We only adjusted *the workflow*. This means it is relatively easy to refactor (modify) a workflow for running sequentially locally or running in parallel in a high-performance context.
 
-これがどのように機能するかを実演したので、分析プランを作成した関数の元のバージョンに戻すことができます。
+Now that we have demonstrated how this works, you can change your analysis plan back to the original versions of the functions you wrote.
 
 ::::::::::::::::::::::::::::::::::::: keypoints 
 
-- 動的ブランチングは単一のコマンドで複数のターゲットを作成します
-- ブランチの出力に必要なメタデータを含めるために、通常カスタム関数を書く必要があります
-- 並列コンピューティングは関数ではなく、ワークフローのレベルで機能します
+- Dynamic branching creates multiple targets with a single command
+- You usually need to write custom functions so that the output of the branches includes necessary metadata 
+- Parallel computing works at the level of the workflow, not the function
 
 ::::::::::::::::::::::::::::::::::::::::::::::::

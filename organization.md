@@ -1,53 +1,51 @@
 ---
-title: 'targetsプロジェクト組織のベストプラクティス'
+title: 'Best Practices for targets Project Organization'
 teaching: 10
 exercises: 2
 ---
 
 :::::::::::::::::::::::::::::::::::::: questions 
 
-- `targets` プロジェクトを整理するためのベストプラクティスは何ですか？
-- `targets` のワークフローの組織はスクリプトベースの分析とどのように異なりますか？
+- What are best practices for organizing `targets` projects?
+- How does the organization of a `targets` workflow differ from a script-based analysis?
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
 ::::::::::::::::::::::::::::::::::::: objectives
 
-- 最大限の再現性のために `targets` プロジェクトをどのように整理するかを説明する
-- `targets` の文脈で関数をどのように使用するかを理解する
+- Explain how to organize `targets` projects for maximal reproducibility
+- Understand how to use functions in the context of `targets`
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
 ::::::::::::::::::::::::::::::::::::: instructor
 
-Episode summary: プロジェクト組織のベストプラクティスを実演する
+Episode summary: Demonstrate best-practices for project organization
 
 :::::::::::::::::::::::::::::::::::::
 
 
 
-## ワークフロープランをより簡単に書く方法
+## A simpler way to write workflow plans
 
-プラン内でターゲットを指定するデフォルトの方法は、`tar_target()` 関数を使うことです。
-しかし、この書き方は少し冗長に感じるかもしれません。
+The default way to specify targets in the plan is with the `tar_target()` function.
+But this way of writing plans can be a bit verbose.
 
-その代わりに、`targets`の開発者であるWill Landauによって作成された `tarchetypes` パッケージを使う方法があります。
+There is an alternative provided by the `tarchetypes` package, also written by the creator of `targets`, Will Landau.
 
 ::::::::::::::::::::::::::::::::::::: prereq
 
-## `tarchetypes` のインストール
+## Install `tarchetypes`
 
-まだインストールしていない場合は、`install.packages("tarchetypes")` で `tarchetypes` をインストールしてください。
+If you haven't done so yet, install `tarchetypes` with `install.packages("tarchetypes")`.
 
 :::::::::::::::::::::::::::::::::::::
 
-`tarchetypes` の目的は、`targets` パイプラインの記述を容易にするさまざまなショートカットを提供することです。
+The purpose of the `tarchetypes` is to provide various shortcuts that make writing `targets` pipelines easier.
+We will introduce just one for now, `tar_plan()`. This is used in place of `list()` at the end of the `_targets.R` script.
+By using `tar_plan()`, instead of specifying targets with `tar_target()`, we can use a syntax like this: `target_name = target_command`.
 
-今回はそのうちの一つ、`tar_plan()` を紹介します。これは `_targets.R` スクリプトの最後にある `list()` の代わりに使用されます。
-
-`tar_plan()` を使用することで、`tar_target()` を使用してターゲットを指定する代わりに、`target_name = target_command` のような構文を使用できます。
-
-ペンギンのワークフローを `tar_plan()` 構文を使用するように編集しましょう：
+Let's edit the penguins workflow to use the `tar_plan()` syntax:
 
 <!-- The chunk below intersperses plan_2b with clean_penguin_data() to avoid writing it manually -->
 
@@ -64,7 +62,7 @@ clean_penguin_data <- function(penguins_data_raw) {
       bill_length_mm = `Culmen Length (mm)`,
       bill_depth_mm = `Culmen Depth (mm)`
     ) |>
-    remove_missing(na.rm = TRUE) |>
+    drop_na() |>
     # Split "species" apart on spaces, and only keep the first word
     separate(species, into = "species", extra = "drop")
 }
@@ -76,31 +74,26 @@ tar_plan(
 )
 ```
 
-読みやすくなったと思いませんか？
+I think it is easier to read, do you?
 
-`tar_plan()` を使用するからといって、すべてのターゲットをこの方法で書かなければならないわけではありません。`tar_plan()` 内で `tar_target()` フォーマットを使用することもできます。
+Notice that `tar_plan()` does not mean you have to write *all* targets this way; you can still use the `tar_target()` format within `tar_plan()`.
+That is because `=`, while short and easy to read, does not provide all of the customization that `targets` is capable of.
+This doesn't matter so much for now, but it will become important when you start to create more advanced `targets` workflows.
 
-これは、`=` が短く読みやすい一方で、`targets` が提供できるすべてのカスタマイズを提供しないためです。
+## Organizing files and folders
 
-今のところあまり重要ではありませんが、より高度な `targets` ワークフローを作成し始めると重要になります。
+So far, we have been doing everything with a single `_targets.R` file.
+This is OK for a small workflow, but does not work very well when the workflow gets bigger.
+There are better ways to organize your code.
 
-## ファイルとフォルダの整理
+First, let's create a directory called `R` to store R code *other than* `_targets.R` (remember, `_targets.R` must be placed in the overall project directory, not in a subdirectory).
+Create a new R file in `R/` called `functions.R`.
+This is where we will put our custom functions.
+Let's go ahead and put `clean_penguin_data()` in there now and save it.
 
-これまで、すべてを単一の `_targets.R` ファイルで行ってきました。
+Similarly, let's put the `library()` calls in their own script in `R/` called `packages.R` (this isn't the only way to do it though; see the ["Managing Packages" episode](https://joelnitta.github.io/targets-workshop/packages.html) for alternative approaches).
 
-これは小規模なワークフローには問題ありませんが、ワークフローが大きくなるとあまりうまく機能しません。
-
-コードを整理するためのより良い方法があります。
-
-まず、`_targets.R` 以外の R コードを保存するために `R` というディレクトリを作成しましょう（`_targets.R` はサブディレクトリではなく、プロジェクト全体のディレクトリに配置する必要があることを覚えておいてください）。
-
-`R/` 内に `functions.R` という新しい R ファイルを作成します。
-ここにカスタム関数を配置します。
-今すぐ `clean_penguin_data()` をそこに入れて保存しましょう。
-
-同様に、`library()` 呼び出しを `R/` 内の `packages.R` という独自のスクリプトに配置しましょう（ただし、これは唯一の方法ではありません。["パッケージの管理" エピソード](https://joelnitta.github.io/targets-workshop/packages.html) を参照してください）。
-
-また、`_targets.R` スクリプトをこれらのスクリプトを `source` で呼び出すように修正する必要があります：
+We will also need to modify our `_targets.R` script to call these scripts with `source`:
 
 
 ``` r
@@ -114,34 +107,34 @@ tar_plan(
 )
 ```
 
-これで `_targets.R` はずっとスリムになりました：ワークフローに集中し、各ステップで何が起こるかをすぐに教えてくれます。
+Now `_targets.R` is much more streamlined: it is focused just on the workflow and immediately tells us what happens in each step.
 
-最後に、データや出力など、コードではないファイルを保存するためのディレクトリを作成しましょう。
-ターゲットキャッシュ内に `user` という新しいディレクトリを作成します：`_targets/user`。
-`user` 内にさらに `data` と `results` の2つのディレクトリを作成します。
-（バージョン管理を使用している場合は、`_targets` ディレクトリを無視することをおそらく望むでしょう）。
+Finally, let's make some directories for storing data and output---files that are not code.
+Create a new directory inside the targets cache called `user`: `_targets/user`.
+Within `user`, create two more directories, `data` and `results`.
+(If you use version control, you will probably want to ignore the `_targets` directory).
 
-## 関数についての一言
+## A word about functions
 
-このレッスンの前半でカスタム関数について触れましたが、これはさらに明確化が必要な重要なトピックです。
-`targets` のような単一のワークフローではなく、複数のスクリプトを使用して R でデータを分析することに慣れている場合、多くの関数（`function()` 関数を使用）を書かないかもしれません。
+We mentioned custom functions earlier in the lesson, but this is an important topic that deserves further clarification.
+If you are used to analyzing data in R with a series of scripts instead of a single workflow like `targets`, you may not write many functions (using the `function()` function).
 
-これは `targets` との大きな違いです。
-カスタム関数を使用せずに効率的な `targets` パイプラインを書くのは非常に難しいでしょう。なぜなら、ビルドする各ターゲットが単一のコマンドの出力でなければならないからです。
+This is a major difference from `targets`.
+It would be quite difficult to write an efficient `targets` pipeline without the use of custom functions, because each target you build has to be the output of a single command.
 
-このカリキュラムでは R での関数の書き方をカバーする時間がありませんが、このトピックを復習するためには [Software Carpentry のレッスン](https://swcarpentry.github.io/r-novice-gapminder/10-functions) をお勧めします。
+We don't have time in this curriculum to cover how to write functions in R, but the [Software Carpentry lesson](https://swcarpentry.github.io/r-novice-gapminder/10-functions) is recommended for reviewing this topic.
 
-もう一つの大きな違いは、**各ターゲットが一意の名前を持たなければならない** ということです。
-以下のようなコードを書くことに慣れているかもしれません：
+Another major difference is that **each target must have a unique name**.
+You may be used to writing code that looks like this:
 
 
 ``` r
-# 人の身長をcmで保存し、インチに変換する
+# Store a person's height in cm, then convert to inches
 height <- 160
 height <- height / 2.54
 ```
 
-同等の `targets` パイプラインを実行しようとするとエラーが発生します：
+You would get an error if you tried to run the equivalent targets pipeline:
 
 
 ``` r
@@ -152,15 +145,48 @@ tar_plan(
 ```
 
 
+``` output
+
+```
+
+``` output
+── Debugging ───────────────────────────────────────────────────────────────────
+```
+
+``` output
+
+```
+
+``` output
+── How to ──────────────────────────────────────────────────────────────────────
+```
+
+``` output
+
+```
+
+``` output
+── Last error message ──────────────────────────────────────────────────────────
+```
+
+``` output
+
+```
+
+``` output
+── Last error traceback ────────────────────────────────────────────────────────
+```
+
 ``` error
 Error:
-! Error running targets::tar_make()
-Error messages: targets::tar_meta(fields = error, complete_only = TRUE)
-Debugging guide: https://books.ropensci.org/targets/debugging.html
-How to ask for help: https://books.ropensci.org/targets/help.html
-Last error message:
+! targets::tar_make() error
+    • tar_errored()
+    • tar_meta(fields = any_of("error"), complete_only = TRUE)
+    • tar_workspace()
+    • tar_workspaces()
+    • Debug: https://books.ropensci.org/targets/debugging.html
+    • Help: https://books.ropensci.org/targets/help.html
     duplicated target names: height
-Last error traceback:
     base::tryCatch(base::withCallingHandlers({ NULL base::saveRDS(base::do.c...
     tryCatchList(expr, classes, parentenv, handlers)
     tryCatchOne(tryCatchList(expr, names[-nh], parentenv, handlers[-nh]), na...
@@ -170,7 +196,7 @@ Last error traceback:
     doTryCatch(return(expr), name, parentenv, handler)
     base::withCallingHandlers({ NULL base::saveRDS(base::do.call(base::do.ca...
     base::saveRDS(base::do.call(base::do.call, base::c(base::readRDS("/tmp/R...
-    base::do.call(base::do.call, base::c(base::readRDS("/tmp/RtmpaSC2wJ/call...
+    base::do.call(base::do.call, base::c(base::readRDS("/tmp/RtmpL6HPXw/call...
     (function (what, args, quote = FALSE, envir = parent.frame()) { if (!is....
     (function (targets_function, targets_arguments, options, envir = NULL, s...
     tryCatch(out <- withCallingHandlers(targets::tar_callr_inner_try(targets...
@@ -186,23 +212,23 @@ Last error traceback:
     tar_assert_unique_targets(names)
     tar_throw_validate(message)
     tar_error(message = paste0(...), class = c("tar_condition_validate", "ta...
-    rlang::abort(message = message, class = class, call = tar_empty_envir)
+    rlang::abort(message = message, class = class, call = tar_envir_base)
     signal_abort(cnd, .file)
 ```
 
-**`targets` パイプラインで作業する大部分は、適切なサイズのカスタム関数を書くことです。**
-それらは単一行のコードだけになるほど小さくてはいけません；そうするとパイプラインが理解しにくくなり、維持管理が難しくなります。
-一方で、変更に過度に敏感になるほど大きくしてはいけません。
+**A major part of working with `targets` pipelines is writing custom functions that are the right size.**
+They should not be so small that each is just a single line of code; this would make your pipeline difficult to understand and be too difficult to maintain.
+On the other hand, they should not be so big that each has large numbers of inputs and is thus overly sensitive to changes.
 
-このバランスを取ることは科学というよりもアートであり、練習を通じてしか習得できません。私が見つけた良い経験則は、ターゲットごとに3つを超える入力を持たないことです。
+Striking this balance is more of art than science, and only comes with practice. I find a good rule of thumb is no more than three inputs per target.
 
 ::::::::::::::::::::::::::::::::::::: keypoints 
 
-- コードを `R/` フォルダに配置する
-- 関数を `R/functions.R` に配置する
-- パッケージを `R/packages.R` に指定する
-- その他の雑多なファイルを `_targets/user` に配置する
-- 関数を書くことは `targets` パイプラインの重要なスキルである
+- Put code in the `R/` folder
+- Put functions in `R/functions.R`
+- Specify packages in `R/packages.R`
+- Put other miscellaneous files in `_targets/user`
+- Writing functions is a key skill for `targets` pipelines
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
