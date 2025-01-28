@@ -16,26 +16,27 @@ tar_plan(
     path_to_file("penguins_raw.csv"),
     read_csv(!!.x, show_col_types = FALSE)
   ),
-  # Clean and group data
-  tar_group_by(
-    penguins_data,
-    clean_penguin_data(penguins_data_raw),
-    species
+  # Clean data
+  penguins_data = clean_penguin_data(penguins_data_raw),
+  # Build models
+  models = list(
+    combined_model = lm(
+      bill_depth_mm ~ bill_length_mm, data = penguins_data),
+    species_model = lm(
+      bill_depth_mm ~ bill_length_mm + species, data = penguins_data),
+    interaction_model = lm(
+      bill_depth_mm ~ bill_length_mm * species, data = penguins_data)
   ),
-  # Get summary of combined model with all species together
-  combined_summary = model_glance(penguins_data),
-  # Get summary of one model per species
+  # Get model summaries
   tar_target(
-    species_summary,
-    model_glance(penguins_data),
-    pattern = map(penguins_data)
+    model_summaries,
+    glance_with_mod_name(models),
+    pattern = map(models)
   ),
-  # Get predictions of combined model with all species together
-  combined_predictions = model_augment(penguins_data),
-  # Get predictions of one model per species
+  # Get model predictions
   tar_target(
-    species_predictions,
-    model_augment(penguins_data),
-    pattern = map(penguins_data)
+    model_predictions,
+    augment_with_mod_name(models),
+    pattern = map(models)
   )
 )
