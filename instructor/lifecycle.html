@@ -368,7 +368,7 @@
       </div>
       <hr></nav><main id="main-content" class="main-content"><div class="container lesson-content">
         <h1>ワークフローのライフサイクル</h1>
-        <p>最終更新日：2025-02-04 |
+        <p>最終更新日：2025-02-18 |
 
         <a href="https://github.com/swcarpentry-ja/targets-workshop/edit/main/episodes/lifecycle.Rmd" class="external-link">ページの編集 <i aria-hidden="true" data-feather="edit"></i></a></p>
 
@@ -438,7 +438,7 @@ make、inspect、adjust、make を実演する</p>
 <pre class="output" tabindex="0"><code>✔ skipped target penguins_csv_file
 ✔ skipped target penguins_data_raw
 ✔ skipped target penguins_data
-✔ skipped pipeline [0.103 seconds]</code></pre>
+✔ skipped pipeline [0.124 seconds]</code></pre>
 </div>
 <p>最初にパイプラインを実行したとき、<code>targets</code>
 がビルドされている各ターゲットのリストを出力したことを覚えていますか？</p>
@@ -479,8 +479,8 @@ make、inspect、adjust、make を実演する</p>
 <pre class="output" tabindex="0"><code>✔ skipped target penguins_csv_file
 ✔ skipped target penguins_data_raw
 ▶ dispatched target penguins_data
-● completed target penguins_data [0.015 seconds]
-▶ ended pipeline [0.139 seconds]</code></pre>
+● completed target penguins_data [0.025 seconds]
+▶ ended pipeline [0.17 seconds]</code></pre>
 </div>
 <p>何が起こったでしょうか？</p>
 <p>今回は、<code>penguins_csv_file</code> と
@@ -680,7 +680,7 @@ targets キャッシュ（<code>_targets</code> フォルダ）に保存しま�
 <pre class="output" tabindex="0"><code>✔ skipped target penguins_csv_file
 ✔ skipped target penguins_data_raw
 ✔ skipped target penguins_data
-✔ skipped pipeline [0.115 seconds]</code></pre>
+✔ skipped pipeline [0.137 seconds]</code></pre>
 </div>
 <p><code>penguins_data</code> を無効化し、再度実行してみましょう：</p>
 <div class="codewrapper sourceCode" id="cb13">
@@ -696,8 +696,8 @@ targets キャッシュ（<code>_targets</code> フォルダ）に保存しま�
 <pre class="output" tabindex="0"><code>✔ skipped target penguins_csv_file
 ✔ skipped target penguins_data_raw
 ▶ dispatched target penguins_data
-● completed target penguins_data [0.026 seconds]
-▶ ended pipeline [0.141 seconds]</code></pre>
+● completed target penguins_data [0.025 seconds]
+▶ ended pipeline [0.173 seconds]</code></pre>
 </div>
 <p>もしすべてをリセットして新たに開始したい場合は、<code>tar_invalidate(everything())</code>
 を使用して <code>_targets</code>
@@ -800,8 +800,8 @@ any links that you are not going to use.
   "url": "https://swcarpentry-ja.github.io/targets-workshop/instructor/lifecycle.html",
   "identifier": "https://swcarpentry-ja.github.io/targets-workshop/instructor/lifecycle.html",
   "dateCreated": "2024-10-24",
-  "dateModified": "2025-02-04",
-  "datePublished": "2025-02-11"
+  "dateModified": "2025-02-18",
+  "datePublished": "2025-02-18"
 }
 
   </script><script>
