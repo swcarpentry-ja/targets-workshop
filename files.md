@@ -56,7 +56,7 @@ tar_plan(
 
 ``` output
 ▶ dispatched target some_data
-● completed target some_data [0 seconds]
+● completed target some_data [0.001 seconds]
 ▶ ended pipeline [0.118 seconds]
 ```
 
@@ -98,10 +98,10 @@ tar_plan(
 
 ``` output
 ▶ dispatched target data_file
-● completed target data_file [0 seconds]
+● completed target data_file [0.001 seconds]
 ▶ dispatched target some_data
 ● completed target some_data [0 seconds]
-▶ ended pipeline [0.179 seconds]
+▶ ended pipeline [0.174 seconds]
 ```
 
 今回は、`targets` が期待通りに `some_data` を再構築するのが確認できます。
@@ -184,9 +184,9 @@ tar_plan(
 
 ``` output
 ▶ dispatched target penguins_data_raw_file
-● completed target penguins_data_raw_file [0.002 seconds]
+● completed target penguins_data_raw_file [0.001 seconds]
 ▶ dispatched target penguins_data_raw
-● completed target penguins_data_raw [0.101 seconds]
+● completed target penguins_data_raw [0.102 seconds]
 ▶ dispatched target penguins_data
 ● completed target penguins_data [0.023 seconds]
 ▶ ended pipeline [0.262 seconds]
@@ -262,12 +262,12 @@ tar_plan(
 ▶ dispatched target hello_file
 ● completed target hello_file [0.001 seconds]
 ▶ dispatched target hello
-● completed target hello [0.001 seconds]
+● completed target hello [0 seconds]
 ▶ dispatched target hello_caps
 ● completed target hello_caps [0 seconds]
 ▶ dispatched target hello_caps_out
-● completed target hello_caps_out [0.001 seconds]
-▶ ended pipeline [0.182 seconds]
+● completed target hello_caps_out [0 seconds]
+▶ ended pipeline [0.177 seconds]
 ```
 
 `results` フォルダ内の `hello_caps.txt` を見て、期待通りであることを確認してください。

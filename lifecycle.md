@@ -42,7 +42,7 @@ tar_make()
 ✔ skipped target penguins_csv_file
 ✔ skipped target penguins_data_raw
 ✔ skipped target penguins_data
-✔ skipped pipeline [0.124 seconds]
+✔ skipped pipeline [0.123 seconds]
 ```
 
 最初にパイプラインを実行したとき、`targets` がビルドされている各ターゲットのリストを出力したことを覚えていますか？
@@ -86,8 +86,8 @@ tar_make()
 ✔ skipped target penguins_csv_file
 ✔ skipped target penguins_data_raw
 ▶ dispatched target penguins_data
-● completed target penguins_data [0.025 seconds]
-▶ ended pipeline [0.17 seconds]
+● completed target penguins_data [0.024 seconds]
+▶ ended pipeline [0.171 seconds]
 ```
 
 何が起こったでしょうか？
@@ -252,7 +252,7 @@ tar_make()
 ✔ skipped target penguins_csv_file
 ✔ skipped target penguins_data_raw
 ✔ skipped target penguins_data
-✔ skipped pipeline [0.137 seconds]
+✔ skipped pipeline [0.136 seconds]
 ```
 
 `penguins_data` を無効化し、再度実行してみましょう：
@@ -268,7 +268,7 @@ tar_make()
 ✔ skipped target penguins_data_raw
 ▶ dispatched target penguins_data
 ● completed target penguins_data [0.025 seconds]
-▶ ended pipeline [0.173 seconds]
+▶ ended pipeline [0.171 seconds]
 ```
 
 もしすべてをリセットして新たに開始したい場合は、`tar_invalidate(everything())` を使用して `_targets` フォルダ全体を削除することができます（`tar_invalidate()` はターゲット名を指定するために `tidyselect` 式を受け入れます）。

@@ -307,10 +307,10 @@ tar_make()
 ▶ dispatched target penguins_csv_file
 ● completed target penguins_csv_file [0.001 seconds]
 ▶ dispatched target penguins_data_raw
-● completed target penguins_data_raw [0.098 seconds]
+● completed target penguins_data_raw [0.097 seconds]
 ▶ dispatched target penguins_data
 ● completed target penguins_data [0.021 seconds]
-▶ ended pipeline [0.242 seconds]
+▶ ended pipeline [0.24 seconds]
 ```
 
 おめでとうございます、`targets` を使って最初のワークフローを実行しました！
