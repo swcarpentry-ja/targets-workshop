@@ -81,8 +81,8 @@ tar_plan(
 ✔ skipped target penguins_data_raw
 ✔ skipped target penguins_data
 ▶ dispatched target combined_model
-● completed target combined_model [0.025 seconds]
-▶ ended pipeline [0.172 seconds]
+● completed target combined_model [0.024 seconds]
+▶ ended pipeline [0.169 seconds]
 ```
 
 モデルを見てみましょう。`broom` パッケージの `glance()` 関数を使用します。これは base R の `summary()` とは異なり、出力をティブル（データフレームの tidyverse 相当）として返します。後で見るように、これは下流の分析に非常に便利です。
@@ -151,16 +151,16 @@ tar_plan(
 ✔ skipped target penguins_data
 ✔ skipped target combined_model
 ▶ dispatched target interaction_model
-● completed target interaction_model [0.004 seconds]
+● completed target interaction_model [0.003 seconds]
 ▶ dispatched target species_model
 ● completed target species_model [0.001 seconds]
 ▶ dispatched target combined_summary
-● completed target combined_summary [0.009 seconds]
+● completed target combined_summary [0.008 seconds]
 ▶ dispatched target interaction_summary
 ● completed target interaction_summary [0.002 seconds]
 ▶ dispatched target species_summary
 ● completed target species_summary [0.002 seconds]
-▶ ended pipeline [0.179 seconds]
+▶ ended pipeline [0.177 seconds]
 ```
 
 モデルの一つのサマリーを見てみましょう：
@@ -231,13 +231,13 @@ tar_plan(
 ▶ dispatched target models
 ● completed target models [0.004 seconds]
 ▶ dispatched branch model_summaries_812e3af782bee03f
-● completed branch model_summaries_812e3af782bee03f [0.009 seconds]
+● completed branch model_summaries_812e3af782bee03f [0.008 seconds]
 ▶ dispatched branch model_summaries_2b8108839427c135
 ● completed branch model_summaries_2b8108839427c135 [0.003 seconds]
 ▶ dispatched branch model_summaries_533cd9a636c3e05b
 ● completed branch model_summaries_533cd9a636c3e05b [0.003 seconds]
 ● completed pattern model_summaries
-▶ ended pipeline [0.193 seconds]
+▶ ended pipeline [0.191 seconds]
 ```
 
 一連の小さなターゲット（ブランチ）があり、それぞれが model_summaries_812e3af782bee03f のように名前付けされ、その後に全体の `model_summaries` ターゲットがあります。
@@ -368,13 +368,13 @@ tar_plan(
 ✔ skipped target penguins_data
 ✔ skipped target models
 ▶ dispatched branch model_summaries_812e3af782bee03f
-● completed branch model_summaries_812e3af782bee03f [0.025 seconds]
+● completed branch model_summaries_812e3af782bee03f [0.013 seconds]
 ▶ dispatched branch model_summaries_2b8108839427c135
-● completed branch model_summaries_2b8108839427c135 [0.006 seconds]
+● completed branch model_summaries_2b8108839427c135 [0.005 seconds]
 ▶ dispatched branch model_summaries_533cd9a636c3e05b
 ● completed branch model_summaries_533cd9a636c3e05b [0.004 seconds]
 ● completed pattern model_summaries
-▶ ended pipeline [0.209 seconds]
+▶ ended pipeline [0.192 seconds]
 ```
 
 今回は、`model_summaries` をロードすると、各行がどのモデルに対応しているかを知ることができます（右にスクロールする必要があるかもしれません）。
