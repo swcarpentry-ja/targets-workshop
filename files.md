@@ -56,8 +56,8 @@ tar_plan(
 
 ``` output
 ▶ dispatched target some_data
-● completed target some_data [0.001 seconds]
-▶ ended pipeline [0.114 seconds]
+● completed target some_data [0 seconds]
+▶ ended pipeline [0.122 seconds]
 ```
 
 `tar_read(some_data)` を使用して `some_data` の内容を検査すると、期待通り `"Hello World"` という文字列が含まれていることがわかります。
@@ -77,7 +77,7 @@ tar_plan(
 
 ``` output
 ✔ skipped target some_data
-✔ skipped pipeline [0.114 seconds]
+✔ skipped pipeline [0.125 seconds]
 ```
 
 ターゲット `some_data` がスキップされましたが、これはファイルの内容が変更されたにもかかわらずです。
@@ -101,7 +101,7 @@ tar_plan(
 ● completed target data_file [0.001 seconds]
 ▶ dispatched target some_data
 ● completed target some_data [0 seconds]
-▶ ended pipeline [0.172 seconds]
+▶ ended pipeline [0.182 seconds]
 ```
 
 今回は、`targets` が期待通りに `some_data` を再構築するのが確認できます。
@@ -186,10 +186,10 @@ tar_plan(
 ▶ dispatched target penguins_data_raw_file
 ● completed target penguins_data_raw_file [0.001 seconds]
 ▶ dispatched target penguins_data_raw
-● completed target penguins_data_raw [0.097 seconds]
+● completed target penguins_data_raw [0.096 seconds]
 ▶ dispatched target penguins_data
-● completed target penguins_data [0.013 seconds]
-▶ ended pipeline [0.244 seconds]
+● completed target penguins_data [0.014 seconds]
+▶ ended pipeline [0.25 seconds]
 ```
 
 ::::::::::::::::::::::::::::::::::
@@ -267,7 +267,7 @@ tar_plan(
 ● completed target hello_caps [0 seconds]
 ▶ dispatched target hello_caps_out
 ● completed target hello_caps_out [0 seconds]
-▶ ended pipeline [0.176 seconds]
+▶ ended pipeline [0.188 seconds]
 ```
 
 `results` フォルダ内の `hello_caps.txt` を見て、期待通りであることを確認してください。
