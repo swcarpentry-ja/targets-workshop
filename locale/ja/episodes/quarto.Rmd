@@ -30,6 +30,11 @@ exercises: 2
 library(targets)
 library(tarchetypes)
 library(quarto) # don't actually need to load, but put here so renv catches it
+
+if (interactive()) {
+  setwd("episodes")
+}
+
 source("files/lesson_functions.R")
 
 # Increase width for printing tibbles
@@ -105,7 +110,6 @@ Quartoのような動的ドキュメント（またはQuartoの前身であるRm
 
 tar_dir({
   library(quarto)
-  write_example_plan(9)
   readr::read_lines("https://raw.githubusercontent.com/joelnitta/penguins-targets/main/penguin_report.qmd") |>
     readr::write_lines("penguin_report.qmd")
   # Run it
@@ -129,36 +133,25 @@ tar_dir({
 
 答えは `penguin_report.qmd` ファイルの **内部** にあります。ファイルの開始部分を見てみましょう：
 
-``````{markdown}
----
-title: "Simpson's Paradox in Palmer Penguins"
-format:
-  html:
-    toc: true
-execute: 
-  echo: false
----
-
 ```{r}
-#| label: load
-#| message: false
-targets::tar_load(penguin_models_augmented)
-targets::tar_load(penguin_models_summary)
+#| label: show-penguin-report-qmd
+#| echo: FALSE
+#| results: 'asis'
 
-library(tidyverse)
+penguin_qmd <- readr::read_lines("https://raw.githubusercontent.com/joelnitta/penguins-targets/main/penguin_report.qmd")
+
+cat("````{.markdown}\n")
+cat(penguin_qmd[1:24], sep = "\n")
+cat("\n````")
 ```
-
-これは南極のパルマー諸島におけるペンギンの分析の一例です。
-
-``````
 
 最初の `---` と `---` の間の行は「YAMLヘッダー」と呼ばれ、ドキュメントをレンダリングする方法に関する指示が含まれています。
 
 実行されるRコードは `` ```{r} `` と `` ``` `` の間の行で指定されます。これは「コードチャンク」と呼ばれ、散文テキストに挿入されたコードの一部です。
 
-Rコードチャンクを詳しく見てみましょう。 `targets::tar_load()` の2つの呼び出しに注目してください。この関数が何をするか覚えていますか？これはワークフロー中にビルドされたターゲットをロードします。
+Rコードチャンクを詳しく見てみましょう。 `targets::tar_load()` の使い方に注目してください。この関数が何をするか覚えていますか？これはワークフロー中にビルドされたターゲットをロードします。
 
-これで少し理解が深まったはずです。`targets` はレポートがワークフロー中にビルドされたターゲット、`penguin_models_augmented` および `penguin_models_summary` に依存していることを **レポート内で `tar_load()` を使用してロードしているため** 知っています。
+これで少し理解が深まったはずです。`targets` はレポートがワークフロー中にビルドされた `combined_summary` や `species_summary` などのターゲットに依存していることを **レポート内で `tar_load()` を使用してロードしているため** 知っています。
 
 ## 動的コンテンツの生成
 
@@ -168,13 +161,13 @@ Rコードチャンクを詳しく見てみましょう。 `targets::tar_load()`
 
 ## チャレンジ: 動的コンテンツを見つけよう
 
-`penguin_report.qmd` を読み、ワークフロー中にビルドされたターゲット (`penguin_models_augmented` および `penguin_models_summary`) がテキストやプロットを動的に生成するために使用されている箇所を見つけてみてください。
+`penguin_report.qmd` を読み、ワークフロー中にビルドされたターゲット (`combined_summary` など) がテキストやプロットを動的に生成するために使用されている箇所を見つけてみてください。
 
 :::::::::::::::::::::::::::::::::: {.solution}
 
-- `results-stats` とラベル付けされたコードチャンクでは、*P*-値や調整済み *R* 二乗値などのモデルからの統計が抽出され、`` `r knitr::inline_expr("mod_stats$combined$r.squared")` `` のようなインラインコードを使用してテキストに挿入されています。
+- `results-stats` とラベル付けされたコードチャンクでは、*R* 二乗値などのモデルからの統計が抽出され、`` `r knitr::inline_expr("combined_r2")` `` のようなインラインコードを使用してテキストに挿入されています。
 
-- 2つの図があります。一つは結合モデル用、もう一つは別々のモデル用です（それぞれ `fig-combined-plot` と `fig-separate-plot` とラベル付けされたコードチャンク）。これらは `penguin_models_augmented` のモデルから予測されたポイントを使用して構築されています。
+- 2つの図があります。一つは結合モデル用、もう一つは別々のモデル用です（それぞれ `fig-combined-plot` と `fig-separate-plot` とラベル付けされたコードチャンク）。これらは `combined_predictions` と `species_predictions` のモデルから予測されたポイントを使用して構築されています。
 
 ::::::::::::::::::::::::::::::::::
 

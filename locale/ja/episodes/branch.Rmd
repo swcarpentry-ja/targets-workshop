@@ -1,6 +1,6 @@
 ---
 title: 'ブランチング'
-teaching: 10
+teaching: 30
 exercises: 2
 ---
 
@@ -30,6 +30,14 @@ exercises: 2
 library(targets)
 library(tarchetypes)
 library(broom)
+
+# sandpaper renders this lesson from episodes/
+# need to emulate this behavior during interactive development
+# would be preferable to use here::here() but it doesn't work for some reason
+if (interactive()) {
+  setwd("episodes")
+}
+
 source("files/lesson_functions.R")
 
 # Increase width for printing tibbles
@@ -102,14 +110,14 @@ popd()
 
 しかし、ちょっと待ってください... これは本当に適切なモデルでしょうか？ データセットには3種類のペンギンがいることを思い出してください。くちばしの深さと長さの関係が**種によって異なる**可能性があります。
 
-おそらく、種に対するパラメータを追加するモデルや、種とくちばしの長さの相互作用効果を追加するモデルなど、いくつかの代替モデルをテストする必要があります。
+種ごとに1つずつモデル（合計3つ）を作成して、どうなるか試してみましょう（これは統計的には厳密には正しいアプローチではありませんが、ここでの目的は統計ではなく `targets` を学ぶことです）。
 
 これでワークフローがより複雑になっています。これは**ブランチングなし**でのそのような分析のワークフローの例です（`packages.R` に `library(broom)` を追加することを忘れないでください）：
 
 ```{r}
 #| label = "example-model-show-1",
 #| eval = FALSE,
-#| code = readLines("files/plans/plan_5.R")[2:31]
+#| code = readLines("files/plans/plan_5.R")[2:36]
 ```
 
 ```{r}
@@ -132,19 +140,32 @@ popd()
 #| eval: true
 #| echo: [2]
 pushd(plan_5_dir)
-tar_read(species_summary)
+tar_read(adelie_summary)
 popd()
 ```
 
 この方法でパイプラインを書くと機能しますが、繰り返しが多くなります。各モデルのサマリー統計量を取得するたびに `glance()` を呼び出さなければなりません。
-さらに、各サマリータゲット（`combined_summary` など）は明示的に名前が付けられ、手動で入力されています。
+さらに、各サマリーターゲット（`adelie_summary` など）は明示的に名前が付けられ、手動で入力されています。
 タイプミスをして間違ったモデルがサマリーされるのはかなり簡単です。
+
+先に進む前に、もう一つ**カスタム関数**を定義しましょう：`model_glance()` です。
+`targets` を使用する際にはカスタム関数を頻繁に書く必要があるため、慣れておくと良いでしょう！
+
+`model_glance()` という名前が示すとおり（目的がわかる名前を関数に付けるのは良い習慣です）、この関数はモデルを構築し、すぐにそのモデルに対して `glance()` を実行します。
+こうする理由は、結果として**データフレームが得られる**ためで、次のセクションで見るように、これはブランチングに非常に役立ちます。
+これを `R/functions.R` に保存してください：
+
+```{r}
+#| label = "model-glance",
+#| eval = FALSE,
+#| code = readLines("files/tar_functions/model_glance_orig.R")
+```
 
 ## ブランチングを使用した例
 
 ### 最初の試み
 
-**動的ブランチング**を使用して同じプランを書く方法を見てみましょう：
+**動的ブランチング**を使用して同じプランを書く方法を見てみましょう（実行した後で、新しいバージョンの各ステップを詳しく見ていきます）：
 
 ```{r}
 #| label = "example-model-show-3",
@@ -164,63 +185,65 @@ pushd(plan_6_dir)
 # simulate already running the plan once
 write_example_plan("plan_5.R")
 tar_make(reporter = "silent")
-write_example_plan("plan_6.R")
+# run version of plan that uses `model_glance_orig()` (doesn't include species
+# names in output)
+write_example_plan("plan_6b.R")
 tar_make()
-example_branch_name <- tar_branch_names(model_summaries, 1)
+example_branch_name <- tar_branch_names(species_summary, 1)
 popd()
 ```
 
-一連の小さなターゲット（ブランチ）があり、それぞれが `r example_branch_name` のように名前付けされ、その後に全体の `model_summaries` ターゲットがあります。
+一連の小さなターゲット（ブランチ）があり、それぞれが `r example_branch_name` のように名前付けされ、その後に全体の `species_summary` ターゲットがあります。
 これはブランチングを使用してターゲットを指定した結果です：小さなターゲットそれぞれが全体のターゲットを構成する「ブランチ」です。
 `targets` は、事前にどれだけのブランチが存在するか、またそれらが何を表しているかを知らないため、数字と文字の一連（「ハッシュ」）を使用して各ブランチに名前を付けます。
 `targets` は各ブランチを一つずつビルドし、それらを全体のターゲットに結合します。
 
-次に、ワークフローがどのように設定されているか、モデルの定義から詳しく見てみましょう：
+次に、ワークフローがどのように設定されているか、データの設定から詳しく見てみましょう：
 
 ```{r}
 #| label = "model-def",
-#| code = readLines("files/plans/plan_6.R")[14:22],
+#| code = readLines("files/plans/plan_6.R")[14:19],
 #| eval = FALSE
 ```
 
-ブランチングなしのバージョンとは異なり、モデルを**リスト内**で定義しました（モデルごとに一つのターゲットではなく）。
-これは動的ブランチングが `base::apply()` や [`purrrr::map()`](https://purrr.tidyverse.org/reference/map.html) のループ方法に似ているためです：リストの各要素に関数を適用します。
-したがって、ループの入力としてリストを準備する必要があります。
+ブランチングなしのバージョンとは異なり、**データをグループ化する**ステップを追加しました。
+これは動的ブランチングが、グループ化されたデータフレームに同じ関数を適用する [`tidyverse` のアプローチ](https://dplyr.tidyverse.org/articles/grouping.html)に似ているためです。
+そこで、`tar_group_by()` 関数を使用して、入力データのグループ（種ごとに1グループ）を指定します。
 
-次に、ターゲット `model_summaries` をビルドするコマンドを見てみましょう。
+次に、ターゲット `species_summary` をビルドするコマンドを見てみましょう。
 
 ```{r}
 #| label = "model-summaries",
-#| code = readLines("files/plans/plan_6.R")[23:28],
+#| code = readLines("files/plans/plan_6.R")[22:27],
 #| eval = FALSE
 ```
 
-以前と同様に、最初の引数はビルドするターゲットの名前で、二つ目の引数はそれをビルドするコマンドです。
+以前と同様に、`tar_target()` の最初の引数はビルドするターゲットの名前で、二つ目の引数はそれをビルドするコマンドです。
 
-ここでは、`glance()` 関数を `models` の各要素に適用しています（`[[1]]` が必要なのは、関数が適用されるとき、各要素が実際にはネストされたリストであり、ネストを一層取り除く必要があるためです）。
+ここでは、カスタム関数 `model_glance()` を `penguins_data_grouped` の各グループ（つまり各種）に適用しています。
 
 最後に、これまで見たことのない引数 `pattern` があります。これは、このターゲットが動的ブランチングを使用してビルドされるべきことを示します。
-`map` は、入力リスト（`models`）の各要素に対して関数を順次適用することを意味します。
+`map` は、入力データ（`penguins_data_grouped`）の各グループに対して関数を順次適用することを意味します。
 
 ブランチングワークフローの構築方法を理解したので、出力を検査してみましょう：
 
 ```{r}
 #| label: example-model-show-4
 #| eval: FALSE
-tar_read(model_summaries)
+tar_read(species_summary)
 ```
 
 ```{r}
 #| label: example-model-hide-4
 #| echo: FALSE
 pushd(plan_6_dir)
-tar_read(model_summaries)
+tar_read(species_summary)
 popd()
 ```
 
 モデルのサマリー統計量がすべて一つのデータフレームに含まれています。
 
-しかし、一つ問題があります：**どの行がどのモデルから来たのか分かりません！** モデルのリストと同じ順序であると仮定するのは賢明ではありません。
+しかし、一つ問題があります：**どの行がどの種から来たのか分かりません！** 入力データと同じ順序であると仮定するのは賢明ではありません。
 
 これは動的ブランチングの動作方法によるものです：デフォルトでは、各ターゲットの由来に関する情報が出力に保持されません。
 
@@ -229,58 +252,43 @@ popd()
 ### 第二の試み
 
 ブランチングパイプラインから有用な出力を得るための鍵は、各ブランチの出力に必要な情報を含めることです。
-ここでは、モデルサマリーの各行に対応するモデルの種類を知りたいと考えています。
-これを行うために、**カスタム関数**を書く必要があります。
-`targets` を使用する際にはカスタム関数を頻繁に書く必要があるため、慣れておくと良いでしょう！
+ここでは、モデルサマリーの各行に対応する種を知りたいと考えています。
 
-以下がその関数です。これを `R/functions.R` に保存してください：
+これは `model_glance` 関数を修正することで実現できます。種を表す列を含めるように修正したら、必ず保存してください：
 
 ```{r}
 #| label: example-model-show-5
 #| eval: FALSE
-#| file: files/tar_functions/glance_with_mod_name.R
+#| file: files/tar_functions/model_glance.R
 ```
 
-新しいパイプラインは以前とほぼ同じですが、今回は `glance()` の代わりにカスタム関数を使用しています。
+新しいパイプラインは以前とまったく同じです。修正したのはパイプラインではなく**関数**です。
 
-```{r}
-#| label = "example-model-show-6",
-#| code = readLines("files/plans/plan_7.R")[2:29],
-#| eval = FALSE
-```
+`targets` はカスタム関数の内容を追跡しているため、`species_summary` を再計算する必要があると判断し、新しく修正した関数を使ってこのターゲットを再び実行します。
 
 ```{r}
 #| label: example-model-hide-6
 #| echo: FALSE
 pushd(plan_6_dir)
-write_example_plan("plan_7.R")
+write_example_plan("plan_6.R")
 tar_make()
 popd()
 ```
 
-今回は、`model_summaries` をロードすると、各行がどのモデルに対応しているかを知ることができます（右にスクロールする必要があるかもしれません）。
+今回は、`model_summaries` をロードすると、各行がどのモデルに対応しているかを知ることができます（`mutate()` の `.before = 1` により、他の列より前に表示されます）。
 
 ```{r}
 #| label: example-model-7
 #| echo: [2]
 #| warning: false
 pushd(plan_6_dir)
-tar_read(model_summaries)
+tar_read(species_summary)
 popd()
 ```
 
 次に、モデルに基づくくちばしの深さの予測を追加します。これはレポートでモデルをプロットする際に必要になります。
-この予測は `broom` パッケージの `augment()` 関数を使用して取得できます。
+この予測は `broom` パッケージの `augment()` 関数を使用して取得できます。モデルのサマリーの場合と同様に、予測された点をデータフレームとして出力するカスタム関数を作成します。
 
-```{r}
-#| label: example-augment
-#| echo: [2, 3]
-#| eval: true
-pushd(plan_6_dir)
-tar_load(models)
-augment(models[[1]])
-popd()
-```
 
 ::::::::::::::::::::::::::::::::::::: {.challenge}
 
@@ -290,19 +298,19 @@ popd()
 
 :::::::::::::::::::::::::::::::::: {.solution}
 
-新しい関数を `augment_with_mod_name()` として定義します。これは `glance_with_mod_name()` と同じですが、`glance()` の代わりに `augment()` を使用します：
+新しい関数を `model_augment()` として定義します。これは `model_glance()` と同じですが、`glance()` の代わりに `augment()` を使用します：
 
 ```{r}
 #| label: example-model-augment-func
 #| eval: FALSE
-#| file: files/tar_functions/augment_with_mod_name.R
+#| file: files/tar_functions/model_augment.R
 ```
 
 ワークフローにステップを追加します：
 
 ```{r}
 #| label = "example-model-augment-show",
-#| code = readLines("files/plans/plan_8.R")[2:35],
+#| code = readLines("files/plans/plan_7.R")[2:36],
 #| eval = FALSE
 ```
 
@@ -310,13 +318,41 @@ popd()
 
 :::::::::::::::::::::::::::::::::::::
 
+### ワークフローをさらに簡素化する
+
+ワークフローをさらに簡素化できることにお気づきかもしれません。`penguins_data` と `penguins_data_grouped` という別々のデータフレームを用意する必要はありません。
+一般に、コードを理解しやすくするために、名前付きオブジェクトの数はできるだけ少なくするのが最善です。
+クリーニングとグループ化のステップを1つのコマンドにまとめましょう：
+
+```{r}
+#| label = "example-model-show-8",
+#| eval = FALSE,
+#| code = readLines("files/plans/plan_8.R")[2:35]
+```
+
+そして、もう一度実行します：
+
+```{r}
+#| label: example-model-hide-8
+#| echo: false
+pushd(plan_6_dir)
+# simulate already running the plan once
+write_example_plan("plan_7.R")
+tar_make(reporter = "silent")
+# run version of plan that uses `model_glance_orig()` (doesn't include species
+# names in output)
+write_example_plan("plan_8.R")
+tar_make()
+popd()
+```
+
 ::::::::::::::::::::::::::::::::::::: {.callout}
 
 ## ブランチングのベストプラクティス
 
-動的ブランチングは**データフレーム**（ティブル）と相性が良いように設計されています。
+動的ブランチングは**データフレーム**と相性が良いように設計されています（[リスト](https://books.ropensci.org/targets/dynamic.html#list-iteration)も使用できますが、より高度なので、可能な限りデータフレームを使用することをお勧めします）。
 
-可能であれば、カスタム関数をデータフレームを入力として受け取り、データフレームを出力として返すように書き、必要なメタデータを列として常に含めるようにしてください。
+カスタム関数は、データフレームを入力として受け取り、データフレームを出力として返すように書き、必要なメタデータを列として常に含めることをお勧めします。
 
 :::::::::::::::::::::::::::::::::::::
 

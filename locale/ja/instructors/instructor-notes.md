@@ -2,6 +2,13 @@
 title: 'Instructor Notes'
 ---
 
-## General notes
+## 全般的な注意事項
 
-The examples gradually build up to a [full analysis](https://github.com/joelnitta/penguins-targets) of the [Palmer Penguins dataset](https://allisonhorst.github.io/palmerpenguins/). However, there are a few places where completely different code is demonstrated to explain certain concepts. Since a given `targets` project can only have one `_targets.R` file, this means the participants may have to delete their existing `_targets.R` file and write a new one to follow along with the examples. This may cause frustration if they can't keep a record of what they have done so far. One solution would be to save the old `_targets.R` file as `_targets_old.R` or similar, then rename it when it should be run again.
+例は徐々に、[Palmer Penguins データセット](https://allisonhorst.github.io/palmerpenguins/)の[完全な分析](https://github.com/joelnitta/penguins-targets)へと発展していきます。ただし、いくつかの概念を説明するために、まったく異なるコードを示す箇所があります。1つの `targets` プロジェクトには `_targets.R` ファイルを1つしか置けないため、参加者は既存の `_targets.R` ファイルを削除し、例に沿って新しいファイルを書く必要があるかもしれません。これまでの作業内容を記録しておけないと、参加者がもどかしく感じるかもしれません。1つの解決策は、古い `_targets.R` ファイルを `_targets_old.R` などの名前で保存しておき、再び実行する必要が生じたときに元の名前に戻すことです。
+
+## オプションのエピソード
+
+「関数」のエピソードはオプションのエピソードであり、ワークショップに参加する学習者によって必要かどうかが変わります。
+関数を使った経験がある人はいるか、挙手（または付箋）で確認し、経験のない学習者がいる場合にこのエピソードを実施することをお勧めします。
+
+`targets` は関数に大きく依存しているため、関数に不慣れな学習者がいる場合は、少し時間をかける価値があると考えています。関数について簡単な導入を受けないと、そうした学習者はすぐについていけなくなり、ワークショップの終了時に `targets` を使いこなせるようにならないでしょう。
