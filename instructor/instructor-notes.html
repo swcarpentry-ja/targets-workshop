@@ -6,21 +6,27 @@
 <title>targets Rパッケージ入門: インストラクター用メモ</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script src="../assets/themetoggle.js"></script><link rel="stylesheet" type="text/css" href="../assets/styles.css">
-<script src="../assets/scripts.js" type="text/javascript"></script><!-- mathjax --><script type="text/x-mathjax-config">
-    MathJax.Hub.Config({
-      config: ["MMLorHTML.js"],
-      jax: ["input/TeX","input/MathML","output/HTML-CSS","output/NativeMML", "output/PreviewHTML"],
-      extensions: ["tex2jax.js","mml2jax.js","MathMenu.js","MathZoom.js", "fast-preview.js", "AssistiveMML.js", "a11y/accessibility-menu.js"],
-      TeX: {
-        extensions: ["AMSmath.js","AMSsymbols.js","noErrors.js","noUndefined.js"]
-      },
-      tex2jax: {
-        inlineMath: [['\\(', '\\)']],
-        displayMath: [ ['$$','$$'], ['\\[', '\\]'] ],
-        processEscapes: true
-      }
-    });
-    </script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><!-- Responsive Favicon for The Carpentries --><link rel="apple-touch-icon" sizes="180x180" href="../favicons/incubator/apple-touch-icon.png">
+<script src="../assets/scripts.js" type="text/javascript"></script><!-- mathjax --><!-- NOTE: https://docs.mathjax.org/en/latest/output/mathml.html#mathml-support --><!-- Changes from V2 to V4: https://mathjax.github.io/MathJax-demos-web/convert-configuration/convert-configuration.html
+        Jax output/NativeMML is not yet implemented
+        Jax output/PreviewHTML is not yet implemented
+        Extension fast-preview is not yet implemented (but may be in a future release)
+    --><script>
+    window.MathJax = {
+        tex: {
+            inlineMath: [['\\(', '\\)']],
+            displayMath: [ ['$$','$$'], ['\\[', '\\]'] ],
+            processEscapes: true,
+            packages: ['base', 'ams', 'noerrors', 'noundefined']
+        },
+        options: {
+            ignoreHtmlClass: 'tex2jax_ignore',
+            processHtmlClass: 'tex2jax_process'
+        },
+        loader: {
+            load: ['a11y/assistive-mml', '[tex]/noerrors']
+        }
+    };
+    </script><script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script><!-- Responsive Favicon for The Carpentries --><link rel="apple-touch-icon" sizes="180x180" href="../favicons/incubator/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="../favicons/incubator/favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="../favicons/incubator/favicon-16x16.png">
 <link rel="manifest" href="../favicons/incubator/site.webmanifest">
@@ -34,9 +40,12 @@
   <div class="container-fluid top-nav-container">
     <div class="col-md-8">
       <div class="large-logo">
-        <img id="incubator-logo" alt="Carpentries Incubator" src="../assets/images/incubator-logo.svg"><span class="badge text-bg-danger">
+        <a href="index.html">
+        <img id="incubator-logo" alt="Carpentries Incubator" src="../assets/images/incubator-logo.svg"></a>
+
+        <span class="badge text-bg-danger">
           <abbr title="このレッスンはプレアルファフェーズ（開発が始まったが、まだ教えられたことがない）にある。">
-            <a href="https://cdh.carpentries.org/the-lesson-life-cycle.html#early-development-pre-alpha-through-alpha" class="external-link alert-link">
+            <a href="https://docs.carpentries.org/resources/curriculum/lesson-life-cycle.html" class="external-link alert-link">
               <i aria-hidden="true" class="icon" data-feather="alert-octagon" style="border-radius: 5px"></i>
               プレアルファ
             </a>
@@ -47,8 +56,8 @@
       </div>
     </div>
     <div class="selector-container">
-      <div id="theme-selector">
-        <li class="nav-item dropdown" id="theme-button-list">
+      <menu class="theme-selector" id="theme-selector-menu">
+<li class="nav-item dropdown theme-button-list" id="theme-button-list-menu">
           <button class="btn btn-link nav-link px-0 px-lg-2 dropdown-toggle d-flex align-items-center" id="bd-theme" type="button" aria-expanded="false" data-bs-toggle="dropdown" data-bs-display="static" aria-label="Toggle theme (auto)">
             <svg class="bi my-1 theme-icon-active"><use href="#circle-half"></use></svg><i data-feather="chevron-down"></i>
           </button>
@@ -73,9 +82,8 @@
             </li>
           </ul>
 </li>
-      </div>
-
-      <div class="dropdown" id="instructor-dropdown">
+    </menu>
+<div class="dropdown" id="instructor-dropdown">
         <button class="btn btn-secondary dropdown-toggle bordered-button" type="button" id="dropdownMenu1" data-bs-toggle="dropdown" aria-expanded="false">
           <i aria-hidden="true" class="icon" data-feather="eye"></i> インストラクター表示 <i data-feather="chevron-down"></i>
         </button>
@@ -85,14 +93,15 @@
 </div>
     </div>
   </div>
-  <hr></header><nav class="navbar navbar-expand-xl bottom-nav incubator" aria-label="メインナビゲーション"><div class="container-fluid nav-container">
+</header><nav class="navbar navbar-expand-xl bottom-nav incubator" aria-label="メインナビゲーション"><div class="container-fluid nav-container">
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="ナビゲーションの切り替え">
       <span class="navbar-toggler-icon"></span>
       <span class="menu-title">メニュー</span>
     </button>
     <div class="nav-logo">
-      <img class="small-logo" alt="Carpentries Incubator" src="../assets/images/incubator-logo-sm.svg">
-</div>
+      <a href="index.html">
+      <img class="small-logo" alt="Carpentries Incubator" src="../assets/images/incubator-logo-sm.svg"></a>
+    </div>
     <div class="lesson-title-md">
       targets Rパッケージ入門
     </div>
@@ -138,32 +147,24 @@
       </fieldset>
     </form>
     -->
-    <a id="search-button" class="btn btn-primary" href="../instructor/aio.html" role="button" aria-label="オールインワンページで検索">オールインワンページで検索</a>
+    <a id="search-button-nav" class="btn btn-primary" href="../instructor/aio.html" role="button" aria-label="オールインワンページで検索">オールインワンページで検索</a>
   </div>
 <!--/div.container-fluid -->
-</nav><div class="col-md-12 mobile-title">
-  targets Rパッケージ入門
-</div>
-
-<aside class="col-md-12 lesson-progress"><div style="width: %" class="percentage">
-    %
-  </div>
-  <div class="progress incubator">
-    <div class="progress-bar incubator" role="progressbar" style="width: %" aria-valuenow="" aria-label="レッスンの進捗状況" aria-valuemin="0" aria-valuemax="100">
-    </div>
-  </div>
-</aside><div class="container">
+</nav><div class="container">
       <div class="row">
         <!-- START: inst/pkgdown/templates/navbar.html -->
 <div id="sidebar-col" class="col-lg-4">
   <div id="sidebar" class="sidebar">
-      <nav aria-labelledby="flush-headingEleven"><button role="button" aria-label="メニューを閉じる" alt="メニューを閉じる" aria-expanded="true" aria-controls="sidebar" class="collapse-toggle" data-collapse="折りたたむ " data-episodes="エピソード ">
+      <nav aria-labelledby="flush-collapse-chapters-toggle"><button role="button" aria-label="折りたたむ" alt="折りたたむ" aria-expanded="true" aria-controls="sidebar" class="collapse-toggle" data-collapse="折りたたむ " data-episodes="エピソード ">
           <i class="search-icon" data-feather="x" role="img"></i>
         </button>
         <div class="sidebar-inner">
           <div class="row mobile-row" id="theme-row-mobile">
-            <div class="col" id="theme-selector">
-              <li class="nav-item dropdown" id="theme-button-list">
+            <a id="search-button-sidebar" class="btn btn-primary" href="../instructor/aio.html" role="button" aria-label="オールインワンページで検索">オールインワンページで検索</a>
+          </div>
+          <div class="row mobile-row" id="theme-row-mobile">
+            <menu class="col theme-selector" id="theme-selector-sidebar">
+<li class="nav-item dropdown theme-button-list" id="theme-button-list-sidebar">
                 <button class="btn btn-link nav-link px-0 px-lg-2 dropdown-toggle d-flex align-items-center" id="bd-theme" type="button" aria-expanded="false" data-bs-toggle="dropdown" data-bs-display="static" aria-label="Toggle theme (auto)">
                   <svg class="bi my-1 theme-icon-active"><use href="#circle-half"></use></svg><span class="d-lg-none ms-1" id="bd-theme-text">Toggle Theme</span>
                 </button>
@@ -188,19 +189,19 @@
                   </li>
                 </ul>
 </li>
-            </div>
-          </div>
+            </menu>
+</div>
           <div class="row mobile-row">
             <div class="col">
               <div class="sidenav-view-selector">
-                <div class="accordion accordion-flush" id="accordionFlush9">
+                <div class="accordion accordion-flush" id="accordion-instructor-toggle">
                   <div class="accordion-item">
-                    <h2 class="accordion-header" id="flush-headingNine">
-                      <button class="accordion-button collapsed" id="instructor" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseNine" aria-expanded="false" aria-controls="flush-collapseNine">
+                    <h2 class="accordion-header" id="flush-heading-instructor-toggle">
+                      <button class="accordion-button collapsed" id="instructor" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapse-instructor-toggle" aria-expanded="false" aria-controls="flush-collapse-instructor-toggle">
                         <i id="eye" aria-hidden="true" class="icon" data-feather="eye"></i> インストラクター表示
                       </button>
                     </h2>
-                    <div id="flush-collapseNine" class="accordion-collapse collapse" aria-labelledby="flush-headingNine" data-bs-parent="#accordionFlush2">
+                    <div id="flush-collapse-instructor-toggle" class="accordion-collapse collapse" data-bs-parent="#accordion-instructor-toggle">
                       <div class="accordion-body">
                         <a href="../instructor-notes.html">学習者表示</a>
                       </div>
@@ -209,24 +210,24 @@
 <!--/div.accordion-item-->
                 </div>
 <!--/div.accordion-flush-->
+
               </div>
 <!--div.sidenav-view-selector -->
             </div>
 <!--/div.col -->
 
-            <hr>
-</div>
+          </div>
 <!--/div.mobile-row -->
 
-          <div class="accordion accordion-flush" id="accordionFlush11">
+          <div class="accordion accordion-flush" id="accordion-chapters-toggle">
             <div class="accordion-item">
 
-              <button id="chapters" class="accordion-button show" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseEleven" aria-expanded="false" aria-controls="flush-collapseEleven">
-                <h2 class="accordion-header chapters" id="flush-headingEleven">
+              <button id="chapters" class="accordion-button show" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapse-chapters-toggle" aria-expanded="false" aria-controls="flush-collapse-chapters-toggle">
+                <h2 class="accordion-header chapters" id="flush-heading-chapters-toggle">
                   エピソード
                 </h2>
               </button>
-              <div id="flush-collapseEleven" class="accordion-collapse show collapse" aria-labelledby="flush-headingEleven" data-bs-parent="#accordionFlush11">
+              <div id="flush-collapse-chapters-toggle" class="accordion-collapse show collapse" data-bs-parent="#accordion-chapters-toggle">
 
                 <div class="accordion-body">
                   <div class="accordion accordion-flush" id="accordionFlush1">
@@ -268,7 +269,7 @@
 <div class="accordion accordion-flush" id="accordionFlush4">
   <div class="accordion-item">
     <div class="accordion-header" id="flush-heading4">
-        <a href="cache.html">3. ワークフローオブジェクトの読み込み</a>
+        <a href="functions.html">3. 関数の簡単な紹介</a>
     </div>
 <!--/div.accordion-header-->
 
@@ -280,7 +281,7 @@
 <div class="accordion accordion-flush" id="accordionFlush5">
   <div class="accordion-item">
     <div class="accordion-header" id="flush-heading5">
-        <a href="lifecycle.html">4. ワークフローのライフサイクル</a>
+        <a href="cache.html">4. ワークフローオブジェクトの読み込み</a>
     </div>
 <!--/div.accordion-header-->
 
@@ -292,7 +293,7 @@
 <div class="accordion accordion-flush" id="accordionFlush6">
   <div class="accordion-item">
     <div class="accordion-header" id="flush-heading6">
-        <a href="organization.html">5. targetsプロジェクト組織のベストプラクティス</a>
+        <a href="lifecycle.html">5. ワークフローのライフサイクル</a>
     </div>
 <!--/div.accordion-header-->
 
@@ -304,7 +305,7 @@
 <div class="accordion accordion-flush" id="accordionFlush7">
   <div class="accordion-item">
     <div class="accordion-header" id="flush-heading7">
-        <a href="packages.html">6. パッケージの管理</a>
+        <a href="organization.html">6. targetsプロジェクト組織のベストプラクティス</a>
     </div>
 <!--/div.accordion-header-->
 
@@ -316,7 +317,7 @@
 <div class="accordion accordion-flush" id="accordionFlush8">
   <div class="accordion-item">
     <div class="accordion-header" id="flush-heading8">
-        <a href="files.html">7. 外部ファイルの取り扱い</a>
+        <a href="packages.html">7. パッケージの管理</a>
     </div>
 <!--/div.accordion-header-->
 
@@ -328,7 +329,7 @@
 <div class="accordion accordion-flush" id="accordionFlush9">
   <div class="accordion-item">
     <div class="accordion-header" id="flush-heading9">
-        <a href="branch.html">8. ブランチング</a>
+        <a href="files.html">8. 外部ファイルの取り扱い</a>
     </div>
 <!--/div.accordion-header-->
 
@@ -340,7 +341,7 @@
 <div class="accordion accordion-flush" id="accordionFlush10">
   <div class="accordion-item">
     <div class="accordion-header" id="flush-heading10">
-        <a href="parallel.html">9. 並列処理</a>
+        <a href="branch.html">9. ブランチング</a>
     </div>
 <!--/div.accordion-header-->
 
@@ -352,7 +353,19 @@
 <div class="accordion accordion-flush" id="accordionFlush11">
   <div class="accordion-item">
     <div class="accordion-header" id="flush-heading11">
-        <a href="quarto.html">10. Quartoを用いた再現可能なレポート</a>
+        <a href="parallel.html">10. 並列処理</a>
+    </div>
+<!--/div.accordion-header-->
+
+  </div>
+<!--/div.accordion-item-->
+</div>
+<!--/div.accordion-flush-->
+
+<div class="accordion accordion-flush" id="accordionFlush12">
+  <div class="accordion-item">
+    <div class="accordion-header" id="flush-heading12">
+        <a href="quarto.html">11. Quartoを用いた再現可能なレポート</a>
     </div>
 <!--/div.accordion-header-->
 
@@ -366,26 +379,45 @@
             </div>
 
             <hr class="half-width">
-<div class="accordion accordion-flush lesson-resources" id="accordionFlush12">
+<div class="accordion accordion-flush" id="accordion-links-toggle">
+                <div class="accordion-item">
+                <h2 class="accordion-header" id="flush-heading-links-toggle">
+                  <button class="accordion-button collapsed" id="links" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapse-links-toggle" aria-expanded="false" aria-controls="flush-collapse-links-toggle">
+                    LINKS
+                  </button>
+                </h2>
+                <div id="flush-collapse-links-toggle" class="accordion-collapse show collapse" data-bs-parent="#accordion-links-toggle">
+                    <div class="accordion-body">
+                        <ul>
+<li>
+                            <a href="../instructor/key-points.html">まとめ</a>
+                            </li>
+                            <li>
+                            <a href="../instructor/instructor-notes.html">インストラクター用メモ</a>
+                            </li>
+                            <li>
+                            <a href="../instructor/images.html">全ての画像</a>
+                            </li>
+                        </ul>
+</div>
+                </div>
+                </div>
+<!--/div.accordion-item-->
+            </div>
+<!--/div.accordion-flush-->
+
+            <hr class="half-width">
+<div class="accordion accordion-flush lesson-resources" id="accordion-resources-toggle">
               <div class="accordion-item">
-                <h2 class="accordion-header" id="flush-headingTwelve">
-                  <button class="accordion-button collapsed" id="lesson-resources" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseTwelve" aria-expanded="false" aria-controls="flush-collapseTwelve">
+                <h2 class="accordion-header" id="flush-heading-resources-toggle">
+                  <button class="accordion-button collapsed" id="lesson-resources" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapse-resources-toggle" aria-expanded="false" aria-controls="flush-collapse-resources-toggle">
                     資料
                   </button>
                 </h2>
-                <div id="flush-collapseTwelve" class="accordion-collapse collapse" aria-labelledby="flush-headingTwelve" data-bs-parent="#accordionFlush12">
+                <div id="flush-collapse-resources-toggle" class="accordion-collapse collapse" data-bs-parent="#accordion-resources-toggle">
                   <div class="accordion-body">
                     <ul>
-<li>
-                        <a href="../instructor/key-points.html">まとめ</a>
-                      </li>
-                      <li>
-                        <a href="../instructor/instructor-notes.html">インストラクター用メモ</a>
-                      </li>
-                      <li>
-                        <a href="../instructor/images.html">全ての画像</a>
-                      </li>
-                      <hr>
+<hr>
 <li><a class="dropdown-item" href="reference.html">Reference</a></li>
                     </ul>
 </div>
@@ -416,21 +448,25 @@
     <main id="main-content" class="main-content"><div class="container lesson-content">
         <h1>インストラクター用メモ</h1>
         
-<section><h2 class="section-heading" id="general-notes">General notes<a class="anchor" aria-label="anchor" href="#general-notes"></a>
+
+<section><h2 class="section-heading" id="全般的な注意事項">全般的な注意事項<a class="anchor" aria-label="anchor" href="#%E5%85%A8%E8%88%AC%E7%9A%84%E3%81%AA%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A0%85"></a>
 </h2>
 <hr class="half-width">
-<p>The examples gradually build up to a <a href="https://github.com/joelnitta/penguins-targets" class="external-link">full analysis</a>
-of the <a href="https://allisonhorst.github.io/palmerpenguins/" class="external-link">Palmer
-Penguins dataset</a>. However, there are a few places where completely
-different code is demonstrated to explain certain concepts. Since a
-given <code>targets</code> project can only have one
-<code>_targets.R</code> file, this means the participants may have to
-delete their existing <code>_targets.R</code> file and write a new one
-to follow along with the examples. This may cause frustration if they
-can’t keep a record of what they have done so far. One solution would be
-to save the old <code>_targets.R</code> file as
-<code>_targets_old.R</code> or similar, then rename it when it should be
-run again.</p>
+<p>例は徐々に、<a href="https://allisonhorst.github.io/palmerpenguins/" class="external-link">Palmer Penguins
+データセット</a>の<a href="https://github.com/joelnitta/penguins-targets" class="external-link">完全な分析</a>へと発展していきます。ただし、いくつかの概念を説明するために、まったく異なるコードを示す箇所があります。1つの
+<code>targets</code> プロジェクトには <code>_targets.R</code>
+ファイルを1つしか置けないため、参加者は既存の <code>_targets.R</code>
+ファイルを削除し、例に沿って新しいファイルを書く必要があるかもしれません。これまでの作業内容を記録しておけないと、参加者がもどかしく感じるかもしれません。1つの解決策は、古い
+<code>_targets.R</code> ファイルを <code>_targets_old.R</code>
+などの名前で保存しておき、再び実行する必要が生じたときに元の名前に戻すことです。</p>
+</section><section><h2 class="section-heading" id="オプションのエピソード">オプションのエピソード<a class="anchor" aria-label="anchor" href="#%E3%82%AA%E3%83%97%E3%82%B7%E3%83%A7%E3%83%B3%E3%81%AE%E3%82%A8%E3%83%94%E3%82%BD%E3%83%BC%E3%83%89"></a>
+</h2>
+<hr class="half-width">
+<p>「関数」のエピソードはオプションのエピソードであり、ワークショップに参加する学習者によって必要かどうかが変わります。
+関数を使った経験がある人はいるか、挙手（または付箋）で確認し、経験のない学習者がいる場合にこのエピソードを実施することをお勧めします。</p>
+<p><code>targets</code>
+は関数に大きく依存しているため、関数に不慣れな学習者がいる場合は、少し時間をかける価値があると考えています。関数について簡単な導入を受けないと、そうした学習者はすぐについていけなくなり、ワークショップの終了時に
+<code>targets</code> を使いこなせるようにならないでしょう。</p>
 <!--
 Place links that you need to refer to multiple times across pages here. Delete
 any links that you are not going to use.
@@ -450,6 +486,14 @@ any links that you are not going to use.
 </h3>
 <p>エピソードの概要:
 非常にシンプルなワークフローを書いて、初めて実際に手を動かしてみる機会</p>
+<hr>
+<br></section><section id="functions"><h2 class="section-heading"><a href="functions.html">関数の簡単な紹介</a></h2>
+<hr class="half-width">
+<h3 id="functions-headingInstructor1">
+<a href="functions.html#headingInstructor1">インストラクター用メモ</a><a class="anchor" aria-label="アンカー" href="#functions-headingInstructor1"></a>
+</h3>
+<p>Episode summary:
+関数の使用経験がない学習者がいる場合のための、関数のごく簡単な紹介。</p>
 <hr>
 <br></section><section id="cache"><h2 class="section-heading"><a href="cache.html">ワークフローオブジェクトの読み込み</a></h2>
 <hr class="half-width">
@@ -537,15 +581,17 @@ make、inspect、adjust、make を実演する</p>
 	
         | <a href="https://github.com/swcarpentry-ja/targets-workshop/blob/main/CONTRIBUTING.md" class="external-link">貢献</a>
         | <a href="https://github.com/swcarpentry-ja/targets-workshop/" class="external-link">ソース</a></p>
-				<p><a href="https://github.com/swcarpentry-ja/targets-workshop/blob/main/CITATION" class="external-link">引用</a> | <a href="mailto:joelnitta@gmail.com">お問い合わせ</a> | <a href="https://carpentries.org/about/" class="external-link">概要</a></p>
-			</div>
-			<div class="col-md-6">
+        <p>
+        <a href="https://github.com/swcarpentry-ja/targets-workshop/blob/main/" class="external-link">引用</a>
+        | <a href="mailto:joelnitta@gmail.com">お問い合わせ</a> | <a href="https://carpentries.org/about/" class="external-link">概要</a></p>
+		</div>
+		<div class="col-md-6">
 
         <p>Materials licensed under <a href="LICENSE.html">CC-BY 4.0</a> by the authors</p>
 
         <p>テンプレートは<a href="https://carpentries.org/" class="external-link">The Carpentries</a>によって<a href="https://creativecommons.org/licenses/by-sa/4.0/" class="external-link">CC-BY 4.0</a>のもとに掲載を許諾されている</p>
-        <p>このレッスンは<a href="https://github.com/carpentries/sandpaper/tree/main" class="external-link">sandpaper (0.16.12.9000)</a>、<a href="https://github.com/carpentries/pegboard/tree/main" class="external-link">pegboard (0.7.9)</a>、および<a href="https://github.com/carpentries/varnish/tree/1.0.5" class="external-link">varnish (1.0.5)</a>によって作られた</p>
-			</div>
+        <p>このレッスンは<a href="https://github.com/carpentries/sandpaper/tree/main" class="external-link">sandpaper (0.21.1)</a>、<a href="https://github.com/carpentries/pegboard/tree/0.7.9" class="external-link">pegboard (0.7.9)</a>、および<a href="https://github.com/carpentries/varnish/tree/1.1.3" class="external-link">varnish (1.1.3)</a>によって作られた</p>
+		</div>
 		</footer>
 </div> <!-- / div.container -->
 	<div id="to-top">
@@ -557,19 +603,19 @@ make、inspect、adjust、make を実演する</p>
   <script type="application/ld+json">
     {
   "@context": "https://schema.org",
-  "@type": "TrainingMaterial",
+  "@type": "LearningResource",
   "@id": "https://swcarpentry-ja.github.io/targets-workshop/instructor/instructor-notes.html",
   "inLanguage": "ja",
-  "dct:conformsTo": "https://bioschemas.org/profiles/TrainingMaterial/1.0-RELEASE",
+  "dct:conformsTo": "https://bioschemas.org/profiles/LearningResource/1.0-RELEASE",
   "description": "A Carpentries Lesson teaching foundational data and coding skills to researchers worldwide",
   "keywords": "再現可能なデータ解析, データ, targets, R",
   "name": "インストラクター用メモ",
   "creativeWorkStatus": "active",
   "url": "https://swcarpentry-ja.github.io/targets-workshop/instructor/instructor-notes.html",
   "identifier": "https://swcarpentry-ja.github.io/targets-workshop/instructor/instructor-notes.html",
-  "dateCreated": "2024-10-24",
-  "dateModified": "2025-04-15",
-  "datePublished": "2025-04-15"
+  "dateCreated": "2026-10-21",
+  "dateModified": "2026-10-21",
+  "datePublished": "2026-10-21"
 }
 
   </script><script>
