@@ -1,6 +1,6 @@
 ---
 title: '並列処理'
-teaching: 10
+teaching: 15
 exercises: 2
 ---
 
@@ -74,54 +74,73 @@ tar_plan(
     path_to_file("penguins_raw.csv"),
     read_csv(!!.x, show_col_types = FALSE)
   ),
-  # Clean data
-  penguins_data = clean_penguin_data(penguins_data_raw),
-  # Build models
-  models = list(
-    combined_model = lm(
-      bill_depth_mm ~ bill_length_mm, data = penguins_data),
-    species_model = lm(
-      bill_depth_mm ~ bill_length_mm + species, data = penguins_data),
-    interaction_model = lm(
-      bill_depth_mm ~ bill_length_mm * species, data = penguins_data)
+  # Clean and group data
+  tar_group_by(
+    penguins_data,
+    clean_penguin_data(penguins_data_raw),
+    species
   ),
-  # Get model summaries
+  # Get summary of combined model with all species together
+  combined_summary = model_glance(penguins_data),
+  # Get summary of one model per species
   tar_target(
-    model_summaries,
-    glance_with_mod_name(models),
-    pattern = map(models)
+    species_summary,
+    model_glance(penguins_data),
+    pattern = map(penguins_data)
   ),
-  # Get model predictions
+  # Get predictions of combined model with all species together
+  combined_predictions = model_augment(penguins_data),
+  # Get predictions of one model per species
   tar_target(
-    model_predictions,
-    augment_with_mod_name(models),
-    pattern = map(models)
+    species_predictions,
+    model_augment(penguins_data),
+    pattern = map(penguins_data)
   )
 )
 ```
 
 このデモの目的のためにまだ1つだけ変更する必要があります：今、分析を並列で実行しても、関数が非常に高速であるため、計算時間の違いに気付かないでしょう。
 
-そこで、`Sys.sleep()` 関数を使用して、`glance_with_mod_name()` と `augment_with_mod_name()` の「遅い」バージョンを作成しましょう。これはコンピュータに数秒待つよう指示します。
+そこで、`Sys.sleep()` 関数を使用して、`model_glance()` と `model_augment()` の「遅い」バージョンを作成しましょう。これはコンピュータに数秒待つよう指示します。
 これにより、長時間実行される計算をシミュレートし、順次実行と並列実行の違いを確認できます。
 
 これらの関数を `functions.R` に追加します（元のものをコピー＆ペーストしてから修正しても構いません）：
 
 
 ``` r
-glance_with_mod_name_slow <- function(model_in_list) {
+model_glance_slow <- function(penguins_data) {
   Sys.sleep(4)
-  model_name <- names(model_in_list)
-  model <- model_in_list[[1]]
-  broom::glance(model) |>
-    mutate(model_name = model_name)
+  # Make model
+  model <- lm(
+    bill_depth_mm ~ bill_length_mm,
+    data = penguins_data)
+  # Get species name
+  species_name <- unique(penguins_data$species)
+  # If this is the combined dataset with multiple
+  # species, changed name to 'combined'
+  if (length(species_name) > 1) {
+    species_name <- "combined"
+  }
+  # Get model summary and add species name
+  glance(model) |>
+    mutate(species = species_name, .before = 1)
 }
-augment_with_mod_name_slow <- function(model_in_list) {
+model_augment_slow <- function(penguins_data) {
   Sys.sleep(4)
-  model_name <- names(model_in_list)
-  model <- model_in_list[[1]]
-  broom::augment(model) |>
-    mutate(model_name = model_name)
+  # Make model
+  model <- lm(
+    bill_depth_mm ~ bill_length_mm,
+    data = penguins_data)
+  # Get species name
+  species_name <- unique(penguins_data$species)
+  # If this is the combined dataset with multiple
+  # species, changed name to 'combined'
+  if (length(species_name) > 1) {
+    species_name <- "combined"
+  }
+  # Get model summary and add species name
+  augment(model) |>
+    mutate(species = species_name, .before = 1)
 }
 ```
 
@@ -145,28 +164,27 @@ tar_plan(
     path_to_file("penguins_raw.csv"),
     read_csv(!!.x, show_col_types = FALSE)
   ),
-  # Clean data
-  penguins_data = clean_penguin_data(penguins_data_raw),
-  # Build models
-  models = list(
-    combined_model = lm(
-      bill_depth_mm ~ bill_length_mm, data = penguins_data),
-    species_model = lm(
-      bill_depth_mm ~ bill_length_mm + species, data = penguins_data),
-    interaction_model = lm(
-      bill_depth_mm ~ bill_length_mm * species, data = penguins_data)
+  # Clean and group data
+  tar_group_by(
+    penguins_data,
+    clean_penguin_data(penguins_data_raw),
+    species
   ),
-  # Get model summaries
+  # Get summary of combined model with all species together
+  combined_summary = model_glance_slow(penguins_data),
+  # Get summary of one model per species
   tar_target(
-    model_summaries,
-    glance_with_mod_name_slow(models),
-    pattern = map(models)
+    species_summary,
+    model_glance_slow(penguins_data),
+    pattern = map(penguins_data)
   ),
-  # Get model predictions
+  # Get predictions of combined model with all species together
+  combined_predictions = model_augment_slow(penguins_data),
+  # Get predictions of one model per species
   tar_target(
-    model_predictions,
-    augment_with_mod_name_slow(models),
-    pattern = map(models)
+    species_predictions,
+    model_augment_slow(penguins_data),
+    pattern = map(penguins_data)
   )
 )
 ```
@@ -175,25 +193,31 @@ tar_plan(
 
 
 ``` output
-✔ skip target penguins_data_raw_file
-✔ skip target penguins_data_raw
-✔ skip target penguins_data
-✔ skip target models
-• start branch model_predictions_5ad4cec5
-• start branch model_predictions_c73912d5
-• start branch model_predictions_91696941
-• start branch model_summaries_5ad4cec5
-• start branch model_summaries_c73912d5
-• start branch model_summaries_91696941
-• built branch model_predictions_5ad4cec5 [4.884 seconds]
-• built branch model_predictions_c73912d5 [4.896 seconds]
-• built branch model_predictions_91696941 [4.006 seconds]
-• built pattern model_predictions
-• built branch model_summaries_5ad4cec5 [4.011 seconds]
-• built branch model_summaries_c73912d5 [4.011 seconds]
-• built branch model_summaries_91696941 [4.011 seconds]
-• built pattern model_summaries
-• end pipeline [15.153 seconds]
+
+Attaching package: ‘palmerpenguins’
+
+The following objects are masked from ‘package:datasets’:
+
+    penguins, penguins_raw
+```
+
+``` output
+
+Attaching package: ‘palmerpenguins’
+
+The following objects are masked from ‘package:datasets’:
+
+    penguins, penguins_raw
+
++ combined_summary dispatched
++ species_summary declared [3 branches]
++ species_predictions declared [3 branches]
+✔ combined_summary completed [4.1s, 371 B]
++ combined_predictions dispatched
+✔ species_summary completed [13.2s, 1.11 kB]
+✔ combined_predictions completed [4s, 24.80 kB]
+✔ species_predictions completed [12s, 26.48 kB]
+✔ ended pipeline [19.1s, 8 completed, 3 skipped]
 ```
 
 各個別ターゲットをビルドするのに約4秒かかるにもかかわらず、ワークフロー全体を実行するのにかかる総時間は、個々のターゲットの合計時間よりも短いことに注目してください！ これはプロセスが並列で実行されており、**時間を節約している** ことの証明です。

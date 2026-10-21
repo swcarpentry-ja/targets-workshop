@@ -55,7 +55,7 @@ v2022.07.1以降、[RStudioにはQuartoが含まれています](https://docs.po
 Quartoファイルは、コードとコメントの通常の書き方を逆転させています。典型的なRスクリプトでは、すべてのテキストはコメントでない限りRコードと見なされますが、Quartoではすべてのテキストが散文と見なされ、評価されるRコードの行を示すために特別な表記を使用します。
 コードが評価されると、その結果が最終的なレンダリングされたドキュメントに挿入され、さまざまな形式の一つになる可能性があります。
 
-![Quarto workflow](https://ucsbcarpentry.github.io/Reproducible-Publications-with-RStudio-Quarto/fig/03-qmd-workflow.png)
+![Quarto workflow](fig/03-qmd-workflow.png)
 
 このレッスンではQuartoの詳細に踏み込む時間がありませんが、このトピックについては ["RStudioによる再現可能な出版物のイントロダクション" インキュベーター（開発中）のレッスン](https://ucsbcarpentry.github.io/Reproducible-Publications-with-RStudio-Quarto/) をお勧めします。
 
@@ -88,35 +88,33 @@ tar_plan(
     path_to_file("penguins_raw.csv"),
     read_csv(!!.x, show_col_types = FALSE)
   ),
-  # Clean data
-  penguins_data = clean_penguin_data(penguins_data_raw),
-  # Build models
-  models = list(
-    combined_model = lm(
-      bill_depth_mm ~ bill_length_mm, data = penguins_data),
-    species_model = lm(
-      bill_depth_mm ~ bill_length_mm + species, data = penguins_data),
-    interaction_model = lm(
-      bill_depth_mm ~ bill_length_mm * species, data = penguins_data)
+  # Clean and group data
+  tar_group_by(
+    penguins_data,
+    clean_penguin_data(penguins_data_raw),
+    species
   ),
-  # Get model summaries
+  # Get summary of combined model with all species together
+  combined_summary = model_glance(penguins_data),
+  # Get summary of one model per species
   tar_target(
-    model_summaries,
-    glance_with_mod_name(models),
-    pattern = map(models)
+    species_summary,
+    model_glance(penguins_data),
+    pattern = map(penguins_data)
   ),
-  # Get model predictions
+  # Get predictions of combined model with all species together
+  combined_predictions = model_augment(penguins_data),
+  # Get predictions of one model per species
   tar_target(
-    model_predictions,
-    augment_with_mod_name(models),
-    pattern = map(models)
+    species_predictions,
+    model_augment(penguins_data),
+    pattern = map(penguins_data)
   ),
   # Generate report
   tar_quarto(
     penguin_report,
     path = "penguin_report.qmd",
-    quiet = FALSE,
-    packages = c("targets", "tidyverse")
+    quiet = FALSE
   )
 )
 ```
@@ -136,8 +134,7 @@ tar_plan(
 
 答えは `penguin_report.qmd` ファイルの **内部** にあります。ファイルの開始部分を見てみましょう：
 
-
-```` markdown
+````{.markdown}
 ---
 title: "Simpson's Paradox in Palmer Penguins"
 format:
@@ -150,13 +147,18 @@ execute:
 ```{r}
 #| label: load
 #| message: false
-targets::tar_load(penguin_models_augmented)
-targets::tar_load(penguin_models_summary)
+targets::tar_load(
+  c(combined_summary,
+    species_summary,
+    combined_predictions,
+    species_predictions
+  )
+)
 
 library(tidyverse)
 ```
 
-これは南極のパルマー諸島におけるペンギンの分析の一例です。
+The goal of this analysis is to determine how bill length and depth are related in three species of penguins from Antarctica.
 
 ````
 
@@ -164,9 +166,9 @@ library(tidyverse)
 
 実行されるRコードは `` ```{r} `` と `` ``` `` の間の行で指定されます。これは「コードチャンク」と呼ばれ、散文テキストに挿入されたコードの一部です。
 
-Rコードチャンクを詳しく見てみましょう。 `targets::tar_load()` の2つの呼び出しに注目してください。この関数が何をするか覚えていますか？これはワークフロー中にビルドされたターゲットをロードします。
+Rコードチャンクを詳しく見てみましょう。 `targets::tar_load()` の使い方に注目してください。この関数が何をするか覚えていますか？これはワークフロー中にビルドされたターゲットをロードします。
 
-これで少し理解が深まったはずです。`targets` はレポートがワークフロー中にビルドされたターゲット、`penguin_models_augmented` および `penguin_models_summary` に依存していることを **レポート内で `tar_load()` を使用してロードしているため** 知っています。
+これで少し理解が深まったはずです。`targets` はレポートがワークフロー中にビルドされた `combined_summary` や `species_summary` などのターゲットに依存していることを **レポート内で `tar_load()` を使用してロードしているため** 知っています。
 
 ## 動的コンテンツの生成
 
@@ -176,13 +178,13 @@ Rコードチャンクを詳しく見てみましょう。 `targets::tar_load()`
 
 ## チャレンジ: 動的コンテンツを見つけよう
 
-`penguin_report.qmd` を読み、ワークフロー中にビルドされたターゲット (`penguin_models_augmented` および `penguin_models_summary`) がテキストやプロットを動的に生成するために使用されている箇所を見つけてみてください。
+`penguin_report.qmd` を読み、ワークフロー中にビルドされたターゲット (`combined_summary` など) がテキストやプロットを動的に生成するために使用されている箇所を見つけてみてください。
 
 :::::::::::::::::::::::::::::::::: {.solution}
 
-- `results-stats` とラベル付けされたコードチャンクでは、*P*-値や調整済み *R* 二乗値などのモデルからの統計が抽出され、`` `r mod_stats$combined$r.squared` `` のようなインラインコードを使用してテキストに挿入されています。
+- `results-stats` とラベル付けされたコードチャンクでは、*R* 二乗値などのモデルからの統計が抽出され、`` `r combined_r2` `` のようなインラインコードを使用してテキストに挿入されています。
 
-- 2つの図があります。一つは結合モデル用、もう一つは別々のモデル用です（それぞれ `fig-combined-plot` と `fig-separate-plot` とラベル付けされたコードチャンク）。これらは `penguin_models_augmented` のモデルから予測されたポイントを使用して構築されています。
+- 2つの図があります。一つは結合モデル用、もう一つは別々のモデル用です（それぞれ `fig-combined-plot` と `fig-separate-plot` とラベル付けされたコードチャンク）。これらは `combined_predictions` と `species_predictions` のモデルから予測されたポイントを使用して構築されています。
 
 ::::::::::::::::::::::::::::::::::
 

@@ -55,9 +55,9 @@ tar_plan(
 
 
 ``` output
-▶ dispatched target some_data
-● completed target some_data [0 seconds]
-▶ ended pipeline [0.122 seconds]
++ some_data dispatched
+✔ some_data completed [1ms, 64 B]
+✔ ended pipeline [320ms, 1 completed, 0 skipped]
 ```
 
 `tar_read(some_data)` を使用して `some_data` の内容を検査すると、期待通り `"Hello World"` という文字列が含まれていることがわかります。
@@ -76,8 +76,7 @@ tar_plan(
 
 
 ``` output
-✔ skipped target some_data
-✔ skipped pipeline [0.125 seconds]
+✔ skipped pipeline [257ms, 1 skipped]
 ```
 
 ターゲット `some_data` がスキップされましたが、これはファイルの内容が変更されたにもかかわらずです。
@@ -97,11 +96,11 @@ tar_plan(
 
 
 ``` output
-▶ dispatched target data_file
-● completed target data_file [0.001 seconds]
-▶ dispatched target some_data
-● completed target some_data [0 seconds]
-▶ ended pipeline [0.182 seconds]
++ data_file dispatched
+✔ data_file completed [1ms, 26 B]
++ some_data dispatched
+✔ some_data completed [0ms, 78 B]
+✔ ended pipeline [390ms, 2 completed, 0 skipped]
 ```
 
 今回は、`targets` が期待通りに `some_data` を再構築するのが確認できます。
@@ -183,13 +182,20 @@ tar_plan(
 
 
 ``` output
-▶ dispatched target penguins_data_raw_file
-● completed target penguins_data_raw_file [0.001 seconds]
-▶ dispatched target penguins_data_raw
-● completed target penguins_data_raw [0.096 seconds]
-▶ dispatched target penguins_data
-● completed target penguins_data [0.014 seconds]
-▶ ended pipeline [0.25 seconds]
+
+Attaching package: ‘palmerpenguins’
+
+The following objects are masked from ‘package:datasets’:
+
+    penguins, penguins_raw
+
++ penguins_data_raw_file dispatched
+✔ penguins_data_raw_file completed [1ms, 53.10 kB]
++ penguins_data_raw dispatched
+✔ penguins_data_raw completed [98ms, 10.40 kB]
++ penguins_data dispatched
+✔ penguins_data completed [22ms, 1.49 kB]
+✔ ended pipeline [438ms, 3 completed, 0 skipped]
 ```
 
 ::::::::::::::::::::::::::::::::::
@@ -259,15 +265,15 @@ tar_plan(
 
 
 ``` output
-▶ dispatched target hello_file
-● completed target hello_file [0.001 seconds]
-▶ dispatched target hello
-● completed target hello [0 seconds]
-▶ dispatched target hello_caps
-● completed target hello_caps [0 seconds]
-▶ dispatched target hello_caps_out
-● completed target hello_caps_out [0 seconds]
-▶ ended pipeline [0.188 seconds]
++ hello_file dispatched
+✔ hello_file completed [1ms, 26 B]
++ hello dispatched
+✔ hello completed [0ms, 78 B]
++ hello_caps dispatched
+✔ hello_caps completed [0ms, 78 B]
++ hello_caps_out dispatched
+✔ hello_caps_out completed [0ms, 26 B]
+✔ ended pipeline [437ms, 4 completed, 0 skipped]
 ```
 
 `results` フォルダ内の `hello_caps.txt` を見て、期待通りであることを確認してください。

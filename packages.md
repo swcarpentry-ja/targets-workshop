@@ -70,9 +70,9 @@ tar_plan(
 
 
 ``` output
-▶ dispatched target adelie_data
-● completed target adelie_data [0.024 seconds]
-▶ ended pipeline [0.183 seconds]
++ adelie_data dispatched
+✔ adelie_data completed [38ms, 1.54 kB]
+✔ ended pipeline [367ms, 1 completed, 0 skipped]
 ```
 
 この方法は、方法1で時々経験するかもしれない遅延を回避します。
@@ -99,9 +99,9 @@ tar_plan(
 
 
 ``` output
-▶ dispatched target adelie_data
-● completed target adelie_data [0.023 seconds]
-▶ ended pipeline [0.183 seconds]
++ adelie_data dispatched
+✔ adelie_data completed [39ms, 1.54 kB]
+✔ ended pipeline [366ms, 1 completed, 0 skipped]
 ```
 
 これは、すべてのパッケージを読み込むよりもメモリ効率が良い場合があります。なぜなら、ワークフローの通常の実行中にすべてのターゲットが常に作成されるわけではないからです。
@@ -126,9 +126,9 @@ tar_plan(
 
 
 ``` output
-▶ dispatched target adelie_data
-● completed target adelie_data [0.015 seconds]
-▶ ended pipeline [0.175 seconds]
++ adelie_data dispatched
+✔ adelie_data completed [25ms, 1.54 kB]
+✔ ended pipeline [346ms, 1 completed, 0 skipped]
 ```
 
 このアプローチの利点は、すべての関数の起源が明確になることです。例えば、GitHub でソースを見たりすることで、すぐに関数がどこから来ているかを知ることができます。

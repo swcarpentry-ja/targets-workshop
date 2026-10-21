@@ -34,15 +34,28 @@ exercises: 2
 これは実際に試してみると理解しやすいです。ワークフローをもう一度実行してみましょう：
 
 
+``` output
+
+Attaching package: ‘palmerpenguins’
+
+The following objects are masked from ‘package:datasets’:
+
+    penguins, penguins_raw
+```
+
 ``` r
 tar_make()
 ```
 
 ``` output
-✔ skipped target penguins_csv_file
-✔ skipped target penguins_data_raw
-✔ skipped target penguins_data
-✔ skipped pipeline [0.129 seconds]
+
+Attaching package: ‘palmerpenguins’
+
+The following objects are masked from ‘package:datasets’:
+
+    penguins, penguins_raw
+
+✔ skipped pipeline [131ms, 3 skipped]
 ```
 
 最初にパイプラインを実行したとき、`targets` がビルドされている各ターゲットのリストを出力したことを覚えていますか？
@@ -69,7 +82,7 @@ clean_penguin_data <- function(penguins_data_raw) {
       bill_length_mm = `Culmen Length (mm)`,
       bill_depth_mm = `Culmen Depth (mm)`
     ) |>
-    remove_missing(na.rm = TRUE) |>
+    drop_na() |>
     # Split "species" apart on spaces, and only keep the first word
     separate(species, into = "species", extra = "drop")
 }
@@ -78,16 +91,30 @@ clean_penguin_data <- function(penguins_data_raw) {
 そして、再度実行します。
 
 
+``` output
+
+Attaching package: ‘palmerpenguins’
+
+The following objects are masked from ‘package:datasets’:
+
+    penguins, penguins_raw
+```
+
 ``` r
 tar_make()
 ```
 
 ``` output
-✔ skipped target penguins_csv_file
-✔ skipped target penguins_data_raw
-▶ dispatched target penguins_data
-● completed target penguins_data [0.014 seconds]
-▶ ended pipeline [0.165 seconds]
+
+Attaching package: ‘palmerpenguins’
+
+The following objects are masked from ‘package:datasets’:
+
+    penguins, penguins_raw
+
++ penguins_data dispatched
+✔ penguins_data completed [35ms, 1.49 kB]
+✔ ended pipeline [226ms, 1 completed, 2 skipped]
 ```
 
 何が起こったでしょうか？
@@ -212,6 +239,15 @@ tar_outdated()
 ```
 
 ``` output
+
+Attaching package: ‘palmerpenguins’
+
+The following objects are masked from ‘package:datasets’:
+
+    penguins, penguins_raw
+```
+
+``` output
 character(0)
 ```
 
@@ -249,10 +285,14 @@ tar_make()
 ```
 
 ``` output
-✔ skipped target penguins_csv_file
-✔ skipped target penguins_data_raw
-✔ skipped target penguins_data
-✔ skipped pipeline [0.144 seconds]
+
+Attaching package: ‘palmerpenguins’
+
+The following objects are masked from ‘package:datasets’:
+
+    penguins, penguins_raw
+
+✔ skipped pipeline [164ms, 3 skipped]
 ```
 
 `penguins_data` を無効化し、再度実行してみましょう：
@@ -264,11 +304,16 @@ tar_make()
 ```
 
 ``` output
-✔ skipped target penguins_csv_file
-✔ skipped target penguins_data_raw
-▶ dispatched target penguins_data
-● completed target penguins_data [0.015 seconds]
-▶ ended pipeline [0.165 seconds]
+
+Attaching package: ‘palmerpenguins’
+
+The following objects are masked from ‘package:datasets’:
+
+    penguins, penguins_raw
+
++ penguins_data dispatched
+✔ penguins_data completed [24ms, 1.49 kB]
+✔ ended pipeline [224ms, 1 completed, 2 skipped]
 ```
 
 もしすべてをリセットして新たに開始したい場合は、`tar_invalidate(everything())` を使用して `_targets` フォルダ全体を削除することができます（`tar_invalidate()` はターゲット名を指定するために `tidyselect` 式を受け入れます）。
