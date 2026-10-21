@@ -170,7 +170,7 @@ popd()
 ```{r}
 #| label = "example-model-show-3",
 #| eval = FALSE,
-#| code = readLines("files/plans/plan_6.R")[2:29]
+#| code = readLines("files/plans/plan_6.R")[2:28]
 ```
 
 ここで何が起こっているのでしょうか？
@@ -327,7 +327,7 @@ popd()
 ```{r}
 #| label = "example-model-show-8",
 #| eval = FALSE,
-#| code = readLines("files/plans/plan_8.R")[2:35]
+#| code = readLines("files/plans/plan_8.R")[2:34]
 ```
 
 そして、もう一度実行します：

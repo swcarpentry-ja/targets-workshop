@@ -76,7 +76,7 @@ tar_option_set(
 ```{r}
 #| label = "example-model-show-setup",
 #| eval = FALSE,
-#| code = readLines("files/plans/plan_9.R")[3:42]
+#| code = readLines("files/plans/plan_9.R")[3:41]
 ```
 
 このデモの目的のためにまだ1つだけ変更する必要があります：今、分析を並列で実行しても、関数が非常に高速であるため、計算時間の違いに気付かないでしょう。
@@ -99,7 +99,7 @@ tar_option_set(
 ```{r}
 #| label = "example-model-show-9",
 #| eval = FALSE,
-#| code = readLines("files/plans/plan_10.R")[3:42]
+#| code = readLines("files/plans/plan_10.R")[3:41]
 ```
 
 最後に、通常どおり `tar_make()` を使用してパイプラインを実行します。
