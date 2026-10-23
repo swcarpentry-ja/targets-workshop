@@ -123,7 +123,7 @@
     <a id="search-button-nav" class="btn btn-primary" href="../instructor/aio.html" role="button" aria-label="オールインワンページで検索">オールインワンページで検索</a>
   </div><!--/div.container-fluid -->
 </nav><aside class="col-md-12 lesson-progress"><div class="progress incubator">
-    <div class="progress-bar incubator" role="progressbar" style="width: 54%" aria-valuenow="54" aria-valuemin="0" aria-valuemax="100" aria-label="レッスンの進捗状況">54%</div>
+    <div class="progress-bar incubator" role="progressbar" style="width: 44%" aria-valuenow="44" aria-valuemin="0" aria-valuemax="100" aria-label="レッスンの進捗状況">44%</div>
   </div>
 </aside><div class="container">
       <div class="row">
@@ -284,7 +284,7 @@
 <div class="accordion accordion-flush" id="accordionFlush9">
   <div class="accordion-item">
     <div class="accordion-header" id="flush-heading9">
-        <a href="files.html">8. 外部ファイルの取り扱い</a>
+        <a href="branch.html">8. ブランチング</a>
     </div><!--/div.accordion-header-->
 
   </div><!--/div.accordion-item-->
@@ -293,7 +293,7 @@
 <div class="accordion accordion-flush" id="accordionFlush10">
   <div class="accordion-item">
     <div class="accordion-header" id="flush-heading10">
-        <a href="branch.html">9. ブランチング</a>
+        <a href="parallel.html">9. 並列処理</a>
     </div><!--/div.accordion-header-->
 
   </div><!--/div.accordion-item-->
@@ -302,7 +302,7 @@
 <div class="accordion accordion-flush" id="accordionFlush11">
   <div class="accordion-item">
     <div class="accordion-header" id="flush-heading11">
-        <a href="parallel.html">10. 並列処理</a>
+        <a href="files.html">10. 外部ファイルの取り扱い</a>
     </div><!--/div.accordion-header-->
 
   </div><!--/div.accordion-item-->
@@ -389,13 +389,13 @@
       </div>
     </nav><main id="main-content" class="main-content"><div class="container lesson-content">
         <h1>targetsプロジェクト組織のベストプラクティス</h1>
-        <p>最終更新日：2026-10-21 |
+        <p>最終更新日：2026-10-23 |
 
         <a href="https://github.com/swcarpentry-ja/targets-workshop/edit/main/episodes/organization.Rmd" class="external-link">ページの編集 <i aria-hidden="true" data-feather="edit"></i></a></p>
 
 
 
-        <p>所要時間：<i aria-hidden="true" data-feather="clock"></i> 12分</p>
+        <p>所要時間：<i aria-hidden="true" data-feather="clock"></i> 20分</p>
 
         <div class="text-end">
           <button role="button" aria-pressed="false" tabindex="0" id="expand-code" class="pull-right" data-expand="回答を全て表示する " data-collapse="回答を全て折りたたむ "> 回答を全て表示する <i aria-hidden="true" data-feather="plus"></i></button>
@@ -483,7 +483,6 @@ Landauによって作成された <code>tarchetypes</code>
 <pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw">library</span><span class="op">(</span><span class="va">targets</span><span class="op">)</span></span>
 <span><span class="kw">library</span><span class="op">(</span><span class="va">tarchetypes</span><span class="op">)</span></span>
-<span><span class="kw">library</span><span class="op">(</span><span class="va">palmerpenguins</span><span class="op">)</span></span>
 <span><span class="kw">library</span><span class="op">(</span><span class="va">tidyverse</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">clean_penguin_data</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">penguins_data_raw</span><span class="op">)</span> <span class="op">{</span></span>
@@ -499,7 +498,7 @@ Landauによって作成された <code>tarchetypes</code>
 <span><span class="op">}</span></span>
 <span></span>
 <span><span class="fu">tar_plan</span><span class="op">(</span></span>
-<span>  penguins_csv_file <span class="op">=</span> <span class="fu">path_to_file</span><span class="op">(</span><span class="st">"penguins_raw.csv"</span><span class="op">)</span>,</span>
+<span>  penguins_csv_file <span class="op">=</span> <span class="st">"data/penguins_raw.csv"</span>,</span>
 <span>  penguins_data_raw <span class="op">=</span> <span class="fu">read_csv</span><span class="op">(</span><span class="va">penguins_csv_file</span>, show_col_types <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>,</span>
 <span>  penguins_data <span class="op">=</span> <span class="fu">clean_penguin_data</span><span class="op">(</span><span class="va">penguins_data_raw</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre>
@@ -518,17 +517,17 @@ Landauによって作成された <code>tarchetypes</code>
 ファイルで行ってきました。</p>
 <p>これは小規模なワークフローには問題ありませんが、ワークフローが大きくなるとあまりうまく機能しません。</p>
 <p>コードを整理するためのより良い方法があります。</p>
-<p>まず、<code>_targets.R</code> 以外の R コードを保存するために
-<code>R</code>
-というディレクトリを作成しましょう（<code>_targets.R</code>
+<p>プロジェクトフォルダ内に、<code>_targets.R</code> 以外の R
+コードを保存するための <code>R</code>
+という新しいディレクトリを作成しましょう（<code>_targets.R</code>
 はサブディレクトリではなく、プロジェクト全体のディレクトリに配置する必要があることを覚えておいてください）。</p>
-<p><code>R/</code> 内に <code>functions.R</code> という新しい R
+<p><code>R/</code> の中に <code>functions.R</code> という新しい R
 ファイルを作成します。 ここにカスタム関数を配置します。 今すぐ
 <code>clean_penguin_data()</code> をそこに入れて保存しましょう。</p>
 <p>同様に、<code>library()</code> 呼び出しを <code>R/</code> 内の
 <code>packages.R</code>
-という独自のスクリプトに配置しましょう（ただし、これは唯一の方法ではありません。<a href="https://joelnitta.github.io/targets-workshop/packages.html" class="external-link">“パッケージの管理”
-エピソード</a> を参照してください）。</p>
+という独自のスクリプトに配置しましょう（ただし、これは唯一の方法ではありません。<a href="packages.html">“パッケージの管理” エピソード</a>
+を参照してください）。</p>
 <p>また、<code>_targets.R</code> スクリプトをこれらのスクリプトを
 <code>source</code> で呼び出すように修正する必要があります：</p>
 <div class="codewrapper sourceCode" id="cb2">
@@ -539,7 +538,7 @@ Landauによって作成された <code>tarchetypes</code>
 <span><span class="kw">source</span><span class="op">(</span><span class="st">"R/functions.R"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">tar_plan</span><span class="op">(</span></span>
-<span>  penguins_csv_file <span class="op">=</span> <span class="fu">path_to_file</span><span class="op">(</span><span class="st">"penguins_raw.csv"</span><span class="op">)</span>,</span>
+<span>  penguins_csv_file <span class="op">=</span> <span class="st">"data/penguins_raw.csv"</span>,</span>
 <span>  penguins_data_raw <span class="op">=</span> <span class="fu">read_csv</span><span class="op">(</span><span class="va">penguins_csv_file</span>, show_col_types <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>,</span>
 <span>  penguins_data <span class="op">=</span> <span class="fu">clean_penguin_data</span><span class="op">(</span><span class="va">penguins_data_raw</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre>
@@ -547,12 +546,21 @@ Landauによって作成された <code>tarchetypes</code>
 <p>これで <code>_targets.R</code>
 はずっとスリムになりました：ワークフローに集中し、各ステップで何が起こるかをすぐに教えてくれます。</p>
 <p>最後に、データや出力など、コードではないファイルを保存するためのディレクトリを作成しましょう。
-ターゲットキャッシュ内に <code>user</code>
-という新しいディレクトリを作成します：<code>_targets/user</code>。
-<code>user</code> 内にさらに <code>data</code> と <code>results</code>
-の2つのディレクトリを作成します。
-（バージョン管理を使用している場合は、<code>_targets</code>
-ディレクトリを無視することをおそらく望むでしょう）。</p>
+生データファイル用の <code>data</code>
+ディレクトリはすでに作成しました。プロジェクトフォルダ内に、もう1つ
+<code>results</code>
+という新しいディレクトリを作成してください（バージョン管理を使用している場合は、<code>_targets</code>
+ディレクトリに加えて、<code>data</code> と <code>results</code>
+も無視することをおそらく望むでしょう）。</p>
+<p>プロジェクトフォルダは、次のようになっているはずです：</p>
+<pre><code>.
+├── _targets/        &lt;- the targets cache (created by targets; do not edit)
+├── _targets.R       &lt;- the workflow
+├── R/
+│   ├── functions.R  &lt;- custom functions
+│   └── packages.R   &lt;- package loading
+├── data/            &lt;- input data files
+└── results/         &lt;- output files</code></pre>
 </section><section><h2 class="section-heading" id="関数についての一言">関数についての一言<a class="anchor" aria-label="anchor" href="#%E9%96%A2%E6%95%B0%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6%E3%81%AE%E4%B8%80%E8%A8%80"></a></h2>
 <hr class="half-width"><p>このレッスンの前半でカスタム関数について触れましたが、これはさらに明確化が必要な重要なトピックです。
 <code>targets</code>
@@ -569,23 +577,23 @@ Carpentry のレッスン</a> をお勧めします。</p>
 <p>もう一つの大きな違いは、<strong>各ターゲットが一意の名前を持たなければならない</strong>
 ということです。
 以下のようなコードを書くことに慣れているかもしれません：</p>
-<div class="codewrapper sourceCode" id="cb3">
-<h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
-</h3>
-<pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># 人の身長をcmで保存し、インチに変換する</span></span>
-<span><span class="va">height</span> <span class="op">&lt;-</span> <span class="fl">160</span></span>
-<span><span class="va">height</span> <span class="op">&lt;-</span> <span class="va">height</span> <span class="op">/</span> <span class="fl">2.54</span></span></code></pre>
-</div>
-<p>同等の <code>targets</code>
-パイプラインを実行しようとするとエラーが発生します：</p>
 <div class="codewrapper sourceCode" id="cb4">
 <h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># ペンギンの体重をグラムで保存し、キログラムに変換する</span></span>
+<span><span class="va">body_mass</span> <span class="op">&lt;-</span> <span class="fl">3750</span></span>
+<span><span class="va">body_mass</span> <span class="op">&lt;-</span> <span class="va">body_mass</span> <span class="op">/</span> <span class="fl">1000</span></span></code></pre>
+</div>
+<p>同等の <code>targets</code>
+パイプラインを実行しようとするとエラーが発生します：</p>
+<div class="codewrapper sourceCode" id="cb5">
+<h3 class="code-label">R<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">tar_plan</span><span class="op">(</span></span>
-<span>    height <span class="op">=</span> <span class="fl">160</span>,</span>
-<span>    height <span class="op">=</span> <span class="va">height</span> <span class="op">/</span> <span class="fl">2.54</span></span>
+<span>    body_mass <span class="op">=</span> <span class="fl">3750</span>,</span>
+<span>    body_mass <span class="op">=</span> <span class="va">body_mass</span> <span class="op">/</span> <span class="fl">1000</span></span>
 <span><span class="op">)</span></span></code></pre>
 </div>
 <div class="codewrapper">
@@ -593,7 +601,7 @@ Carpentry のレッスン</a> をお勧めします。</p>
 </h3>
 <pre class="error" tabindex="0"><code>Error:
 ! Error in tar_make():
-  duplicated target names: height
+  duplicated target names: body_mass
   See https://books.ropensci.org/targets/debugging.html</code></pre>
 </div>
 <p><strong><code>targets</code>
@@ -611,7 +619,8 @@ Carpentry のレッスン</a> をお勧めします。</p>
 <ul><li>コードを <code>R/</code> フォルダに配置する</li>
 <li>関数を <code>R/functions.R</code> に配置する</li>
 <li>パッケージを <code>R/packages.R</code> に指定する</li>
-<li>その他の雑多なファイルを <code>_targets/user</code> に配置する</li>
+<li>データファイルを <code>data/</code> に、出力ファイルを
+<code>results/</code> に配置する</li>
 <li>関数を書くことは <code>targets</code>
 パイプラインの重要なスキルである</li>
 </ul></div>
@@ -651,7 +660,7 @@ any links that you are not going to use.
         | <a href="https://github.com/swcarpentry-ja/targets-workshop/blob/main/CONTRIBUTING.md" class="external-link">貢献</a>
         | <a href="https://github.com/swcarpentry-ja/targets-workshop/" class="external-link">ソース</a></p>
         <p>
-        <a href="https://github.com/swcarpentry-ja/targets-workshop/blob/main/" class="external-link">引用</a>
+        <a href="../citation.html">引用</a>
         | <a href="mailto:joelnitta@gmail.com">お問い合わせ</a> | <a href="https://carpentries.org/about/" class="external-link">概要</a></p>
 		</div>
 		<div class="col-md-6">
@@ -681,8 +690,8 @@ any links that you are not going to use.
   "creativeWorkStatus": "active",
   "url": "https://swcarpentry-ja.github.io/targets-workshop/instructor/organization.html",
   "identifier": "https://swcarpentry-ja.github.io/targets-workshop/instructor/organization.html",
-  "dateCreated": "2026-10-21",
-  "dateModified": "2026-10-21",
+  "dateCreated": "2026-10-23",
+  "dateModified": "2026-10-23",
   "datePublished": "2026-10-23"
 }
 

@@ -328,7 +328,7 @@
 <div class="accordion accordion-flush" id="accordionFlush9">
   <div class="accordion-item">
     <div class="accordion-header" id="flush-heading9">
-        <a href="files.html">8. 外部ファイルの取り扱い</a>
+        <a href="branch.html">8. ブランチング</a>
     </div>
 <!--/div.accordion-header-->
 
@@ -340,7 +340,7 @@
 <div class="accordion accordion-flush" id="accordionFlush10">
   <div class="accordion-item">
     <div class="accordion-header" id="flush-heading10">
-        <a href="branch.html">9. ブランチング</a>
+        <a href="parallel.html">9. 並列処理</a>
     </div>
 <!--/div.accordion-header-->
 
@@ -352,7 +352,7 @@
 <div class="accordion accordion-flush" id="accordionFlush11">
   <div class="accordion-item">
     <div class="accordion-header" id="flush-heading11">
-        <a href="parallel.html">10. 並列処理</a>
+        <a href="files.html">10. 外部ファイルの取り扱い</a>
     </div>
 <!--/div.accordion-header-->
 
@@ -487,9 +487,6 @@ function」ツールは、コードを関数に変換する作業を始める助
 <code>tar_load()</code>
 はワークフローオブジェクトを現在のRセッションにロードします</li>
 <li>
-<code>tar_read()</code>
-はワークフローオブジェクトを読み取り、その値を返します</li>
-<li>
 <code>_targets</code>
 フォルダはキャッシュであり、一般的には手動で編集すべきではありません</li>
 </ul></section><section id="lifecycle"><h2 class="section-heading"><a href="lifecycle.html">ワークフローのライフサイクル</a></h2>
@@ -502,12 +499,6 @@ function」ツールは、コードを関数に変換する作業を始める助
 <code>tar_visnetwork()</code>
 はワークフローの現在の状態をネットワークとして表示します</li>
 <li>
-<code>tar_progress()</code>
-はワークフローの現在の状態をデータフレームとして表示します</li>
-<li>
-<code>tar_outdated()</code>
-は古くなったターゲットをリストします</li>
-<li>
 <code>tar_invalidate()</code>
 は特定のターゲットを無効化（再実行）するために使用できます</li>
 </ul></section><section id="organization"><h2 class="section-heading"><a href="organization.html">targetsプロジェクト組織のベストプラクティス</a></h2>
@@ -516,7 +507,8 @@ function」ツールは、コードを関数に変換する作業を始める助
 <li>コードを <code>R/</code> フォルダに配置する</li>
 <li>関数を <code>R/functions.R</code> に配置する</li>
 <li>パッケージを <code>R/packages.R</code> に指定する</li>
-<li>その他の雑多なファイルを <code>_targets/user</code> に配置する</li>
+<li>データファイルを <code>data/</code> に、出力ファイルを
+<code>results/</code> に配置する</li>
 <li>関数を書くことは <code>targets</code>
 パイプラインの重要なスキルである</li>
 </ul></section><section id="packages"><h2 class="section-heading"><a href="packages.html">パッケージの管理</a></h2>
@@ -530,21 +522,8 @@ function」ツールは、コードを関数に変換する作業を始める助
 <li>
 <code>renv</code> を使用してパッケージバージョンを管理する</li>
 <li>
-<code>conflicted</code>
-パッケージを使用して名前空間の競合を管理する</li>
-</ul></section><section id="files"><h2 class="section-heading"><a href="files.html">外部ファイルの取り扱い</a></h2>
-<hr class="half-width">
-<ul>
-<li>
-<code>tarchetypes::tar_file()</code>
-はファイルの内容を追跡します</li>
-<li>
-<code>tarchetypes::tar_file_read()</code>
-をデータ読み込み関数（例えば
-<code>read_csv()</code>）と組み合わせて使用し、入力データとパイプラインを同期させる</li>
-<li>
-<code>tarchetypes::tar_file()</code>
-をファイルに書き出す関数（ファイルに書き込んでパスを返す関数）と組み合わせてデータを書き出す</li>
+<code>::</code> 記法（たとえば
+<code>dplyr::filter()</code>）を使用して、関数がどのパッケージのものかを明示し、名前空間の競合を避ける</li>
 </ul></section><section id="branch"><h2 class="section-heading"><a href="branch.html">ブランチング</a></h2>
 <hr class="half-width">
 <ul>
@@ -556,14 +535,25 @@ function」ツールは、コードを関数に変換する作業を始める助
 <li>動的ブランチングは単一のコマンドで複数のターゲットを作成します</li>
 <li>ブランチの出力に必要なメタデータを含めるために、通常カスタム関数を書く必要があります</li>
 <li>並列コンピューティングは関数ではなく、ワークフローのレベルで機能します</li>
+</ul></section><section id="files"><h2 class="section-heading"><a href="files.html">外部ファイルの取り扱い</a></h2>
+<hr class="half-width">
+<ul>
+<li>
+<code>tarchetypes::tar_file()</code>
+はファイルの内容を追跡します</li>
+<li>
+<code>tarchetypes::tar_file()</code> をデータ読み込み関数（例えば
+<code>read_csv()</code>）と組み合わせて使用し、入力データとパイプラインを同期させる</li>
+<li>
+<code>tarchetypes::tar_file()</code>
+をファイルに書き出す関数（ファイルに書き込んでパスを返す関数）と組み合わせてデータを書き出す</li>
 </ul></section><section id="quarto"><h2 class="section-heading"><a href="quarto.html">Quartoを用いた再現可能なレポート</a></h2>
 <hr class="half-width">
 <ul>
 <li>
 <code>tarchetypes::tar_quarto()</code> は Quarto
 ドキュメントをレンダリングするために使用されます</li>
-<li>Quarto ドキュメント内で <code>tar_load()</code> および
-<code>tar_read()</code>
+<li>Quarto ドキュメント内で <code>tar_load()</code>
 を使用してターゲットをロードする必要があります</li>
 <li>重い計算は主な <code>targets</code>
 ワークフローで行い、軽いフォーマットやプロットの生成は Quarto
@@ -587,7 +577,7 @@ function」ツールは、コードを関数に変換する作業を始める助
         | <a href="https://github.com/swcarpentry-ja/targets-workshop/blob/main/CONTRIBUTING.md" class="external-link">貢献</a>
         | <a href="https://github.com/swcarpentry-ja/targets-workshop/" class="external-link">ソース</a></p>
         <p>
-        <a href="https://github.com/swcarpentry-ja/targets-workshop/blob/main/" class="external-link">引用</a>
+        <a href="citation.html">引用</a>
         | <a href="mailto:joelnitta@gmail.com">お問い合わせ</a> | <a href="https://carpentries.org/about/" class="external-link">概要</a></p>
 		</div>
 		<div class="col-md-6">
@@ -618,7 +608,7 @@ function」ツールは、コードを関数に変換する作業を始める助
   "creativeWorkStatus": "active",
   "url": "https://swcarpentry-ja.github.io/targets-workshop/key-points.html",
   "identifier": "https://swcarpentry-ja.github.io/targets-workshop/key-points.html",
-  "dateCreated": "2026-10-21",
+  "dateCreated": "2026-10-23",
   "dateModified": "2026-10-23",
   "datePublished": "2026-10-23"
 }

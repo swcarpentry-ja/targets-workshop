@@ -329,7 +329,7 @@
 <div class="accordion accordion-flush" id="accordionFlush9">
   <div class="accordion-item">
     <div class="accordion-header" id="flush-heading9">
-        <a href="files.html">8. 外部ファイルの取り扱い</a>
+        <a href="branch.html">8. ブランチング</a>
     </div>
 <!--/div.accordion-header-->
 
@@ -341,7 +341,7 @@
 <div class="accordion accordion-flush" id="accordionFlush10">
   <div class="accordion-item">
     <div class="accordion-header" id="flush-heading10">
-        <a href="branch.html">9. ブランチング</a>
+        <a href="parallel.html">9. 並列処理</a>
     </div>
 <!--/div.accordion-header-->
 
@@ -353,7 +353,7 @@
 <div class="accordion accordion-flush" id="accordionFlush11">
   <div class="accordion-item">
     <div class="accordion-header" id="flush-heading11">
-        <a href="parallel.html">10. 並列処理</a>
+        <a href="files.html">10. 外部ファイルの取り扱い</a>
     </div>
 <!--/div.accordion-header-->
 
@@ -453,16 +453,31 @@
 </h2>
 <hr class="half-width">
 <p>例は徐々に、<a href="https://allisonhorst.github.io/palmerpenguins/" class="external-link">Palmer Penguins
-データセット</a>の<a href="https://github.com/joelnitta/penguins-targets" class="external-link">完全な分析</a>へと発展していきます。ただし、いくつかの概念を説明するために、まったく異なるコードを示す箇所があります。1つの
-<code>targets</code> プロジェクトには <code>_targets.R</code>
-ファイルを1つしか置けないため、参加者は既存の <code>_targets.R</code>
-ファイルを削除し、例に沿って新しいファイルを書く必要があるかもしれません。これまでの作業内容を記録しておけないと、参加者がもどかしく感じるかもしれません。1つの解決策は、古い
-<code>_targets.R</code> ファイルを <code>_targets_old.R</code>
-などの名前で保存しておき、再び実行する必要が生じたときに元の名前に戻すことです。</p>
+データセット</a>の完全な分析へと発展していきます。このデータセットは、R
+の基本パッケージに <code>penguins</code> と <code>penguins_raw</code>
+として含まれています。最終版はこのリポジトリにあります。ワークフロー（<code>_targets.R</code>）は
+<a href="https://github.com/carpentries-incubator/targets-workshop/blob/main/episodes/files/plans/plan_11.R" class="external-link"><code>plan_11.R</code></a>（<code>episodes/files/plans/</code>
+にある番号付きプランファイルの最後のもの）、それが使用するカスタム関数は
+<a href="https://github.com/carpentries-incubator/targets-workshop/tree/main/episodes/files/tar_functions" class="external-link"><code>tar_functions</code></a>、レポートは
+<a href="https://github.com/carpentries-incubator/targets-workshop/blob/main/episodes/files/penguin_report.qmd" class="external-link"><code>penguin_report.qmd</code></a>
+です。</p>
+</section><section><h2 class="section-heading" id="r-のバージョン">R のバージョン<a class="anchor" aria-label="anchor" href="#r-%E3%81%AE%E3%83%90%E3%83%BC%E3%82%B8%E3%83%A7%E3%83%B3"></a>
+</h2>
+<hr class="half-width">
+<p>penguins データセットは <strong>R バージョン 4.5.0</strong>
+で基本パッケージに追加されたため、このレッスンには R 4.5.0
+以降が必要です。ワークショップの前に、学習者（および使用予定の共有サーバーやクラウドインスタンス）が十分に新しいバージョンの
+R を使用していることを確認してください。</p>
+<p>このレッスンは、ホスト済みの環境を提供していません。Posit Cloud
+などのクラウドサービスでワークショップを実施したい場合は、R 4.5.0
+以降と<a href="index.html#setup">セットアップ手順</a>に記載されているパッケージを備えた環境を、ご自身で用意する必要があります。</p>
 </section><section><h2 class="section-heading" id="オプションのエピソード">オプションのエピソード<a class="anchor" aria-label="anchor" href="#%E3%82%AA%E3%83%97%E3%82%B7%E3%83%A7%E3%83%B3%E3%81%AE%E3%82%A8%E3%83%94%E3%82%BD%E3%83%BC%E3%83%89"></a>
 </h2>
 <hr class="half-width">
-<p>「関数」のエピソードはオプションのエピソードであり、ワークショップに参加する学習者によって必要かどうかが変わります。
+<p>「パッケージの管理」のエピソードは、より発展的なトピック（パッケージを読み込むさまざまな方法、<code>renv</code>
+によるパッケージバージョンの管理、名前空間の衝突）を扱っており、時間が足りない場合は省略できます。レッスンの残りの部分はこのエピソードに依存しません。ワークフローはすでに
+<code>library()</code> でパッケージを読み込んでいます。</p>
+<p>「関数の簡単な紹介」のエピソードはオプションのエピソードであり、ワークショップに参加する学習者によって必要かどうかが変わります。
 関数を使った経験がある人はいるか、挙手（または付箋）で確認し、経験のない学習者がいる場合にこのエピソードを実施することをお勧めします。</p>
 <p><code>targets</code>
 は関数に大きく依存しているため、関数に不慣れな学習者がいる場合は、少し時間をかける価値があると考えています。関数について簡単な導入を受けないと、そうした学習者はすぐについていけなくなり、ワークショップの終了時に
@@ -535,13 +550,6 @@ make、inspect、adjust、make を実演する</p>
 <p>エピソードの概要:
 パッケージの読み込み方法とパッケージバージョンの維持方法を示す</p>
 <hr>
-<br></section><section id="files"><h2 class="section-heading"><a href="files.html">外部ファイルの取り扱い</a></h2>
-<hr class="half-width">
-<h3 id="files-headingInstructor1">
-<a href="files.html#headingInstructor1">インストラクター用メモ</a><a class="anchor" aria-label="アンカー" href="#files-headingInstructor1"></a>
-</h3>
-<p>エピソードの概要: 外部ファイルの読み書き方法を示す</p>
-<hr>
 <br></section><section id="branch"><h2 class="section-heading"><a href="branch.html">ブランチング</a></h2>
 <hr class="half-width">
 <h3 id="branch-headingInstructor1">
@@ -555,6 +563,13 @@ make、inspect、adjust、make を実演する</p>
 <a href="parallel.html#headingInstructor1">インストラクター用メモ</a><a class="anchor" aria-label="アンカー" href="#parallel-headingInstructor1"></a>
 </h3>
 <p>エピソードの概要: 並列処理の使用方法を示す</p>
+<hr>
+<br></section><section id="files"><h2 class="section-heading"><a href="files.html">外部ファイルの取り扱い</a></h2>
+<hr class="half-width">
+<h3 id="files-headingInstructor1">
+<a href="files.html#headingInstructor1">インストラクター用メモ</a><a class="anchor" aria-label="アンカー" href="#files-headingInstructor1"></a>
+</h3>
+<p>エピソードの概要: 外部ファイルの読み書き方法を示す</p>
 <hr>
 <br></section><section id="quarto"><h2 class="section-heading"><a href="quarto.html">Quartoを用いた再現可能なレポート</a></h2>
 <hr class="half-width">
@@ -582,7 +597,7 @@ make、inspect、adjust、make を実演する</p>
         | <a href="https://github.com/swcarpentry-ja/targets-workshop/blob/main/CONTRIBUTING.md" class="external-link">貢献</a>
         | <a href="https://github.com/swcarpentry-ja/targets-workshop/" class="external-link">ソース</a></p>
         <p>
-        <a href="https://github.com/swcarpentry-ja/targets-workshop/blob/main/" class="external-link">引用</a>
+        <a href="../citation.html">引用</a>
         | <a href="mailto:joelnitta@gmail.com">お問い合わせ</a> | <a href="https://carpentries.org/about/" class="external-link">概要</a></p>
 		</div>
 		<div class="col-md-6">
@@ -613,7 +628,7 @@ make、inspect、adjust、make を実演する</p>
   "creativeWorkStatus": "active",
   "url": "https://swcarpentry-ja.github.io/targets-workshop/instructor/instructor-notes.html",
   "identifier": "https://swcarpentry-ja.github.io/targets-workshop/instructor/instructor-notes.html",
-  "dateCreated": "2026-10-21",
+  "dateCreated": "2026-10-23",
   "dateModified": "2026-10-23",
   "datePublished": "2026-10-23"
 }
