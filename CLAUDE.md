@@ -81,7 +81,10 @@ sandpaper::build_lesson("/tmp/ja-lesson", preview = FALSE)
 - Checks out `l10n_main` (not `main`).
 - Writes the repo secret `LANG_CODE` (set to `ja`) into `~/.Renviron`, installs `carpentries/sandpaper` and `joelnitta/dovetail`.
 - Runs `dovetail:::make_translated_dir()` into a temp dir, then `sandpaper:::ci_deploy()` to push the result to `gh-pages`.
-- Trigger by pushing to `l10n_main` or manually: `gh workflow run "01 Build and Deploy Site"`. GitHub disables scheduled workflows after 60 days of repo inactivity (`disabled_inactivity`); re-enable with `gh workflow enable`.
+- Pushing to `l10n_main` already starts the build and deploy; no manual trigger is needed. To run it manually: `gh workflow run "01 Build and Deploy Site" -R swcarpentry-ja/targets-workshop --ref l10n_main`.
+- **Always pass `-R swcarpentry-ja/targets-workshop` to `gh` commands** (the default repo is also set with `gh repo set-default`, but don't rely on it). Without it, `gh` can target upstream `carpentries-incubator/targets-workshop`, and workflow dispatches/reruns would run there by mistake. Check with `gh repo view --json nameWithOwner` if unsure.
+- If a run fails, look at the fork's own runs (`gh run list -R swcarpentry-ja/targets-workshop`) before changing any workflow files; workflow files are upstream boilerplate and should not be edited to chase a failure seen in a different repo.
+- GitHub disables scheduled workflows after 60 days of repo inactivity (`disabled_inactivity`); re-enable with `gh workflow enable`.
 - Other workflows (`pr-*.yaml`, `update-workflows.yaml`, `update-cache.yaml`) are upstream Workbench boilerplate; `update-workflows.yaml` bumps them (sandpaper version is in `sandpaper-version.txt`).
 
 ### Lockfile
