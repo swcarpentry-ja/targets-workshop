@@ -1,7 +1,7 @@
 ---
 title: 'パッケージの管理'
-teaching: 10
-exercises: 2
+teaching: 20
+exercises: 0
 ---
 
 :::::::::::::::::::::::::::::::::::::: questions 
@@ -24,55 +24,86 @@ exercises: 2
 
 
 
+
+
 ## パッケージの読み込み
 
 ほとんどすべての R 分析は、base R で利用可能な機能を超える関数を提供するパッケージに依存しています。
 
-`targets` ワークフローでパッケージを読み込む主な方法は3つあります。
+私たちのワークフローもそうです。`read_csv()` は `readr` パッケージのものであり、`clean_penguin_data()` は `dplyr` の `select()` と、`tidyr` の `drop_na()` および `separate()` を使用しています。
+これらはすべて `tidyverse` の一部です。
+
+これまでのワークフローは次のとおりです：
+
+
+``` r
+source("R/packages.R")
+source("R/functions.R")
+
+tar_plan(
+  penguins_csv_file = "data/penguins_raw.csv",
+  penguins_data_raw = read_csv(penguins_csv_file, show_col_types = FALSE),
+  penguins_data = clean_penguin_data(penguins_data_raw)
+)
+```
+
+これまでやってきたことはうまく動作します。`R/packages.R` の `library()` 呼び出しによって必要な関数がすべて使えるようになっているのに、なぜ他の方法でパッケージを読み込む必要があるのでしょうか？
+私たちのような小さなワークフローでは、その必要はありません。
+しかし、ワークフローが大きくなると、`library()` でパッケージを読み込むことでいくつかの問題が生じ始めることがあります：
+
+- **遅くなることがあります。** `targets` が `_targets.R` ファイルを読み込むたびに（たとえば `tar_make()` や `tar_visnetwork()` を実行するとき）、これから実行されるターゲットが実際に必要としているかどうかにかかわらず、すべてのパッケージが読み込まれます。パッケージのリストが長いと、これが積み重なります。
+- **関数がどこから来ているのかが分かりにくくなります。** 多くのパッケージを読み込むと、ある関数がどのパッケージに属しているのかが明らかでなくなり、2つのパッケージに同じ名前の関数があることもあります（これについてはエピソードの最後で再び取り上げます）。
+
+`targets` には、これらの問題の解決に役立つ、パッケージを利用可能にする他の方法がいくつか用意されており、他の人の `targets` プロジェクトでも目にするでしょう。
+
+`targets` ワークフローでパッケージを読み込む主な方法は3つあり、それに加えて、読み込みを避ける方法が1つあります。
+以下では、それぞれの方法でワークフローがどのようになるかを見ていきます。
+これらは読むための例であり、ご自身のファイルを変更する必要はありません（すでにお持ちの方法は最初のものです）。
 
 ### 方法1: `library()` {#method-1}
 
-これはおそらく最も馴染みのある方法であり、これまでデフォルトで使用してきた方法です。
-
-他の R スクリプトと同様に、`_targets.R` スクリプトの上部近くに `library()` 呼び出しを含めます。あるいは（<!-- FIXME ADD LINK -->プロジェクト組織の推奨ベストプラクティスとして）、すべての `library()` 呼び出しを別のスクリプトに配置することもできます---通常これは `packages.R` と呼ばれ、プロジェクトの `R/` ディレクトリに保存されます。
-
-このアプローチの潜在的な欠点は、読み込むパッケージのリストが長い場合、`tar_visnetwork()`、`tar_outdated()` などの特定の関数がすべてのパッケージを読み込まなければならないため、必ずしもそれらを使用しなくても不必要に長い時間がかかる可能性があることです。
-
-### 方法2: `tar_option_set()` {#method-2}
-
-この方法では、ワークフローを実行するときに読み込むパッケージを指定するために、`_targets.R` 内で `tar_option_set()` 関数を使用します。
-
-これは `palmerpenguins` パッケージの事前にクリーンアップされたデータセットを使用して実演されます。例えば、アデリーペンギンのデータのみにフィルタリングしたいとしましょう。
-
-::::::::::::::::::::::::::::::::::::: {.callout}
-
-## 進捗の保存
-
-1つのプロジェクト内でアクティブな `_targets.R` ファイルは1つだけです。
-
-新しい `_targets.R` ファイルを作成しようとしていますが、これまで作業してきたもの（ペンギンのくちばし分析）の進捗を失いたくないでしょう。そのファイルを一時的に `_targets_old.R` のような名前に変更することで、以下の新しい例の `_targets.R` ファイルを上書きしないようにできます。再び作業を再開するときに名前を戻してください。
-
-:::::::::::::::::::::::::::::::::::::
-
-これが `tar_option_set()` メソッドを使用したときの例です：
+これはおそらく最も馴染みのある方法であり、これまでデフォルトで使用してきた方法です。`R/packages.R` が `library()` でパッケージを読み込み、`_targets.R` が `source("R/packages.R")` を実行します。
 
 
 ``` r
 library(targets)
 library(tarchetypes)
+library(tidyverse)
+```
 
-tar_option_set(packages = c("dplyr", "palmerpenguins"))
+他の R スクリプトと同様に、`_targets.R` スクリプトの上部近くに `library()` 呼び出しを含めることができます。あるいは（[プロジェクト組織](episodes/organization.Rmd)の推奨ベストプラクティスとして）、すべての `library()` 呼び出しを別のスクリプトに配置することもできます---通常これは `packages.R` と呼ばれ、プロジェクトの `R/` ディレクトリに保存されます。
+
+このアプローチの潜在的な欠点は、読み込むパッケージのリストが長い場合、`tar_visnetwork()` などの特定の関数がすべてのパッケージを読み込まなければならないため、必ずしもそれらを使用しなくても不必要に長い時間がかかる可能性があることです。
+
+### 方法2: `tar_option_set()` {#method-2}
+
+この方法では、ワークフローを実行するときに読み込むパッケージを指定するために、`_targets.R` 内で `tar_option_set()` 関数を使用します。
+
+私たちのワークフローでは、`R/packages.R` から `library(tidyverse)` を削除し（`library(targets)` と `library(tarchetypes)` だけが残ります）、代わりに必要なパッケージを `_targets.R` に列挙することができます：
+
+
+``` r
+source("R/packages.R")
+source("R/functions.R")
+
+tar_option_set(packages = c("readr", "dplyr", "tidyr"))
 
 tar_plan(
-  adelie_data = filter(penguins, species == "Adelie")
+  penguins_csv_file = "data/penguins_raw.csv",
+  penguins_data_raw = read_csv(penguins_csv_file, show_col_types = FALSE),
+  penguins_data = clean_penguin_data(penguins_data_raw)
 )
 ```
 
 
 ``` output
-+ adelie_data dispatched
-✔ adelie_data completed [38ms, 1.54 kB]
-✔ ended pipeline [367ms, 1 completed, 0 skipped]
++ penguins_csv_file dispatched
+✔ penguins_csv_file completed [58ms, 74 B]
++ penguins_data_raw dispatched
+✔ penguins_data_raw completed [73ms, 10.40 kB]
++ penguins_data dispatched
+✔ penguins_data completed [15ms, 1.49 kB]
+✔ ended pipeline [490ms, 3 completed, 0 skipped]
 ```
 
 この方法は、方法1で時々経験するかもしれない遅延を回避します。
@@ -81,27 +112,38 @@ tar_plan(
 
 ターゲットを定義するための主要な関数である `tar_target()` には、指定したターゲットのために**のみ**指定されたパッケージを読み込む `packages` 引数があります。
 
-これは、上記と同じ例から修正したこの方法の使用例です。
+私たちのワークフローでこの方法を使用する例を示します（ここでも `R/packages.R` から `library(tidyverse)` を削除しています）。
+`penguins_data_raw` は `readr` を必要とし、`penguins_data` は `dplyr` と `tidyr` を必要とします。
 
 
 ``` r
-library(targets)
-library(tarchetypes)
+source("R/packages.R")
+source("R/functions.R")
 
 tar_plan(
+  penguins_csv_file = "data/penguins_raw.csv",
   tar_target(
-    adelie_data,
-    filter(penguins, species == "Adelie"),
-    packages = c("dplyr", "palmerpenguins")
+    penguins_data_raw,
+    read_csv(penguins_csv_file, show_col_types = FALSE),
+    packages = "readr"
+  ),
+  tar_target(
+    penguins_data,
+    clean_penguin_data(penguins_data_raw),
+    packages = c("dplyr", "tidyr")
   )
 )
 ```
 
 
 ``` output
-+ adelie_data dispatched
-✔ adelie_data completed [39ms, 1.54 kB]
-✔ ended pipeline [366ms, 1 completed, 0 skipped]
++ penguins_csv_file dispatched
+✔ penguins_csv_file completed [0ms, 74 B]
++ penguins_data_raw dispatched
+✔ penguins_data_raw completed [102ms, 10.40 kB]
++ penguins_data dispatched
+✔ penguins_data completed [39ms, 1.49 kB]
+✔ ended pipeline [485ms, 3 completed, 0 skipped]
 ```
 
 これは、すべてのパッケージを読み込むよりもメモリ効率が良い場合があります。なぜなら、ワークフローの通常の実行中にすべてのターゲットが常に作成されるわけではないからです。
@@ -112,23 +154,46 @@ tar_plan(
 実際にパッケージを読み込むことなく、`::` 記法を使用して各関数に関連付けられたパッケージを指定する方法があります。例えば、`dplyr::mutate()` です。
 これにより、**パッケージの読み込みを完全に避けることができます**。
 
-この方法を使用してプランを書く方法は以下の通りです：
+この方法を使用してプランを書く方法を、`R/functions.R` のカスタム関数 `clean_penguin_data()` とともに以下に示します。
+`R/packages.R` はもう必要ありません。読み込むパッケージは、`tar_plan()` 自体を提供する `targets` と `tarchetypes` だけです：
 
 
 ``` r
 library(targets)
 library(tarchetypes)
+source("R/functions.R")
 
 tar_plan(
-  adelie_data = dplyr::filter(palmerpenguins::penguins, species == "Adelie")
+  penguins_csv_file = "data/penguins_raw.csv",
+  penguins_data_raw = readr::read_csv(penguins_csv_file, show_col_types = FALSE),
+  penguins_data = clean_penguin_data(penguins_data_raw)
 )
 ```
 
 
+``` r
+clean_penguin_data <- function(penguins_data_raw) {
+  penguins_data_raw |>
+    dplyr::select(
+      species = Species,
+      bill_length_mm = `Culmen Length (mm)`,
+      bill_depth_mm = `Culmen Depth (mm)`
+    ) |>
+    tidyr::drop_na() |>
+    # Split "species" apart on spaces, and only keep the first word
+    tidyr::separate(species, into = "species", extra = "drop")
+}
+```
+
+
 ``` output
-+ adelie_data dispatched
-✔ adelie_data completed [25ms, 1.54 kB]
-✔ ended pipeline [346ms, 1 completed, 0 skipped]
++ penguins_csv_file dispatched
+✔ penguins_csv_file completed [1ms, 74 B]
++ penguins_data_raw dispatched
+✔ penguins_data_raw completed [98ms, 10.40 kB]
++ penguins_data dispatched
+✔ penguins_data completed [31ms, 1.49 kB]
+✔ ended pipeline [485ms, 3 completed, 0 skipped]
 ```
 
 このアプローチの利点は、すべての関数の起源が明確になることです。例えば、GitHub でソースを見たりすることで、すぐに関数がどこから来ているかを知ることができます。
@@ -139,6 +204,10 @@ tar_plan(
 **パッケージの読み込み方法に「正解」はありません**---それは特定の状況に最も適した方法の問題です。
 
 多くの場合、最も頻繁に使用するパッケージ（例えば `tidyverse`）を `packages.R` 内で `library()` を使って読み込み、起源を忘れがちなあまり頻繁に使用しない関数には `::` 記法を使用するのが合理的なアプローチです。
+
+**これが、このレッスンで使用しているアプローチです。**
+`tidyverse` は `R/packages.R` の `library()` で読み込み、分岐のエピソードでの `broom::glance()` のように、1か所でしか必要としないパッケージには `::` を使用しています。
+
 
 ## パッケージバージョンの維持
 
@@ -154,7 +223,9 @@ tar_plan(
 
 幸いなことに、これを手動で行う必要はありません。このプロセスを自動化するのに役立つ R パッケージが利用可能です。私たちは [renv](https://rstudio.github.io/renv/index.html) をお勧めしますが、他にも [groundhog](https://groundhogr.com/) などがあります。このレッスンでは `renv` の詳細な使用方法をカバーする時間がありません。`renv` を始めるには、["Introduction to renv" ビネット](https://rstudio.github.io/renv/articles/renv.html) を参照してください。
 
-一般的に、`renv` は他の R プロジェクトと同様に `targets` プロジェクトでも使用できます。しかし、1つの例外があります：`tar_option_set()` や `tar_target()` の `packages` 引数（それぞれ[方法2](#method-2) または[方法3](#method-3)）を使用してパッケージを読み込む場合、`renv` はそれらを検出しません（なぜなら、`renv` は `library()`、`require()` などでパッケージが読み込まれることを期待しているからです）。
+一般的に、`renv` は他の R プロジェクトと同様に `targets` プロジェクトでも使用できます。`renv` は、`library()`、`require()` などで読み込まれたパッケージに加えて、`_targets.R` 内の `tar_option_set()` の `packages` 引数に列挙されたパッケージ（[方法2](#method-2)）も検出します。
+
+ただし、1つの例外があります：`tar_target()` の `packages` 引数（[方法3](#method-3)）を使用してパッケージを読み込む場合、`renv` はそれらを検出しません。
 
 この場合の解決策は、[`tar_renv()` 関数](https://docs.ropensci.org/targets/reference/tar_renv.html) を使用することです。これにより、ワークフローで使用される各パッケージの `library()` 呼び出しを含む別のファイルが書き出され、`renv` がそれらを正しく検出できるようになります。
 
@@ -166,24 +237,22 @@ tar_plan(
 これは、依存関係を計算する際に `targets` に過度な計算負荷をかけないため、少数のパッケージに対してのみ行うのが最適です。
 例えば、頻繁に更新する独自のカスタムパッケージを使用している場合にこれを行いたいかもしれません。
 
-これを行う方法は、`tar_option_set()` を使用し、`packages` と `imports` の両方に**同じ**パッケージ名を指定することです。以下は、`dplyr` と `palmerpenguins` に対してこれを示す前のコードを修正したバージョンです。
+これを行う方法は、`tar_option_set()` を使用し、`packages` と `imports` の両方に**同じ**パッケージ名を指定することです。以下は、`readr` と `tidyr` に対してこれを示す、方法2の例を修正したバージョンです。
 
 
 ``` r
-library(targets)
-library(tarchetypes)
-
 tar_option_set(
-  packages = c("dplyr", "palmerpenguins"),
-  imports = c("dplyr", "palmerpenguins")
-)
-
-tar_plan(
-  adelie_data = filter(penguins, species == "Adelie")
+  packages = c("readr", "dplyr", "tidyr"),
+  imports = c("readr", "tidyr")
 )
 ```
 
-もし `dplyr` または `palmerpenguins` を再インストールし、パイプラインで使用されるそれらの関数の一つ（例えば `filter()`）が変更された場合、その関数に依存するターゲットは再構築されます。
+
+
+もし `readr` または `tidyr` を再インストールし、パイプラインで使用されるそれらの関数の一つ（例えば `read_csv()`）が変更された場合、その関数に依存するターゲットは再構築されます。
+
+ただし、これはすべてのパッケージで機能するわけではありません。たとえば、`targets` に `dplyr` をこの方法で追跡させようとすると、循環依存に関するエラーで失敗します。
+そのため、ここでは `readr` と `tidyr` だけを追跡しています。
 
 ## 名前空間の競合の解決
 
@@ -197,32 +266,15 @@ tar_plan(
 例えば、`filter()` 関数は `stats` パッケージと `dplyr` パッケージの両方に存在しますが、それぞれで全く異なる動作をします。
 これは**名前空間の競合**です：私たちはどの `filter()` を指しているのか、どうやって知るのでしょうか？
 
-`conflicted` パッケージは、曖昧な関数を使用しようとした場合に停止させ、どのパッケージを使用するかを明確にするのを助けることで、このような混乱を防ぐのに役立ちます。
-ここでは詳細をカバーする時間がありませんが、`conflicted` の使用方法については [公式サイト](https://conflicted.r-lib.org/) を参照してください。
+すでに取り上げた解決策の一つは、関数を呼び出すときに `::` 記法を使用することです。`dplyr::filter()` と書くことで、`dplyr` 名前空間の `filter()` を使用することが明示されるからです。このアプローチのトレードオフは冗長さであり、入力と読む量が増えることです。
 
-`conflicted` を使用するとき、通常は `conflicts_prefer(dplyr::filter)` のように名前空間の競合を明示的に解決する一連のコマンドを実行します（これは、`dplyr` の `filter` を使用したいことを R に伝えます、`stats` の `filter` ではありません）。
-
-これを `targets` ワークフローで使用するには、`.Rprofile` と呼ばれる特別なファイルに `conflicts_prefer` のすべての呼び出しを配置する必要があります。このファイルはプロジェクトのメインフォルダにあります。これにより、各ターゲットに対して常に競合が解決されることが保証されます。
-
-`.Rprofile` を編集する推奨方法は、`usethis::edit_r_profile("project")` を使用することです。
-これにより、エディタで `.Rprofile` が開かれ、そこで編集して保存できます。
-
-例えば、あなたの `.Rprofile` は以下のようになります：
-
-
-``` r
-library(conflicted)
-conflicts_prefer(dplyr::filter)
-```
-
-`.Rprofile` のコードを実行するために `source()` を実行する必要はありません。
-それは各 R セッションの開始時に自動的に実行されます。
+もう一つの解決策は、[`conflicted`](https://conflicted.r-lib.org/) パッケージを使用することです。このパッケージは、名前が曖昧な関数を使用するとエラーで停止し、どちらを意図しているかを選べるようにします。ここでは詳細には触れません。
 
 ::::::::::::::::::::::::::::::::::::: keypoints 
 
 - `targets` でパッケージをロードする方法は複数あります
 - `targets` はユーザー定義の関数のみを追跡し、パッケージは追跡しません
 - `renv` を使用してパッケージバージョンを管理する
-- `conflicted` パッケージを使用して名前空間の競合を管理する
+- `::` 記法（たとえば `dplyr::filter()`）を使用して、関数がどのパッケージのものかを明示し、名前空間の競合を避ける
 
 ::::::::::::::::::::::::::::::::::::::::::::::::

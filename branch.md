@@ -1,7 +1,7 @@
 ---
 title: 'ブランチング'
-teaching: 30
-exercises: 2
+teaching: 40
+exercises: 10
 ---
 
 :::::::::::::::::::::::::::::::::::::: questions 
@@ -39,7 +39,7 @@ exercises: 2
 
 ## ブランチングなしの例
 
-これがどのように機能するかを理解するために、`palmerpenguins` データセットの分析を続けましょう。
+これがどのように機能するかを理解するために、penguins データセットの分析を続けましょう。
 
 **私たちの仮説は、くちばしの深さがくちばしの長さとともに減少するということです。**
 この仮説を線形モデルで検証します。
@@ -60,11 +60,8 @@ source("R/functions.R")
 
 tar_plan(
   # Load raw data
-  tar_file_read(
-    penguins_data_raw,
-    path_to_file("penguins_raw.csv"),
-    read_csv(!!.x, show_col_types = FALSE)
-  ),
+  penguins_csv_file = "data/penguins_raw.csv",
+  penguins_data_raw = read_csv(penguins_csv_file, show_col_types = FALSE),
   # Clean data
   penguins_data = clean_penguin_data(penguins_data_raw),
   # Build model
@@ -77,34 +74,17 @@ tar_plan(
 
 
 ``` output
-
-Attaching package: ‘palmerpenguins’
-
-The following objects are masked from ‘package:datasets’:
-
-    penguins, penguins_raw
-```
-
-``` output
-
-Attaching package: ‘palmerpenguins’
-
-The following objects are masked from ‘package:datasets’:
-
-    penguins, penguins_raw
-
 + combined_model dispatched
-✔ combined_model completed [27ms, 11.20 kB]
-✔ ended pipeline [231ms, 1 completed, 3 skipped]
+✔ combined_model completed [2ms, 11.20 kB]
+✔ ended pipeline [150ms, 1 completed, 3 skipped]
 ```
 
-モデルを見てみましょう。`broom` パッケージの `glance()` 関数を使用します。これは base R の `summary()` とは異なり、出力をティブル（データフレームの tidyverse 相当）として返します。後で見るように、これは下流の分析に非常に便利です。
+モデルを見てみましょう。`broom` パッケージの `glance()` 関数を、パッケージ全体を読み込まずに済むよう `broom::glance()` と書いて使用します（`::` 記法は、関数がどのパッケージのものかを指定します）。これは base R の `summary()` とは異なり、出力をティブル（データフレームの tidyverse 相当）として返します。後で見るように、これは下流の分析に非常に便利です。
 
 
 ``` r
-library(broom)
 tar_load(combined_model)
-glance(combined_model)
+broom::glance(combined_model)
 ```
 
 ``` output
@@ -121,7 +101,7 @@ glance(combined_model)
 
 種ごとに1つずつモデル（合計3つ）を作成して、どうなるか試してみましょう（これは統計的には厳密には正しいアプローチではありませんが、ここでの目的は統計ではなく `targets` を学ぶことです）。
 
-これでワークフローがより複雑になっています。これは**ブランチングなし**でのそのような分析のワークフローの例です（`packages.R` に `library(broom)` を追加することを忘れないでください）：
+これでワークフローがより複雑になっています。これは**ブランチングなし**でのそのような分析のワークフローの例です：
 
 
 ``` r
@@ -130,11 +110,8 @@ source("R/functions.R")
 
 tar_plan(
   # Load raw data
-  tar_file_read(
-    penguins_data_raw,
-    path_to_file("penguins_raw.csv"),
-    read_csv(!!.x, show_col_types = FALSE)
-  ),
+  penguins_csv_file = "data/penguins_raw.csv",
+  penguins_data_raw = read_csv(penguins_csv_file, show_col_types = FALSE),
   # Clean data
   penguins_data = clean_penguin_data(penguins_data_raw),
   # Build models
@@ -155,53 +132,38 @@ tar_plan(
     data = filter(penguins_data, species == "Gentoo")
   ),
   # Get model summaries
-  combined_summary = glance(combined_model),
-  adelie_summary = glance(adelie_model),
-  chinstrap_summary = glance(chinstrap_model),
-  gentoo_summary = glance(gentoo_model)
+  combined_summary = broom::glance(combined_model),
+  adelie_summary = broom::glance(adelie_model),
+  chinstrap_summary = broom::glance(chinstrap_model),
+  gentoo_summary = broom::glance(gentoo_model)
 )
 ```
 
 
 ``` output
-
-Attaching package: ‘palmerpenguins’
-
-The following objects are masked from ‘package:datasets’:
-
-    penguins, penguins_raw
-```
-
-``` output
-
-Attaching package: ‘palmerpenguins’
-
-The following objects are masked from ‘package:datasets’:
-
-    penguins, penguins_raw
-
 + adelie_model dispatched
-✔ adelie_model completed [18ms, 6.48 kB]
+✔ adelie_model completed [26ms, 6.48 kB]
 + gentoo_model dispatched
 ✔ gentoo_model completed [2ms, 5.88 kB]
 + chinstrap_model dispatched
 ✔ chinstrap_model completed [2ms, 4.54 kB]
 + combined_summary dispatched
-✔ combined_summary completed [35ms, 350 B]
+✔ combined_summary completed [106ms, 350 B]
 + adelie_summary dispatched
-✔ adelie_summary completed [3ms, 351 B]
+✔ adelie_summary completed [2ms, 351 B]
 + gentoo_summary dispatched
-✔ gentoo_summary completed [2ms, 351 B]
+✔ gentoo_summary completed [1ms, 351 B]
 + chinstrap_summary dispatched
-✔ chinstrap_summary completed [3ms, 351 B]
-✔ ended pipeline [414ms, 7 completed, 4 skipped]
+✔ chinstrap_summary completed [2ms, 351 B]
+✔ ended pipeline [340ms, 7 completed, 4 skipped]
 ```
 
 モデルの一つのサマリーを見てみましょう：
 
 
 ``` r
-tar_read(adelie_summary)
+tar_load(adelie_summary)
+adelie_summary
 ```
 
 ``` output
@@ -245,26 +207,19 @@ source("R/functions.R")
 
 tar_plan(
   # Load raw data
-  tar_file_read(
-    penguins_data_raw,
-    path_to_file("penguins_raw.csv"),
-    read_csv(!!.x, show_col_types = FALSE)
-  ),
+  penguins_csv_file = "data/penguins_raw.csv",
+  penguins_data_raw = read_csv(penguins_csv_file, show_col_types = FALSE),
   # Clean data
   penguins_data = clean_penguin_data(penguins_data_raw),
-  # Group data
-  tar_group_by(
-    penguins_data_grouped,
-    penguins_data,
-    species
-  ),
+  # Get species names
+  species_name = penguins_data |> dplyr::pull(species) |> unique(),
   # Build combined model with all species together
   combined_summary = model_glance(penguins_data),
   # Build one model per species
   tar_target(
     species_summary,
-    model_glance(penguins_data_grouped),
-    pattern = map(penguins_data_grouped)
+    penguins_data |> dplyr::filter(species == species_name) |> model_glance(),
+    pattern = map(species_name)
   )
 )
 ```
@@ -275,76 +230,56 @@ tar_plan(
 
 
 ``` output
-
-Attaching package: ‘palmerpenguins’
-
-The following objects are masked from ‘package:datasets’:
-
-    penguins, penguins_raw
-```
-
-``` output
-
-Attaching package: ‘palmerpenguins’
-
-The following objects are masked from ‘package:datasets’:
-
-    penguins, penguins_raw
-
 + combined_summary dispatched
-✔ combined_summary completed [38ms, 350 B]
-+ penguins_data_grouped dispatched
-✔ penguins_data_grouped completed [13ms, 1.53 kB]
+✔ combined_summary completed [52ms, 350 B]
++ species_name dispatched
+✔ species_name completed [2ms, 76 B]
 + species_summary declared [3 branches]
-✔ species_summary completed [12ms, 1.05 kB]
-✔ ended pipeline [389ms, 5 completed, 3 skipped]
+✔ species_summary completed [22ms, 1.05 kB]
+✔ ended pipeline [340ms, 5 completed, 3 skipped]
 ```
 
-一連の小さなターゲット（ブランチ）があり、それぞれが species_summary_7fe6634f7c7f6a77 のように名前付けされ、その後に全体の `species_summary` ターゲットがあります。
-これはブランチングを使用してターゲットを指定した結果です：小さなターゲットそれぞれが全体のターゲットを構成する「ブランチ」です。
-`targets` は、事前にどれだけのブランチが存在するか、またそれらが何を表しているかを知らないため、数字と文字の一連（「ハッシュ」）を使用して各ブランチに名前を付けます。
+メッセージには、`species_summary` が3つのブランチで「宣言」され、その後完了したと表示されています。
+これはブランチングを使用してターゲットを指定した結果です：`species_summary` は、一連の小さなターゲット（ブランチ）、ここでは種ごとに1つずつから構成される、1つの全体のターゲットです。
 `targets` は各ブランチを一つずつビルドし、それらを全体のターゲットに結合します。
 
 次に、ワークフローがどのように設定されているか、データの設定から詳しく見てみましょう：
 
 
 ``` r
-  # Group data
-  tar_group_by(
-    penguins_data_grouped,
-    penguins_data,
-    species
-  ),
+  # Get species names
+  species_name = penguins_data |> dplyr::pull(species) |> unique(),
 ```
 
-ブランチングなしのバージョンとは異なり、**データをグループ化する**ステップを追加しました。
-これは動的ブランチングが、グループ化されたデータフレームに同じ関数を適用する [`tidyverse` のアプローチ](https://dplyr.tidyverse.org/articles/grouping.html)に似ているためです。
-そこで、`tar_group_by()` 関数を使用して、入力データのグループ（種ごとに1グループ）を指定します。
+ブランチングなしのバージョンとは異なり、種の名前を取得するステップを追加しました。
+これは、`species_summary` ターゲットをどのようにブランチさせるかを targets に伝えるために必要です。
+ここでは、一意の種ごとに1つのブランチが欲しいのです。
 
 次に、ターゲット `species_summary` をビルドするコマンドを見てみましょう。
 
 
 ``` r
-  # Build one model per species
   tar_target(
     species_summary,
-    model_glance(penguins_data_grouped),
-    pattern = map(penguins_data_grouped)
+    penguins_data |> dplyr::filter(species == species_name) |> model_glance(),
+    pattern = map(species_name)
   )
 ```
 
 以前と同様に、`tar_target()` の最初の引数はビルドするターゲットの名前で、二つ目の引数はそれをビルドするコマンドです。
 
-ここでは、カスタム関数 `model_glance()` を `penguins_data_grouped` の各グループ（つまり各種）に適用しています。
+次に、`penguins_data` を1つの種の行（`species == species_name`）に絞り込み、その結果にカスタム関数 `model_glance()` を適用します。
+ここまでは通常のターゲットと同じです。
 
 最後に、これまで見たことのない引数 `pattern` があります。これは、このターゲットが動的ブランチングを使用してビルドされるべきことを示します。
-`map` は、入力データ（`penguins_data_grouped`）の各グループに対して関数を順次適用することを意味します。
+`map(species_name)` は、`species_name` の各要素（つまり各種）に対して1つずつブランチを順次ビルドし、各ブランチで `species_name` がその要素の値になることを意味します。
 
 ブランチングワークフローの構築方法を理解したので、出力を検査してみましょう：
 
 
 ``` r
-tar_read(species_summary)
+tar_load(species_summary)
+species_summary
 ```
 
 
@@ -353,8 +288,8 @@ tar_read(species_summary)
   r.squared adj.r.squared sigma statistic  p.value    df logLik   AIC   BIC deviance df.residual  nobs
       <dbl>         <dbl> <dbl>     <dbl>    <dbl> <dbl>  <dbl> <dbl> <dbl>    <dbl>       <int> <int>
 1     0.153         0.148 1.12       27.0 6.67e- 7     1 -231.   468.  477.    188.          149   151
-2     0.427         0.418 0.866      49.2 1.53e- 9     1  -85.7  177.  184.     49.5          66    68
-3     0.414         0.409 0.754      85.5 1.02e-15     1 -139.   284.  292.     68.8         121   123
+2     0.414         0.409 0.754      85.5 1.02e-15     1 -139.   284.  292.     68.8         121   123
+3     0.427         0.418 0.866      49.2 1.53e- 9     1  -85.7  177.  184.     49.5          66    68
 ```
 
 モデルのサマリー統計量がすべて一つのデータフレームに含まれています。
@@ -387,7 +322,7 @@ model_glance <- function(penguins_data) {
     species_name <- "combined"
   }
   # Get model summary and add species name
-  glance(model) |>
+  broom::glance(model) |>
     mutate(species = species_name, .before = 1)
 }
 ```
@@ -398,25 +333,19 @@ model_glance <- function(penguins_data) {
 
 
 ``` output
-
-Attaching package: ‘palmerpenguins’
-
-The following objects are masked from ‘package:datasets’:
-
-    penguins, penguins_raw
-
 + combined_summary dispatched
-✔ combined_summary completed [65ms, 371 B]
+✔ combined_summary completed [70ms, 371 B]
 + species_summary declared [3 branches]
-✔ species_summary completed [23ms, 1.11 kB]
-✔ ended pipeline [409ms, 4 completed, 4 skipped]
+✔ species_summary completed [97ms, 1.11 kB]
+✔ ended pipeline [339ms, 4 completed, 4 skipped]
 ```
 
-今回は、`model_summaries` をロードすると、各行がどのモデルに対応しているかを知ることができます（`mutate()` の `.before = 1` により、他の列より前に表示されます）。
+今回は、`species_summary` をロードすると、各行がどの種に対応しているかを知ることができます（`mutate()` の `.before = 1` により、他の列より前に表示されます）。
 
 
 ``` r
-tar_read(species_summary)
+tar_load(species_summary)
+species_summary
 ```
 
 ``` output
@@ -424,8 +353,8 @@ tar_read(species_summary)
   species   r.squared adj.r.squared sigma statistic  p.value    df logLik   AIC   BIC deviance df.residual  nobs
   <chr>         <dbl>         <dbl> <dbl>     <dbl>    <dbl> <dbl>  <dbl> <dbl> <dbl>    <dbl>       <int> <int>
 1 Adelie        0.153         0.148 1.12       27.0 6.67e- 7     1 -231.   468.  477.    188.          149   151
-2 Chinstrap     0.427         0.418 0.866      49.2 1.53e- 9     1  -85.7  177.  184.     49.5          66    68
-3 Gentoo        0.414         0.409 0.754      85.5 1.02e-15     1 -139.   284.  292.     68.8         121   123
+2 Gentoo        0.414         0.409 0.754      85.5 1.02e-15     1 -139.   284.  292.     68.8         121   123
+3 Chinstrap     0.427         0.418 0.866      49.2 1.53e- 9     1  -85.7  177.  184.     49.5          66    68
 ```
 
 次に、モデルに基づくくちばしの深さの予測を追加します。これはレポートでモデルをプロットする際に必要になります。
@@ -457,7 +386,7 @@ model_augment <- function(penguins_data) {
     species_name <- "combined"
   }
   # Get model summary and add species name
-  augment(model) |>
+  broom::augment(model) |>
     mutate(species = species_name, .before = 1)
 }
 ```
@@ -471,34 +400,27 @@ source("R/packages.R")
 
 tar_plan(
   # Load raw data
-  tar_file_read(
-    penguins_data_raw,
-    path_to_file("penguins_raw.csv"),
-    read_csv(!!.x, show_col_types = FALSE)
-  ),
+  penguins_csv_file = "data/penguins_raw.csv",
+  penguins_data_raw = read_csv(penguins_csv_file, show_col_types = FALSE),
   # Clean data
   penguins_data = clean_penguin_data(penguins_data_raw),
-  # Group data
-  tar_group_by(
-    penguins_data_grouped,
-    penguins_data,
-    species
-  ),
+  # Get species names
+  species_name = penguins_data |> dplyr::pull(species) |> unique(),
   # Get summary of combined model with all species together
   combined_summary = model_glance(penguins_data),
   # Get summary of one model per species
   tar_target(
     species_summary,
-    model_glance(penguins_data_grouped),
-    pattern = map(penguins_data_grouped)
+    penguins_data |> dplyr::filter(species == species_name) |> model_glance(),
+    pattern = map(species_name)
   ),
   # Get predictions of combined model with all species together
-  combined_predictions = model_augment(penguins_data_grouped),
+  combined_predictions = model_augment(penguins_data),
   # Get predictions of one model per species
   tar_target(
     species_predictions,
-    model_augment(penguins_data_grouped),
-    pattern = map(penguins_data_grouped)
+    penguins_data |> dplyr::filter(species == species_name) |> model_augment(),
+    pattern = map(species_name)
   )
 )
 ```
@@ -506,82 +428,6 @@ tar_plan(
 ::::::::::::::::::::::::::::::::::
 
 :::::::::::::::::::::::::::::::::::::
-
-### ワークフローをさらに簡素化する
-
-ワークフローをさらに簡素化できることにお気づきかもしれません。`penguins_data` と `penguins_data_grouped` という別々のデータフレームを用意する必要はありません。
-一般に、コードを理解しやすくするために、名前付きオブジェクトの数はできるだけ少なくするのが最善です。
-クリーニングとグループ化のステップを1つのコマンドにまとめましょう：
-
-
-``` r
-source("R/functions.R")
-source("R/packages.R")
-
-tar_plan(
-  # Load raw data
-  tar_file_read(
-    penguins_data_raw,
-    path_to_file("penguins_raw.csv"),
-    read_csv(!!.x, show_col_types = FALSE)
-  ),
-  # Clean and group data
-  tar_group_by(
-    penguins_data,
-    clean_penguin_data(penguins_data_raw),
-    species
-  ),
-  # Get summary of combined model with all species together
-  combined_summary = model_glance(penguins_data),
-  # Get summary of one model per species
-  tar_target(
-    species_summary,
-    model_glance(penguins_data),
-    pattern = map(penguins_data)
-  ),
-  # Get predictions of combined model with all species together
-  combined_predictions = model_augment(penguins_data),
-  # Get predictions of one model per species
-  tar_target(
-    species_predictions,
-    model_augment(penguins_data),
-    pattern = map(penguins_data)
-  )
-)
-```
-
-そして、もう一度実行します：
-
-
-``` output
-
-Attaching package: ‘palmerpenguins’
-
-The following objects are masked from ‘package:datasets’:
-
-    penguins, penguins_raw
-```
-
-``` output
-
-Attaching package: ‘palmerpenguins’
-
-The following objects are masked from ‘package:datasets’:
-
-    penguins, penguins_raw
-
-+ penguins_data dispatched
-✔ penguins_data completed [37ms, 1.53 kB]
-+ combined_summary dispatched
-✔ combined_summary completed [112ms, 371 B]
-+ species_summary declared [3 branches]
-✔ species_summary completed [28ms, 1.11 kB]
-+ combined_predictions dispatched
-✔ combined_predictions completed [7ms, 24.80 kB]
-+ species_predictions declared [3 branches]
-✔ species_predictions completed [16ms, 26.48 kB]
-✔ ended pipeline [500ms, 9 completed, 2 skipped]
-```
 
 ::::::::::::::::::::::::::::::::::::: {.callout}
 

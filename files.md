@@ -1,7 +1,7 @@
 ---
 title: '外部ファイルの取り扱い'
-teaching: 10
-exercises: 2
+teaching: 25
+exercises: 10
 ---
 
 :::::::::::::::::::::::::::::::::::::: questions 
@@ -29,173 +29,134 @@ exercises: 2
 
 ほとんどすべてのワークフローはデータのインポートから始まります。データは通常、外部ファイルとして保存されています。
 
-簡単な例として、RStudioの「新しいファイル」メニューオプションを使用して外部データファイルを作成しましょう。「Hello World」という一行のテキストを入力し、`_targets/user/data/` に "hello.txt" テキストファイルとして保存します。
+ここまでのペンギンのワークフローは、プロジェクトの `data/` フォルダにある CSV ファイルからデータを読み込んできました。
+ここでは、自分たちで作成する、もう1つのずっと小さなデータファイルを追加しましょう。ペンギンが測定された島に関する情報です。
+これは後でレポートで使用します。
 
-次に、このファイルの内容を読み込み、ワークフロー内で `some_data` として保存するために、以下のプランを書いて `tar_make()` を実行します：
+RStudio の「New File」メニューオプションで新しいテキストファイルを作成します。
+次の行を入力（コピー＆ペーストでも構いません）し、プロジェクトの `data/` フォルダに "islands.csv" として保存してください（このフォルダは[最初のワークフローのエピソード](episodes/basic-targets.Rmd)で作成しました。まだない場合は、今プロジェクトフォルダ内に作成してください）。
+これらの座標はおおよその値です。
 
-::::::::::::::::::::::::::::::::::::: {.callout}
+```
+island,latitude,longitude
+Biscoe,-65.43,-65.50
+Dream,-64.73,-64.23
+Torgersen,-64.77,-64.08
 
-## 進捗の保存
+```
 
-1つのプロジェクト内でアクティブな `_targets.R` ファイルは1つだけです。
-
-新しい `_targets.R` ファイルを作成しようとしていますが、これまで作業してきたもの（ペンギンのくちばし分析）の進捗を失いたくないでしょう。そのファイルを一時的に `_targets_old.R` のような名前に変更することで、以下の新しい例の `_targets.R` ファイルを上書きしないようにできます。再び作業を再開するときに名前を戻してください。
-
-:::::::::::::::::::::::::::::::::::::
+このファイルの内容を読み込み、ワークフロー内で `island_data` として保存します。
+`_targets.R` のプランの最後に新しいターゲットを追加し（直前のターゲットの後にカンマが必要になることに注意してください）、`tar_make()` を実行します：
 
 
 ``` r
-library(targets)
-library(tarchetypes)
-
-tar_plan(
-  some_data = readLines("_targets/user/data/hello.txt")
+  # Get predictions of one model per species
+  tar_target(
+    species_predictions,
+    penguins_data |> dplyr::filter(species == species_name) |> model_augment(),
+    pattern = map(species_name)
+  ),
+  # Read island data
+  island_data = read_csv("data/islands.csv", show_col_types = FALSE)
 )
 ```
 
 
 ``` output
-+ some_data dispatched
-✔ some_data completed [1ms, 64 B]
-✔ ended pipeline [320ms, 1 completed, 0 skipped]
++ island_data dispatched
+✔ island_data completed [80ms, 365 B]
++ species_summary declared [3 branches]
++ species_predictions declared [3 branches]
+✔ ended pipeline [303ms, 1 completed, 12 skipped]
 ```
 
-`tar_read(some_data)` を使用して `some_data` の内容を検査すると、期待通り `"Hello World"` という文字列が含まれていることがわかります。
+`tar_load(island_data)` で `island_data` をロードして確認すると、期待通り3つの島が含まれています。
 
-次に、"hello.txt" を編集して、テキストを追加します。例えば、「Hello World. How are you?」としましょう。これをRStudioのテキストエディタで編集して保存します。次にパイプラインを再実行します。
+ここで、トルガーセン島のより正確な緯度が分かり、"islands.csv" を編集して `-64.77` を `-64.80` に変更したとしましょう。RStudio のテキストエディタで編集して保存してください。そして、もう一度パイプラインを実行します。
 
 
 ``` r
-library(targets)
-library(tarchetypes)
+tar_make()
+```
 
-tar_plan(
-  some_data = readLines("_targets/user/data/hello.txt")
+``` output
++ species_summary declared [3 branches]
++ species_predictions declared [3 branches]
+✔ skipped pipeline [139ms, 13 skipped]
+```
+
+ファイルの内容が変更されたにもかかわらず、ターゲット `island_data` はスキップされました。
+
+これは、現時点では targets がファイルの**名前**だけを追跡しており、その内容を追跡していないためです。そのためには特別な関数、`tarchetypes` パッケージの `tar_file()` を使用する必要があります。`tar_file()` はファイルの「ハッシュ」を計算します---これはファイルの内容によって決まる一意のデジタル署名です。内容が変更されるとハッシュも変わり、`targets` がそれを検出します。
+
+`_targets.R` のプランの最後を、島のファイルに `tar_file()` を使用するように変更し、`tar_make()` を実行します：
+
+
+``` r
+  # Get predictions of one model per species
+  tar_target(
+    species_predictions,
+    penguins_data |> dplyr::filter(species == species_name) |> model_augment(),
+    pattern = map(species_name)
+  ),
+  # Read island data
+  tar_file(island_file, "data/islands.csv"),
+  island_data = read_csv(island_file, show_col_types = FALSE)
 )
 ```
 
-
-``` output
-✔ skipped pipeline [257ms, 1 skipped]
-```
-
-ターゲット `some_data` がスキップされましたが、これはファイルの内容が変更されたにもかかわらずです。
-
-これは、現在のところ `targets` がファイルの**名前のみ**を追跡しており、その内容を追跡していないためです。これを行うには、`tarchetypes` パッケージの `tar_file()` 関数を使用する必要があります。`tar_file()` はファイルの「ハッシュ」を計算します。これはファイルの内容によって決定される一意のデジタル署名です。内容が変更されると、ハッシュも変更され、`targets` によって検出されます。
-
-
-``` r
-library(targets)
-library(tarchetypes)
-
-tar_plan(
-  tar_file(data_file, "_targets/user/data/hello.txt"),
-  some_data = readLines(data_file)
-)
-```
+その後、もう一度 "islands.csv" を編集します。たとえば、ドリーム島の経度を `-64.23` から `-64.25` に変更してみましょう。保存して、もう一度パイプラインを実行します。
 
 
 ``` output
-+ data_file dispatched
-✔ data_file completed [1ms, 26 B]
-+ some_data dispatched
-✔ some_data completed [0ms, 78 B]
-✔ ended pipeline [390ms, 2 completed, 0 skipped]
++ island_file dispatched
+✔ island_file completed [0ms, 91 B]
++ island_data dispatched
+✔ island_data completed [67ms, 358 B]
++ species_summary declared [3 branches]
++ species_predictions declared [3 branches]
+✔ ended pipeline [337ms, 2 completed, 12 skipped]
 ```
 
-今回は、`targets` が期待通りに `some_data` を再構築するのが確認できます。
-
-## ショートカット（または、ターゲットファクトリーについて）
-
-しかし、これにより、一つのターゲットではなく二つのターゲットを書く必要があることにも気づきます。ファイルの内容を追跡するターゲット（`data_file`）と、ファイルからロードした内容を保存するターゲット（`some_data`）です。
-
-これは `targets` ワークフローでは一般的なパターンであるため、`tarchetypes` はこれをより簡潔に表現するショートカット、`tar_file_read()` を提供しています。
-
-
-``` r
-library(targets)
-library(tarchetypes)
-
-tar_plan(
-  tar_file_read(
-    hello,
-    "_targets/user/data/hello.txt",
-    readLines(!!.x)
-  )
-)
-```
-
-このプランを `tar_manifest()` で検査してみましょう：
-
-
-``` r
-tar_manifest()
-```
-
-
-``` output
-# A tibble: 2 × 2
-  name       command                           
-  <chr>      <chr>                             
-1 hello_file "\"_targets/user/data/hello.txt\""
-2 hello      "readLines(hello_file)"           
-```
-
-`tar_file_read()` を使用してパイプラインに一つのターゲット（`hello`）のみを指定しましたが、実際には **二つ** のターゲット、`hello_file` と `hello` が含まれていることに気づきます。
-
-これは `tar_file_read()` が **ターゲットファクトリー** と呼ばれる特別な関数だからです。ターゲットファクトリーは一度に**複数**のターゲットを作成します。`tarchetypes` パッケージの主な目的の一つは、パイプラインの記述を容易にし、エラーを減らすためにターゲットファクトリーを提供することです。
-
-## 非標準評価
-
-`!!.x` の意味は何でしょうか？これはRの使用に慣れていても馴染みがないかもしれません。これは「非標準評価」として知られ、特定のコンテキストで使用されます。詳細については時間がありませんが、`tar_file_read()` を使用する際にはこの特別な記法を使用する必要があることを覚えておいてください。書き方を忘れた場合（これは頻繁に起こります！）、`?tar_file_read` を実行してヘルプファイルの例を参照してください。
+今回は、`targets` が期待通り `island_data` を再構築することが分かります。
 
 ## 他のデータ読み込み関数
 
-ここでは `readLines()` を例として使用しましたが、`readr::read_csv()`、`xlsx::read_excel()` など、外部ファイルからデータを読み込む他の関数でも同じパターンを使用できます（例えば、`read_csv(!!.x)`、`read_excel(!!.x)` など）。
-    
-これは一般的に推奨されます。そうすることで、入力データとパイプラインが同期し、常に最新の状態に保たれます。
+これには2つのターゲットが必要であることに注意してください。1つはファイルの内容を追跡するもの（`tar_file()` で作成する `island_file`）、もう1つはファイルから読み込んだものを保存するもの（`island_data`）です。
+
+ここでは例として `read_csv()` を使用しましたが、外部ファイルからデータを読み込む他の関数、たとえば `readxl::read_excel()` や `readLines()` などにも同じパターンを使用できます（たとえば、`tar_file(excel_file, "data.xlsx")` の後に `my_data = read_excel(excel_file)` とします）。
+
+パイプラインを入力データと同期させるために、一般的にこれが推奨されます。
 
 ::::::::::::::::::::::::::::::::::::: {.challenge}
 
-## Challenge: penguins の例で `tar_file_read()` を使用する
+## チャレンジ: penguins の例で `tar_file()` を使用する
 
-ペンギンのくちばし分析を開始したとき、まだ `tar_file_read()` を知りませんでした。
+penguins のくちばし分析を始めた時点では `tar_file()` についてまだ知りませんでした。そのため、`targets` はペンギンの CSV ファイルの**名前**だけを追跡しており、その内容は追跡していません。
 
-`tar_file_read()` を使用してCSVファイルを読み込み、その内容を追跡するにはどうすればよいですか？
+`tar_file()` を使用して、内容を追跡しながら CSV ファイルを読み込むにはどうすればよいでしょうか？
 
 :::::::::::::::::::::::::::::::::: {.solution}
 
+プランの最初にある `penguins_csv_file` ターゲットに `tar_file()` を使用します：
+
 
 ``` r
-source("R/packages.R")
-source("R/functions.R")
-
 tar_plan(
-  tar_file_read(
-    penguins_data_raw,
-    path_to_file("penguins_raw.csv"),
-    read_csv(!!.x, show_col_types = FALSE)
-  ),
-  penguins_data = clean_penguin_data(penguins_data_raw)
-)
+  # Load raw data
+  tar_file(penguins_csv_file, "data/penguins_raw.csv"),
+  penguins_data_raw = read_csv(penguins_csv_file, show_col_types = FALSE),
 ```
 
 
 ``` output
-
-Attaching package: ‘palmerpenguins’
-
-The following objects are masked from ‘package:datasets’:
-
-    penguins, penguins_raw
-
-+ penguins_data_raw_file dispatched
-✔ penguins_data_raw_file completed [1ms, 53.10 kB]
++ penguins_csv_file dispatched
+✔ penguins_csv_file completed [0ms, 57.98 kB]
 + penguins_data_raw dispatched
-✔ penguins_data_raw completed [98ms, 10.40 kB]
-+ penguins_data dispatched
-✔ penguins_data completed [22ms, 1.49 kB]
-✔ ended pipeline [438ms, 3 completed, 0 skipped]
+✔ penguins_data_raw completed [73ms, 10.40 kB]
++ species_summary declared [3 branches]
++ species_predictions declared [3 branches]
+✔ ended pipeline [356ms, 2 completed, 12 skipped]
 ```
 
 ::::::::::::::::::::::::::::::::::
@@ -204,25 +165,30 @@ The following objects are masked from ‘package:datasets’:
 
 ## データの書き出し
 
-ファイルへの書き出しは、ファイルの読み込みと似ています。`tar_file()` 関数を使用します。ただし、重要な注意点があります：この場合、`tar_file()` の第二引数（ターゲットをビルドするためのコマンド）は**ファイルへのパスを返さなければなりません**。すべてのファイルを書き出す関数がこれを行うわけではありません（一部は何も返さず、ファイルの出力を関数の副作用として扱います）。そのため、ファイルを書き出し、そのパスを返すカスタム関数を定義する必要があるかもしれません。
+ファイルへの書き出しは、ファイルの読み込みと似ています。`tar_file()` 関数を使用します。これが機能するのは、`tar_file()` がファイルが入力か出力かを区別しないためです。どちらの場合も、ターゲットの値はファイルへの**パス**であり、`targets` はファイルの名前だけでなく内容（ハッシュ）も追跡します。ファイルが最初からそこにあったもの（"islands.csv" のように）か、ターゲットをビルドするコマンドによって作成されるものかは関係ありません。ただし、重要な注意点があります：この場合、`tar_file()` の第二引数（ターゲットをビルドするためのコマンド）は**ファイルへのパスを返さなければなりません**。すべてのファイルを書き出す関数がこれを行うわけではありません（一部は書き出したデータを返したり、何も返さなかったりして、ファイルの出力を関数の副作用として扱います）。そのため、ファイルを書き出し、そのパスを返すカスタム関数を定義する必要があるかもしれません。
+
+ここでは、データフレームを CSV ファイルに書き出す `readr` の関数 `write_csv()` で試してみましょう。この関数の出力は、書き出されたデータであり、ファイルへのパスではありません。次のように確認できます：
 
 
 ``` r
-x <- writeLines("some text", "test.txt")
+x <- readr::write_csv(head(penguins, 3), "test.csv")
 x
 ```
 
 
 ``` output
-NULL
+  species    island bill_len bill_dep flipper_len body_mass    sex year
+1  Adelie Torgersen     39.1     18.7         181      3750   male 2007
+2  Adelie Torgersen     39.5     17.4         186      3800 female 2007
+3  Adelie Torgersen     40.3     18.0         195      3250 female 2007
 ```
 
-ここでは、文字データをファイルに書き出し、そのファイル名を返す修正済み関数を作成します（`...` は「これらの引数の残りを `writeLines()` に渡す」を意味します）：
+ここでは、データフレームを CSV ファイルに書き出し、そのファイル名を返す修正済み関数を示します（`...` は「これらの引数の残りを `write_csv()` に渡す」を意味します）。これを `R/functions.R` に追加してください：
 
 
 ``` r
-write_lines_file <- function(text, file, ...) {
-  writeLines(text = text, con = file, ...)
+write_csv_file <- function(data, file, ...) {
+  readr::write_csv(x = data, file = file, ...)
   file
 }
 ```
@@ -231,64 +197,52 @@ write_lines_file <- function(text, file, ...) {
 
 
 ``` r
-x <- write_lines_file("some text", "test.txt")
+x <- write_csv_file(head(penguins, 3), "test.csv")
 x
 ```
 
 
 ``` output
-[1] "test.txt"
+[1] "test.csv"
 ```
 
-これで、この関数をパイプラインで使用できます。例えば、テキストを大文字に変換して再度書き出してみましょう：
+これでワークフローで使用できます。例えば、プランの最後にターゲットをもう1つ追加して、各種のモデルの結果（`species_summary`）を書き出してみましょう：
 
 
 ``` r
-library(targets)
-library(tarchetypes)
-
-source("R/functions.R")
-
-tar_plan(
-  tar_file_read(
-    hello,
-    "_targets/user/data/hello.txt",
-    readLines(!!.x)
-  ),
-  hello_caps = toupper(hello),
+  # Read island data
+  tar_file(island_file, "data/islands.csv"),
+  island_data = read_csv(island_file, show_col_types = FALSE),
+  # Write out the summary of one model per species
   tar_file(
-    hello_caps_out,
-    write_lines_file(hello_caps, "_targets/user/results/hello_caps.txt")
+    species_summary_file,
+    write_csv_file(species_summary, "results/species_summary.csv")
   )
 )
 ```
 
 
 ``` output
-+ hello_file dispatched
-✔ hello_file completed [1ms, 26 B]
-+ hello dispatched
-✔ hello completed [0ms, 78 B]
-+ hello_caps dispatched
-✔ hello_caps completed [0ms, 78 B]
-+ hello_caps_out dispatched
-✔ hello_caps_out completed [0ms, 26 B]
-✔ ended pipeline [437ms, 4 completed, 0 skipped]
++ species_summary declared [3 branches]
++ species_predictions declared [3 branches]
++ species_summary_file dispatched
+✔ species_summary_file completed [64ms, 664 B]
+✔ ended pipeline [344ms, 1 completed, 14 skipped]
 ```
 
-`results` フォルダ内の `hello_caps.txt` を見て、期待通りであることを確認してください。
+`results` フォルダ内の `species_summary.csv` を見て、期待通りであることを確認してください。
 
 ::::::::::::::::::::::::::::::::::::: {.challenge}
 
-## Challenge: What happens to file output if its modified?
+## チャレンジ: ファイル出力が変更された場合はどうなりますか？
 
-Delete or change the contents of `hello_caps.txt` in the `results` folder.
-What do you think will happen when you run `tar_make()` again?
-Try it and see.
+`results` フォルダ内の `species_summary.csv` を削除するか、その内容を変更してください。
+もう一度 `tar_make()` を実行すると、どうなると思いますか？
+実際に試してみましょう。
 
 :::::::::::::::::::::::::::::::::: {.solution}
 
-`targets` は `hello_caps_out` が変更された（「無効化された」）ことを検出し、再構築のためにコードを再実行します。これにより、`hello_caps.txt` が再度 `results` に書き出されます。
+`targets` は `species_summary_file` が変更された（「無効化された」）ことを検出し、再構築のためにコードを再実行します。これにより、`species_summary.csv` が再度 `results` に書き出されます。
 
 この方法で結果を出力することで、パイプラインがより堅牢になります。つまり、`results` 内のファイルの内容がプラン内のコードによってのみ生成されることが保証されます。
 
@@ -299,7 +253,7 @@ Try it and see.
 ::::::::::::::::::::::::::::::::::::: keypoints 
 
 - `tarchetypes::tar_file()` はファイルの内容を追跡します
-- `tarchetypes::tar_file_read()` をデータ読み込み関数（例えば `read_csv()`）と組み合わせて使用し、入力データとパイプラインを同期させる
+- `tarchetypes::tar_file()` をデータ読み込み関数（例えば `read_csv()`）と組み合わせて使用し、入力データとパイプラインを同期させる
 - `tarchetypes::tar_file()` をファイルに書き出す関数（ファイルに書き込んでパスを返す関数）と組み合わせてデータを書き出す
 
 ::::::::::::::::::::::::::::::::::::::::::::::::

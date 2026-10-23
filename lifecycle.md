@@ -1,7 +1,7 @@
 ---
 title: 'ワークフローのライフサイクル'
-teaching: 10
-exercises: 2
+teaching: 20
+exercises: 10
 ---
 
 :::::::::::::::::::::::::::::::::::::: questions 
@@ -34,28 +34,12 @@ exercises: 2
 これは実際に試してみると理解しやすいです。ワークフローをもう一度実行してみましょう：
 
 
-``` output
-
-Attaching package: ‘palmerpenguins’
-
-The following objects are masked from ‘package:datasets’:
-
-    penguins, penguins_raw
-```
-
 ``` r
 tar_make()
 ```
 
 ``` output
-
-Attaching package: ‘palmerpenguins’
-
-The following objects are masked from ‘package:datasets’:
-
-    penguins, penguins_raw
-
-✔ skipped pipeline [131ms, 3 skipped]
+✔ skipped pipeline [96ms, 3 skipped]
 ```
 
 最初にパイプラインを実行したとき、`targets` がビルドされている各ターゲットのリストを出力したことを覚えていますか？
@@ -91,30 +75,14 @@ clean_penguin_data <- function(penguins_data_raw) {
 そして、再度実行します。
 
 
-``` output
-
-Attaching package: ‘palmerpenguins’
-
-The following objects are masked from ‘package:datasets’:
-
-    penguins, penguins_raw
-```
-
 ``` r
 tar_make()
 ```
 
 ``` output
-
-Attaching package: ‘palmerpenguins’
-
-The following objects are masked from ‘package:datasets’:
-
-    penguins, penguins_raw
-
 + penguins_data dispatched
-✔ penguins_data completed [35ms, 1.49 kB]
-✔ ended pipeline [226ms, 1 completed, 2 skipped]
+✔ penguins_data completed [16ms, 1.49 kB]
+✔ ended pipeline [165ms, 1 completed, 2 skipped]
 ```
 
 何が起こったでしょうか？
@@ -133,7 +101,7 @@ The following objects are masked from ‘package:datasets’:
 
 :::::::::::::::::::::::::::::::::: solution
 
-`tar_read(penguins_data)` を使用するか、`tar_load(penguins_data)` を実行した後に `penguins_data` を実行します。
+`tar_load(penguins_data)` を実行した後に `penguins_data` を実行します。
 
 ::::::::::::::::::::::::::::::::::::::::::::
 
@@ -197,11 +165,15 @@ tar_visnetwork()
 `_targets.R` でワークフローを変更し、`tar_make()` を実行せずに再度 `tar_visnetwork()` を実行してください。
 ターゲットが古くなっていることを示す色は何ですか？
 
+たとえば、`penguins_data_raw` ターゲットの `read_csv()` 呼び出しから引数 `show_col_types = FALSE` を削除してみてください。
+これはコードを変更しますがデータは変更しないので、何かが壊れることはありません。
+
 :::::::::::::::::::::::::::::::::: solution
 
 薄い青色がターゲットが古くなっていることを示します。
 
-コードをどのように変更したかによりますが、ターゲットのいくつかまたはすべてが薄い青色になる場合があります。
+上記の変更の場合、`penguins_data_raw` と `penguins_data` が薄い青色になります。`penguins_data_raw` はコードが変更されたため、`penguins_data` は `penguins_data_raw` に依存しているためです。`penguins_csv_file` は、依存しているものが何も変更されていないため緑色のままです。
+別の方法でコードを変更した場合は、薄い青色になるターゲットの組み合わせが異なる場合があります。
 
 ::::::::::::::::::::::::::::::::::::::::::::
 
@@ -223,50 +195,31 @@ tar_visnetwork()
 
 ほとんどの場合、単一の変更が下流のターゲット全体に影響を及ぼし、再構築を引き起こしますが、必ずしもそうではありません。`targets` は事前に実際の出力がどうなるかを知る方法がないため、将来を完全に予測するネットワーク可視化を提供することはできません！
 
+チャレンジ 2 での変更でこれを確認できます。`penguins_data_raw` と `penguins_data` の両方が古くなっているように表示されましたが、ワークフローを実行するとどうなるでしょうか？
+
+
+``` r
+tar_make()
+```
+
+``` output
++ penguins_data_raw dispatched
+Rows: 344 Columns: 17
+── Column specification ────────────────────────────────────────────────────────
+Delimiter: ","
+chr  (9): studyName, Species, Region, Island, Stage, Individual ID, Clutch C...
+dbl  (7): Sample Number, Culmen Length (mm), Culmen Depth (mm), Flipper Leng...
+date (1): Date Egg
+
+ℹ Use `spec()` to retrieve the full column specification for this data.
+ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+✔ penguins_data_raw completed [191ms, 10.40 kB]
+✔ ended pipeline [334ms, 1 completed, 2 skipped]
+```
+
+再実行されたのは `penguins_data_raw` だけでした（追加のメッセージは `read_csv()` によるもので、`show_col_types = FALSE` を削除したため、列の型が報告されています）。そのコードは変更されたため再構築されましたが、以前とまったく同じデータが生成されました。そのため、古くなっているように見えた `penguins_data` はスキップされました。
+
 :::::::::::::::::::::::::::::::::::::::::::::::
-
-## ワークフローの状態を確認する他の方法
-
-可視化は非常に便利ですが、時にはグラフィカルな出力を提供しないサーバー上で作業している場合や、ワークフローの迅速なテキストサマリーを望む場合があります。
-それを行うための他の有用な関数があります。
-
-`tar_outdated()` は古くなったターゲットのみをリストします。つまり、次回の実行時にビルドされるターゲット、またはそのようなターゲットに依存するターゲットです。
-すべてが最新の場合、ゼロ長の文字ベクトル (`character(0)`) を返します。
-
-
-``` r
-tar_outdated()
-```
-
-``` output
-
-Attaching package: ‘palmerpenguins’
-
-The following objects are masked from ‘package:datasets’:
-
-    penguins, penguins_raw
-```
-
-``` output
-character(0)
-```
-
-`tar_progress()` はワークフローの現在の状態をデータフレームとして表示します。
-ワークフローの有用なサマリーを取得するためにデータフレームをさらに操作することが役立つ場合があります。例えば、`dplyr` を使用するなど（このデータ操作はこのレッスンの範囲外ですが、インストラクターがその使用を示すかもしれません）。
-
-
-``` r
-tar_progress()
-```
-
-``` output
-# A tibble: 3 × 2
-  name              progress 
-  <chr>             <chr>    
-1 penguins_csv_file skipped  
-2 penguins_data_raw skipped  
-3 penguins_data     completed
-```
 
 ## ターゲットの細かい制御
 
@@ -285,17 +238,35 @@ tar_make()
 ```
 
 ``` output
-
-Attaching package: ‘palmerpenguins’
-
-The following objects are masked from ‘package:datasets’:
-
-    penguins, penguins_raw
-
-✔ skipped pipeline [164ms, 3 skipped]
+✔ skipped pipeline [105ms, 3 skipped]
 ```
 
-`penguins_data` を無効化し、再度実行してみましょう：
+次に、`penguins_data_raw` を無効化し、そのターゲットだけをビルドしてみましょう：
+
+
+``` r
+tar_invalidate(penguins_data_raw)
+tar_make(penguins_data_raw)
+```
+
+``` output
++ penguins_data_raw dispatched
+Rows: 344 Columns: 17
+── Column specification ────────────────────────────────────────────────────────
+Delimiter: ","
+chr  (9): studyName, Species, Region, Island, Stage, Individual ID, Clutch C...
+dbl  (7): Sample Number, Culmen Length (mm), Culmen Depth (mm), Flipper Leng...
+date (1): Date Egg
+
+ℹ Use `spec()` to retrieve the full column specification for this data.
+ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+✔ penguins_data_raw completed [184ms, 10.40 kB]
+✔ ended pipeline [321ms, 1 completed, 1 skipped]
+```
+
+ビルドされたのは `penguins_data_raw` だけです（まだ `show_col_types = FALSE` を使用していないため、先ほどと同じ `read_csv()` のメッセージが再び表示されます）。`penguins_data` はこの実行に含まれておらず、`penguins_data_raw` が依存している `penguins_csv_file` はすでに最新だったためスキップされました。
+
+続いて、`penguins_data` を無効化し、ワークフロー全体を再度実行してみましょう：
 
 
 ``` r
@@ -304,20 +275,27 @@ tar_make()
 ```
 
 ``` output
-
-Attaching package: ‘palmerpenguins’
-
-The following objects are masked from ‘package:datasets’:
-
-    penguins, penguins_raw
-
 + penguins_data dispatched
-✔ penguins_data completed [24ms, 1.49 kB]
-✔ ended pipeline [224ms, 1 completed, 2 skipped]
+✔ penguins_data completed [29ms, 1.49 kB]
+✔ ended pipeline [164ms, 1 completed, 2 skipped]
 ```
 
 もしすべてをリセットして新たに開始したい場合は、`tar_invalidate(everything())` を使用して `_targets` フォルダ全体を削除することができます（`tar_invalidate()` はターゲット名を指定するために `tidyselect` 式を受け入れます）。
 しかし、これはすべてを再実行する必要があることを意味するため、軽率に行わないでください！
+
+## ワークフローを元に戻す
+
+チャレンジ 2 では、`penguins_data_raw` の `read_csv()` 呼び出しから `show_col_types = FALSE` を削除しました。
+先に進む前に、`_targets.R` でそれを元に戻して、ワークフローが以降のエピソードで使用するものと一致するようにしてください。
+`penguins_data_raw` ターゲットは、再び次のようになるはずです：
+
+```r
+tar_target(penguins_data_raw, read_csv(
+  penguins_csv_file, show_col_types = FALSE))
+```
+
+その後、`tar_make()` を実行してすべてを最新の状態にします。
+`penguins_data_raw` はコードが変更されたため再構築されますが、データは同じなので `penguins_data` はスキップされます。
 
 ## 実際の運用での動作
 
@@ -327,8 +305,6 @@ The following objects are masked from ‘package:datasets’:
 
 - `targets` はコードの変更に影響を受けたステップのみを実行します
 - `tar_visnetwork()` はワークフローの現在の状態をネットワークとして表示します
-- `tar_progress()` はワークフローの現在の状態をデータフレームとして表示します
-- `tar_outdated()` は古くなったターゲットをリストします
 - `tar_invalidate()` は特定のターゲットを無効化（再実行）するために使用できます
 
 ::::::::::::::::::::::::::::::::::::::::::::::::

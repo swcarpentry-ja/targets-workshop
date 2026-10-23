@@ -1,7 +1,7 @@
 ---
 title: 'Quartoを用いた再現可能なレポート'
-teaching: 10
-exercises: 2
+teaching: 25
+exercises: 10
 ---
 
 :::::::::::::::::::::::::::::::::::::: questions 
@@ -68,47 +68,20 @@ Quartoのような動的ドキュメント（またはQuartoの前身であるRm
 
 ## ペンギンのくちばしの大きさに関するレポート
 
-ペンギンのくちばしの大きさの分析を続けて、各モデルを評価するレポートを書きましょう。
+ペンギンのくちばしの大きさの分析を続けて、各モデルを評価し、先ほど追加した島のデータも含めたレポートを書きましょう。
 
-時間を節約するために、レポートはすでに <https://github.com/joelnitta/penguins-targets> にあります。
+時間を節約するために、レポートはすでに <https://github.com/carpentries-incubator/targets-workshop/blob/main/episodes/files/penguin_report.qmd> にあります。
 
-[こちらから生のコードをコピー](https://raw.githubusercontent.com/joelnitta/penguins-targets/main/penguin_report.qmd)して、新しいファイル `penguin_report.qmd` としてプロジェクトフォルダに保存してください（ブラウザで右クリックして「名前を付けて保存」を選択することもできます）。
+[こちらから生のコードをコピー](https://raw.githubusercontent.com/carpentries-incubator/targets-workshop/main/episodes/files/penguin_report.qmd)して、新しいファイル `penguin_report.qmd` としてプロジェクトフォルダに保存してください（ブラウザで右クリックして「名前を付けて保存」を選択することもできます）。
 
-次に、`tar_quarto()` 関数を使用してパイプラインにもう一つターゲットを追加します。以下のようにします：
+次に、`tar_quarto()` 関数を使用してパイプラインの最後にもう一つターゲットを追加します。以下のようにします（直前のターゲットの後にカンマが必要になることに注意してください）：
 
 
 ``` r
-source("R/functions.R")
-source("R/packages.R")
-
-tar_plan(
-  # Load raw data
-  tar_file_read(
-    penguins_data_raw,
-    path_to_file("penguins_raw.csv"),
-    read_csv(!!.x, show_col_types = FALSE)
-  ),
-  # Clean and group data
-  tar_group_by(
-    penguins_data,
-    clean_penguin_data(penguins_data_raw),
-    species
-  ),
-  # Get summary of combined model with all species together
-  combined_summary = model_glance(penguins_data),
-  # Get summary of one model per species
-  tar_target(
-    species_summary,
-    model_glance(penguins_data),
-    pattern = map(penguins_data)
-  ),
-  # Get predictions of combined model with all species together
-  combined_predictions = model_augment(penguins_data),
-  # Get predictions of one model per species
-  tar_target(
-    species_predictions,
-    model_augment(penguins_data),
-    pattern = map(penguins_data)
+  # Write out the summary of one model per species
+  tar_file(
+    species_summary_file,
+    write_csv_file(species_summary, "results/species_summary.csv")
   ),
   # Generate report
   tar_quarto(
@@ -151,14 +124,13 @@ targets::tar_load(
   c(combined_summary,
     species_summary,
     combined_predictions,
-    species_predictions
+    species_predictions,
+    island_data
   )
 )
 
 library(tidyverse)
 ```
-
-The goal of this analysis is to determine how bill length and depth are related in three species of penguins from Antarctica.
 
 ````
 
@@ -168,7 +140,7 @@ The goal of this analysis is to determine how bill length and depth are related 
 
 Rコードチャンクを詳しく見てみましょう。 `targets::tar_load()` の使い方に注目してください。この関数が何をするか覚えていますか？これはワークフロー中にビルドされたターゲットをロードします。
 
-これで少し理解が深まったはずです。`targets` はレポートがワークフロー中にビルドされた `combined_summary` や `species_summary` などのターゲットに依存していることを **レポート内で `tar_load()` を使用してロードしているため** 知っています。
+これで少し理解が深まったはずです。`targets` はレポートがワークフロー中にビルドされた `combined_summary`、`species_summary`、`island_data` などのターゲットに依存していることを **レポート内で `tar_load()` を使用してロードしているため** 知っています。
 
 ## 動的コンテンツの生成
 
@@ -183,6 +155,8 @@ Rコードチャンクを詳しく見てみましょう。 `targets::tar_load()`
 :::::::::::::::::::::::::::::::::: {.solution}
 
 - `results-stats` とラベル付けされたコードチャンクでは、*R* 二乗値などのモデルからの統計が抽出され、`` `r combined_r2` `` のようなインラインコードを使用してテキストに挿入されています。
+
+- 「Methods」セクションでは、島の数がインラインコード（`` `r nrow(island_data)` ``）でテキストに挿入されており、島の表（`tbl-islands` とラベル付けされたコードチャンク）は、`data/islands.csv` から読み込まれた `island_data` から作成されています。このファイルを編集して `tar_make()` を実行すると、レポートが更新されます。
 
 - 2つの図があります。一つは結合モデル用、もう一つは別々のモデル用です（それぞれ `fig-combined-plot` と `fig-separate-plot` とラベル付けされたコードチャンク）。これらは `combined_predictions` と `species_predictions` のモデルから予測されたポイントを使用して構築されています。
 
@@ -199,7 +173,7 @@ Rコードチャンクを詳しく見てみましょう。 `targets::tar_load()`
 ::::::::::::::::::::::::::::::::::::: keypoints 
 
 - `tarchetypes::tar_quarto()` は Quarto ドキュメントをレンダリングするために使用されます
-- Quarto ドキュメント内で `tar_load()` および `tar_read()` を使用してターゲットをロードする必要があります
+- Quarto ドキュメント内で `tar_load()` を使用してターゲットをロードする必要があります
 - 重い計算は主な `targets` ワークフローで行い、軽いフォーマットやプロットの生成は Quarto ドキュメントで行うことが推奨されます
 
 ::::::::::::::::::::::::::::::::::::::::::::::::

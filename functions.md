@@ -1,6 +1,6 @@
 ---
 title: '関数の簡単な紹介'
-teaching: 30
+teaching: 20
 exercises: 10
 ---
 
@@ -44,37 +44,35 @@ Rの関数は、パッケージから提供されるものだと考えるのに�
 ### 関数を書く
 
 自分で関数を書くことと、Rで他のコードを書くことの間に大きな違いはありません。あなたはこれまでどおりRでコーディングしているのです！
-ペンギンのデータにあるミリメートルの測定値を、センチメートルに変換したいとしましょう。
+ペンギンのデータにあるミリメートルの測定値を、センチメートルに変換したいとしましょう（`head()` を使って最初の数行だけを表示します）。
 
 
 ``` r
-library(palmerpenguins)
 library(tidyverse)
 
 penguins |>
   mutate(
-    bill_length_cm = bill_length_mm / 10,
-    bill_depth_cm = bill_depth_mm / 10
-  )
+    bill_len_cm = bill_len / 10,
+    bill_dep_cm = bill_dep / 10
+  ) |>
+  head()
 ```
 
 ``` output
-# A tibble: 344 × 10
-   species island    bill_length_mm bill_depth_mm flipper_length_mm body_mass_g
-   <fct>   <fct>              <dbl>         <dbl>             <int>       <int>
- 1 Adelie  Torgersen           39.1          18.7               181        3750
- 2 Adelie  Torgersen           39.5          17.4               186        3800
- 3 Adelie  Torgersen           40.3          18                 195        3250
- 4 Adelie  Torgersen           NA            NA                  NA          NA
- 5 Adelie  Torgersen           36.7          19.3               193        3450
- 6 Adelie  Torgersen           39.3          20.6               190        3650
- 7 Adelie  Torgersen           38.9          17.8               181        3625
- 8 Adelie  Torgersen           39.2          19.6               195        4675
- 9 Adelie  Torgersen           34.1          18.1               193        3475
-10 Adelie  Torgersen           42            20.2               190        4250
-# ℹ 334 more rows
-# ℹ 4 more variables: sex <fct>, year <int>, bill_length_cm <dbl>,
-#   bill_depth_cm <dbl>
+  species    island bill_len bill_dep flipper_len body_mass    sex year
+1  Adelie Torgersen     39.1     18.7         181      3750   male 2007
+2  Adelie Torgersen     39.5     17.4         186      3800 female 2007
+3  Adelie Torgersen     40.3     18.0         195      3250 female 2007
+4  Adelie Torgersen       NA       NA          NA        NA   <NA> 2007
+5  Adelie Torgersen     36.7     19.3         193      3450 female 2007
+6  Adelie Torgersen     39.3     20.6         190      3650   male 2007
+  bill_len_cm bill_dep_cm
+1        3.91        1.87
+2        3.95        1.74
+3        4.03        1.80
+4          NA          NA
+5        3.67        1.93
+6        3.93        2.06
 ```
 
 これは複雑な操作ではありませんが、それでもこの変換を行ってくれる便利なカスタム関数を作りたいかもしれません。
@@ -109,28 +107,27 @@ mm2cm <- function(x) {
 ``` r
 penguins |>
   mutate(
-    bill_length_cm = mm2cm(bill_length_mm),
-    bill_depth_cm = mm2cm(bill_depth_mm)
-  )
+    bill_len_cm = mm2cm(bill_len),
+    bill_dep_cm = mm2cm(bill_dep)
+  ) |>
+  head()
 ```
 
 ``` output
-# A tibble: 344 × 10
-   species island    bill_length_mm bill_depth_mm flipper_length_mm body_mass_g
-   <fct>   <fct>              <dbl>         <dbl>             <int>       <int>
- 1 Adelie  Torgersen           39.1          18.7               181        3750
- 2 Adelie  Torgersen           39.5          17.4               186        3800
- 3 Adelie  Torgersen           40.3          18                 195        3250
- 4 Adelie  Torgersen           NA            NA                  NA          NA
- 5 Adelie  Torgersen           36.7          19.3               193        3450
- 6 Adelie  Torgersen           39.3          20.6               190        3650
- 7 Adelie  Torgersen           38.9          17.8               181        3625
- 8 Adelie  Torgersen           39.2          19.6               195        4675
- 9 Adelie  Torgersen           34.1          18.1               193        3475
-10 Adelie  Torgersen           42            20.2               190        4250
-# ℹ 334 more rows
-# ℹ 4 more variables: sex <fct>, year <int>, bill_length_cm <dbl>,
-#   bill_depth_cm <dbl>
+  species    island bill_len bill_dep flipper_len body_mass    sex year
+1  Adelie Torgersen     39.1     18.7         181      3750   male 2007
+2  Adelie Torgersen     39.5     17.4         186      3800 female 2007
+3  Adelie Torgersen     40.3     18.0         195      3250 female 2007
+4  Adelie Torgersen       NA       NA          NA        NA   <NA> 2007
+5  Adelie Torgersen     36.7     19.3         193      3450 female 2007
+6  Adelie Torgersen     39.3     20.6         190      3650   male 2007
+  bill_len_cm bill_dep_cm
+1        3.91        1.87
+2        3.95        1.74
+3        4.03        1.80
+4          NA          NA
+5        3.67        1.93
+6        3.93        2.06
 ```
 
 おめでとうございます、最初のカスタム関数を作成して使用しました！
@@ -222,7 +219,6 @@ vecmean <- function(x) {
 ``` r
 library(targets)
 library(tidyverse)
-library(palmerpenguins)
 
 clean_penguin_data <- function(penguins_data_raw) {
   penguins_data_raw |>
@@ -235,7 +231,7 @@ clean_penguin_data <- function(penguins_data_raw) {
 }
 
 list(
-  tar_target(penguins_csv_file, path_to_file("penguins_raw.csv")),
+  tar_target(penguins_csv_file, "data/penguins_raw.csv"),
   tar_target(penguins_data_raw, read_csv(
     penguins_csv_file, show_col_types = FALSE)),
   tar_target(penguins_data, clean_penguin_data(penguins_data_raw))
@@ -245,30 +241,14 @@ list(
 ワークフローが最新の状態であることを確認するため、`tar_make()` でもう一度実行しましょう：
 
 
-``` output
-
-Attaching package: ‘palmerpenguins’
-
-The following objects are masked from ‘package:datasets’:
-
-    penguins, penguins_raw
-```
-
 ``` r
 tar_make()
 ```
 
 ``` output
-
-Attaching package: ‘palmerpenguins’
-
-The following objects are masked from ‘package:datasets’:
-
-    penguins, penguins_raw
-
 + penguins_data dispatched
-✔ penguins_data completed [27ms, 1.61 kB]
-✔ ended pipeline [198ms, 1 completed, 2 skipped]
+✔ penguins_data completed [11ms, 1.61 kB]
+✔ ended pipeline [138ms, 1 completed, 2 skipped]
 ```
 
 `targets()` が出力するメッセージについては、すぐ後で詳しく学びます。

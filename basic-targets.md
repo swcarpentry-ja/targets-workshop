@@ -1,6 +1,6 @@
 ---
 title: '初めての targets ワークフロー'
-teaching: 30
+teaching: 40
 exercises: 10
 ---
 
@@ -84,40 +84,26 @@ RStudioを使用して新しいプロジェクトを開始しましょう。
 
 まず、使用する関数やパッケージに慣れるために、`targets` を使用せずに「通常の」Rスクリプトのようにコードを実行してみましょう。
 
-データを取得するために `palmerpenguins` Rパッケージを使用していることを思い出してください。
+データには、R の基本パッケージに含まれているペンギンのデータ（R バージョン 4.5.0 以降）を使用していることを思い出してください。
 
-このパッケージには実際にデータセットの2つのバリエーションが含まれています。1つは生データを含む外部CSVファイルで、もう1つはRに読み込まれたクリーンなデータです。
-
+実際にはデータセットには2つのバリエーションがあります。`penguins` はクリーンなデータ、`penguins_raw` は生データです。
+（`penguins_raw` が見つからないというエラーが出た場合は、R をバージョン 4.5.0 以降に更新する必要があります。セットアップの手順を参照してください。）
 実際のところ、生データは外部に保存されていることが多いため、**生のペンギンデータ** を分析の出発点として使用しましょう。
 
-`palmerpenguins` の `path_to_file()` 関数は、生データCSVファイルへのパスを提供します（これは、パッケージをインストールしたときにコンピュータにダウンロードされた `palmerpenguins` Rパッケージのソースコード内にあります）。
+これを再現するために、まず生データをプロジェクト内の CSV ファイルとして保存します。
+プロジェクトフォルダ内に `data` という新しいフォルダを作成してください（たとえば、RStudio の Files ペインにある "New Folder" ボタンを使います）。
+その後、R コンソールで次のコードを実行します：
 
 
 ``` r
-library(palmerpenguins)
+# Save the raw data to a CSV file in the data folder
+write.csv(penguins_raw, "data/penguins_raw.csv", row.names = FALSE)
+
+# The path to the CSV file
+penguins_csv_file <- "data/penguins_raw.csv"
 ```
 
-``` output
 
-Attaching package: 'palmerpenguins'
-```
-
-``` output
-The following objects are masked from 'package:datasets':
-
-    penguins, penguins_raw
-```
-
-``` r
-# Get path to CSV file
-penguins_csv_file <- path_to_file("penguins_raw.csv")
-
-penguins_csv_file
-```
-
-``` output
-[1] "/home/runner/.local/share/renv/cache/v5/linux-ubuntu-jammy/R-4.6/x86_64-pc-linux-gnu/palmerpenguins/0.1.1/6c6861efbc13c1d543749e9c7be4a592/palmerpenguins/extdata/penguins_raw.csv"
-```
 
 データの読み込みと操作には、`tidyverse` パッケージ群を使用します。
 
@@ -175,7 +161,7 @@ date (1): Date Egg
 
 生データでは、「culmen」というやや技術的な用語がくちばしを指すために使用されています。
 
-![くちばし（culmen）の長さと深さのイラスト。アートワーク：@allison_horst.](https://allisonhorst.github.io/palmerpenguins/reference/figures/culmen_depth.png)
+![くちばし（culmen）の長さと深さのイラスト。アートワーク：@allison_horst.](fig/culmen_depth.png){alt="ペンギンの頭を横から見たイラスト。矢印は、くちばしの長さが付け根から先端まで上側に沿って測られること、くちばしの深さがくちばしの厚みであることを示している。注記には、生データではこれらが culmen length と culmen depth として記録されていること、culmen はくちばしの上にある背側の隆起部であることが書かれている。"}
 
 下流の分析で使用しやすくするためにデータを整理しましょう。
 
@@ -288,7 +274,7 @@ list(
 ## 例示分析を実行するための `_targets.R` の修正
 
 まず、ワークフローに必要なパッケージをすべて読み込みましょう。
-`_targets.R` の先頭、`library(targets)` の後に `library(tidyverse)` と `library(palmerpenguins)` を追加します。
+`_targets.R` の先頭、`library(targets)` の後に `library(tidyverse)` を追加します。
 
 次に、`function()` 文は今はまだ使わないので削除できます（カスタム関数についてはすぐ後で扱います！）。
 
@@ -326,7 +312,7 @@ list(
 
 
 ``` r
-tar_target(name = penguins_csv_file, command = path_to_file("penguins_raw.csv"))
+tar_target(name = penguins_csv_file, command = "data/penguins_raw.csv")
 ```
 
 `tar_target()` の最初の2つの引数は、ターゲットの**名前**と、それをビルドする**コマンド**です。
@@ -335,7 +321,7 @@ tar_target(name = penguins_csv_file, command = path_to_file("penguins_raw.csv"))
 
 
 ``` r
-tar_target(penguins_csv_file, path_to_file("penguins_raw.csv"))
+tar_target(penguins_csv_file, "data/penguins_raw.csv")
 ```
 
 ::::::::::::::::::::::::::::::::::
@@ -350,10 +336,9 @@ tar_target(penguins_csv_file, path_to_file("penguins_raw.csv"))
 ``` r
 library(targets)
 library(tidyverse)
-library(palmerpenguins)
 
 list(
-  tar_target(penguins_csv_file, path_to_file("penguins_raw.csv")),
+  tar_target(penguins_csv_file, "data/penguins_raw.csv"),
   tar_target(
     penguins_data_raw,
     read_csv(penguins_csv_file, show_col_types = FALSE)
@@ -385,20 +370,13 @@ tar_make()
 ```
 
 ``` output
-
-Attaching package: ‘palmerpenguins’
-
-The following objects are masked from ‘package:datasets’:
-
-    penguins, penguins_raw
-
 + penguins_csv_file dispatched
-✔ penguins_csv_file completed [1ms, 191 B]
+✔ penguins_csv_file completed [1ms, 74 B]
 + penguins_data_raw dispatched
-✔ penguins_data_raw completed [99ms, 10.40 kB]
+✔ penguins_data_raw completed [64ms, 10.40 kB]
 + penguins_data dispatched
-✔ penguins_data completed [14ms, 1.61 kB]
-✔ ended pipeline [348ms, 3 completed, 0 skipped]
+✔ penguins_data completed [10ms, 1.61 kB]
+✔ ended pipeline [238ms, 3 completed, 0 skipped]
 ```
 
 おめでとうございます、`targets` を使って最初のワークフローを実行しました！

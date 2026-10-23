@@ -1,7 +1,7 @@
 ---
 title: 'targetsプロジェクト組織のベストプラクティス'
-teaching: 10
-exercises: 2
+teaching: 20
+exercises: 0
 ---
 
 :::::::::::::::::::::::::::::::::::::: questions 
@@ -54,7 +54,6 @@ Episode summary: プロジェクト組織のベストプラクティスを実演
 ``` r
 library(targets)
 library(tarchetypes)
-library(palmerpenguins)
 library(tidyverse)
 
 clean_penguin_data <- function(penguins_data_raw) {
@@ -70,7 +69,7 @@ clean_penguin_data <- function(penguins_data_raw) {
 }
 
 tar_plan(
-  penguins_csv_file = path_to_file("penguins_raw.csv"),
+  penguins_csv_file = "data/penguins_raw.csv",
   penguins_data_raw = read_csv(penguins_csv_file, show_col_types = FALSE),
   penguins_data = clean_penguin_data(penguins_data_raw)
 )
@@ -92,13 +91,13 @@ tar_plan(
 
 コードを整理するためのより良い方法があります。
 
-まず、`_targets.R` 以外の R コードを保存するために `R` というディレクトリを作成しましょう（`_targets.R` はサブディレクトリではなく、プロジェクト全体のディレクトリに配置する必要があることを覚えておいてください）。
+プロジェクトフォルダ内に、`_targets.R` 以外の R コードを保存するための `R` という新しいディレクトリを作成しましょう（`_targets.R` はサブディレクトリではなく、プロジェクト全体のディレクトリに配置する必要があることを覚えておいてください）。
 
-`R/` 内に `functions.R` という新しい R ファイルを作成します。
+`R/` の中に `functions.R` という新しい R ファイルを作成します。
 ここにカスタム関数を配置します。
 今すぐ `clean_penguin_data()` をそこに入れて保存しましょう。
 
-同様に、`library()` 呼び出しを `R/` 内の `packages.R` という独自のスクリプトに配置しましょう（ただし、これは唯一の方法ではありません。["パッケージの管理" エピソード](https://joelnitta.github.io/targets-workshop/packages.html) を参照してください）。
+同様に、`library()` 呼び出しを `R/` 内の `packages.R` という独自のスクリプトに配置しましょう（ただし、これは唯一の方法ではありません。["パッケージの管理" エピソード](episodes/packages.Rmd) を参照してください）。
 
 また、`_targets.R` スクリプトをこれらのスクリプトを `source` で呼び出すように修正する必要があります：
 
@@ -108,7 +107,7 @@ source("R/packages.R")
 source("R/functions.R")
 
 tar_plan(
-  penguins_csv_file = path_to_file("penguins_raw.csv"),
+  penguins_csv_file = "data/penguins_raw.csv",
   penguins_data_raw = read_csv(penguins_csv_file, show_col_types = FALSE),
   penguins_data = clean_penguin_data(penguins_data_raw)
 )
@@ -117,9 +116,20 @@ tar_plan(
 これで `_targets.R` はずっとスリムになりました：ワークフローに集中し、各ステップで何が起こるかをすぐに教えてくれます。
 
 最後に、データや出力など、コードではないファイルを保存するためのディレクトリを作成しましょう。
-ターゲットキャッシュ内に `user` という新しいディレクトリを作成します：`_targets/user`。
-`user` 内にさらに `data` と `results` の2つのディレクトリを作成します。
-（バージョン管理を使用している場合は、`_targets` ディレクトリを無視することをおそらく望むでしょう）。
+生データファイル用の `data` ディレクトリはすでに作成しました。プロジェクトフォルダ内に、もう1つ `results` という新しいディレクトリを作成してください（バージョン管理を使用している場合は、`_targets` ディレクトリに加えて、`data` と `results` も無視することをおそらく望むでしょう）。
+
+プロジェクトフォルダは、次のようになっているはずです：
+
+```
+.
+├── _targets/        <- the targets cache (created by targets; do not edit)
+├── _targets.R       <- the workflow
+├── R/
+│   ├── functions.R  <- custom functions
+│   └── packages.R   <- package loading
+├── data/            <- input data files
+└── results/         <- output files
+```
 
 ## 関数についての一言
 
@@ -136,9 +146,9 @@ tar_plan(
 
 
 ``` r
-# 人の身長をcmで保存し、インチに変換する
-height <- 160
-height <- height / 2.54
+# ペンギンの体重をグラムで保存し、キログラムに変換する
+body_mass <- 3750
+body_mass <- body_mass / 1000
 ```
 
 同等の `targets` パイプラインを実行しようとするとエラーが発生します：
@@ -146,8 +156,8 @@ height <- height / 2.54
 
 ``` r
 tar_plan(
-    height = 160,
-    height = height / 2.54
+    body_mass = 3750,
+    body_mass = body_mass / 1000
 )
 ```
 
@@ -155,7 +165,7 @@ tar_plan(
 ``` error
 Error:
 ! Error in tar_make():
-  duplicated target names: height
+  duplicated target names: body_mass
   See https://books.ropensci.org/targets/debugging.html
 ```
 
@@ -170,7 +180,7 @@ Error:
 - コードを `R/` フォルダに配置する
 - 関数を `R/functions.R` に配置する
 - パッケージを `R/packages.R` に指定する
-- その他の雑多なファイルを `_targets/user` に配置する
+- データファイルを `data/` に、出力ファイルを `results/` に配置する
 - 関数を書くことは `targets` パイプラインの重要なスキルである
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
