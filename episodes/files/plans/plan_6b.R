@@ -4,25 +4,20 @@ source("R/functions.R")
 
 tar_plan(
   # Load raw data
-  tar_file_read(
-    penguins_data_raw,
-    path_to_file("penguins_raw.csv"),
-    read_csv(!!.x, show_col_types = FALSE)
-  ),
+  penguins_csv_file = "data/penguins_raw.csv",
+  penguins_data_raw = read_csv(penguins_csv_file, show_col_types = FALSE),
   # Clean data
   penguins_data = clean_penguin_data(penguins_data_raw),
-  # Group data
-  tar_group_by(
-    penguins_data_grouped,
-    penguins_data,
-    species
-  ),
+  # Get species names
+  species_name = penguins_data |> dplyr::pull(species) |> unique(),
   # Build combined model with all species together
   combined_summary = model_glance_orig(penguins_data),
   # Build one model per species
   tar_target(
     species_summary,
-    model_glance_orig(penguins_data_grouped),
-    pattern = map(penguins_data_grouped)
+    penguins_data |>
+      dplyr::filter(species == species_name) |>
+      model_glance_orig(),
+    pattern = map(species_name)
   )
 )
