@@ -1,7 +1,7 @@
 ---
 title: '並列処理'
 teaching: 15
-exercises: 2
+exercises: 0
 ---
 
 :::::::::::::::::::::::::::::::::::::: questions 
@@ -29,7 +29,6 @@ exercises: 2
 #| warning: FALSE
 library(targets)
 library(tarchetypes)
-library(broom)
 
 if (interactive()) {
   setwd("episodes")
@@ -59,24 +58,24 @@ options(width = 140)
 
 ### ワークフローのセットアップ
 
-`crew` を使用して並列処理を有効にするには、`crew` パッケージをロードし、`tar_option_set` を使用して `targets` にそれを使用するように指示するだけです。
+`crew` を使用して並列処理を有効にするには、まず他のパッケージと同様に、`R/packages.R` に `library(crew)` を追加します。
+次に、`_targets.R` で `tar_option_set()` を使用して `targets` にそれを使用するように指示します。
 具体的には、以下の行が `crew` を有効にし、2つの並列ワーカーを使用するように指示します。
 より強力なマシンでは、この数を増やすことができます：
 
 ```r
-library(crew)
 tar_option_set(
   controller = crew_controller_local(workers = 2)
 )
 ```
 
 ペンギンの分析にこれらの変更を加えましょう。
-現在は次のようになっているはずです：
+`_targets.R` は次のようになっているはずです：
 
 ```{r}
 #| label = "example-model-show-setup",
 #| eval = FALSE,
-#| code = readLines("files/plans/plan_9.R")[3:41]
+#| code = readLines("files/plans/plan_9.R")[3:35]
 ```
 
 このデモの目的のためにまだ1つだけ変更する必要があります：今、分析を並列で実行しても、関数が非常に高速であるため、計算時間の違いに気付かないでしょう。
@@ -99,7 +98,7 @@ tar_option_set(
 ```{r}
 #| label = "example-model-show-9",
 #| eval = FALSE,
-#| code = readLines("files/plans/plan_10.R")[3:41]
+#| code = readLines("files/plans/plan_10.R")[3:39]
 ```
 
 最後に、通常どおり `tar_make()` を使用してパイプラインを実行します。
@@ -113,13 +112,20 @@ tar_option_set(
 plan_10_dir <- make_tempdir()
 pushd(plan_10_dir)
 write_example_plan("plan_9.R")
+# emulate adding library(crew) to packages.R
+write("library(crew)", file = "R/packages.R", append = TRUE)
 tar_make(reporter = "silent")
 write_example_plan("plan_10.R")
 tar_make()
 popd()
 ```
 
-各個別ターゲットをビルドするのに約4秒かかるにもかかわらず、ワークフロー全体を実行するのにかかる総時間は、個々のターゲットの合計時間よりも短いことに注目してください！ これはプロセスが並列で実行されており、**時間を節約している** ことの証明です。
+各ターゲット（または分岐したターゲットの各ブランチ）のビルドに約4秒かかっていることに注目してください。
+分岐したターゲットについては、表示されている時間はそのブランチ全体の合計です（3ブランチ × 各4秒 = 12秒）。
+すべてを合計すると、このワークフローは約32秒分の作業を行っています（分岐していないターゲットが 2 × 4秒、分岐した2つのターゲットが 12 + 12 秒）。
+しかし、出力の最後（`ended pipeline`）に表示される、開始から終了までに実際に経過した時間は、その約半分にすぎません。
+もしターゲットを1つずつビルドしていたら、32秒まるまでかかっていたはずです。
+これはプロセスが並列で実行されており、**時間を節約している** ことの証明です。
 
 `targets` の独自で強力な点は、**並列で実行するためにカスタム関数を変更する必要がなかった** ことです。ワークフローを*調整*しただけです。これは、ワークフローを順次にローカルで実行するか、高性能なコンテキストで並列に実行するようにリファクタリング（修正）するのが比較的簡単であることを意味します。
 

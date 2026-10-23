@@ -1,6 +1,6 @@
 ---
 title: '関数の簡単な紹介'
-teaching: 30
+teaching: 20
 exercises: 10
 ---
 
@@ -56,19 +56,19 @@ Rの関数は、パッケージから提供されるものだと考えるのに�
 ### 関数を書く
 
 自分で関数を書くことと、Rで他のコードを書くことの間に大きな違いはありません。あなたはこれまでどおりRでコーディングしているのです！
-ペンギンのデータにあるミリメートルの測定値を、センチメートルに変換したいとしましょう。
+ペンギンのデータにあるミリメートルの測定値を、センチメートルに変換したいとしましょう（`head()` を使って最初の数行だけを表示します）。
 
 ```{r}
 #| label: targets-functions-problem
 #| message: FALSE
-library(palmerpenguins)
 library(tidyverse)
 
 penguins |>
   mutate(
-    bill_length_cm = bill_length_mm / 10,
-    bill_depth_cm = bill_depth_mm / 10
-  )
+    bill_len_cm = bill_len / 10,
+    bill_dep_cm = bill_dep / 10
+  ) |>
+  head()
 
 ```
 
@@ -105,9 +105,10 @@ mm2cm <- function(x) {
 #| label: targets-functions-cm-use
 penguins |>
   mutate(
-    bill_length_cm = mm2cm(bill_length_mm),
-    bill_depth_cm = mm2cm(bill_depth_mm)
-  )
+    bill_len_cm = mm2cm(bill_len),
+    bill_dep_cm = mm2cm(bill_dep)
+  ) |>
+  head()
 ```
 
 おめでとうございます、最初のカスタム関数を作成して使用しました！
@@ -199,7 +200,7 @@ vecmean <- function(x) {
 ```{r}
 #| label = "targets-show-fun-add",
 #| eval = FALSE,
-#| code = readLines("files/plans/plan_1.R")[2:21]
+#| code = readLines("files/plans/plan_1.R")[2:20]
 ```
 
 ワークフローが最新の状態であることを確認するため、`tar_make()` でもう一度実行しましょう：

@@ -55,8 +55,6 @@ So:
 4. Match the **existing wording and style** (register, terminology, how code terms like `targets` are set in backticks and spaced from Japanese text). Look at neighbouring translated episodes before writing new text.
 5. Render locally (below), then have Joel review the translation diff.
 
-Known quirks to preserve/mention: upstream `branch.Rmd` says "load `model_summaries`" where the plan no longer has that target (upstream issue #81); the Japanese file mirrors it until upstream fixes it.
-
 ## Building locally
 
 Use dovetail, from an R session at the repo root (on `l10n_main`):

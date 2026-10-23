@@ -1,7 +1,7 @@
 ---
 title: 'Quartoを用いた再現可能なレポート'
-teaching: 10
-exercises: 2
+teaching: 25
+exercises: 10
 ---
 
 :::::::::::::::::::::::::::::::::::::: questions 
@@ -85,18 +85,18 @@ Quartoのような動的ドキュメント（またはQuartoの前身であるRm
 
 ## ペンギンのくちばしの大きさに関するレポート
 
-ペンギンのくちばしの大きさの分析を続けて、各モデルを評価するレポートを書きましょう。
+ペンギンのくちばしの大きさの分析を続けて、各モデルを評価し、先ほど追加した島のデータも含めたレポートを書きましょう。
 
-時間を節約するために、レポートはすでに <https://github.com/joelnitta/penguins-targets> にあります。
+時間を節約するために、レポートはすでに <https://github.com/carpentries-incubator/targets-workshop/blob/main/episodes/files/penguin_report.qmd> にあります。
 
-[こちらから生のコードをコピー](https://raw.githubusercontent.com/joelnitta/penguins-targets/main/penguin_report.qmd)して、新しいファイル `penguin_report.qmd` としてプロジェクトフォルダに保存してください（ブラウザで右クリックして「名前を付けて保存」を選択することもできます）。
+[こちらから生のコードをコピー](https://raw.githubusercontent.com/carpentries-incubator/targets-workshop/main/episodes/files/penguin_report.qmd)して、新しいファイル `penguin_report.qmd` としてプロジェクトフォルダに保存してください（ブラウザで右クリックして「名前を付けて保存」を選択することもできます）。
 
-次に、`tar_quarto()` 関数を使用してパイプラインにもう一つターゲットを追加します。以下のようにします：
+次に、`tar_quarto()` 関数を使用してパイプラインの最後にもう一つターゲットを追加します。以下のようにします（直前のターゲットの後にカンマが必要になることに注意してください）：
 
 ```{r}
 #| label = "example-penguins-show-1",
 #| eval = FALSE,
-#| code = readLines("files/plans/plan_11.R")[2:40]
+#| code = readLines("files/plans/plan_11.R")[32:43]
 ```
 
 ```{r}
@@ -108,12 +108,15 @@ Quartoのような動的ドキュメント（またはQuartoの前身であるRm
 # Skip eval until can figure out how to install quarto CLI in whatever is
 # compiling the lesson
 
+report_qmd <- normalizePath("files/penguin_report.qmd")
+islands_csv <- normalizePath("files/data/islands.csv")
 tar_dir({
   library(quarto)
-  readr::read_lines("https://raw.githubusercontent.com/joelnitta/penguins-targets/main/penguin_report.qmd") |>
-    readr::write_lines("penguin_report.qmd")
+  file.copy(report_qmd, "penguin_report.qmd")
+  fs::dir_create(c("data", "results"))
+  file.copy(islands_csv, "data/islands.csv")
   # Run it
-  write_example_plan("plan_8.R")
+  write_example_plan("plan_files_4.R")
   tar_make(reporter = "silent")
   write_example_plan("plan_11.R")
   tar_make()
@@ -138,10 +141,13 @@ tar_dir({
 #| echo: FALSE
 #| results: 'asis'
 
-penguin_qmd <- readr::read_lines("https://raw.githubusercontent.com/joelnitta/penguins-targets/main/penguin_report.qmd")
+penguin_qmd <- readr::read_lines("files/penguin_report.qmd")
+# Show the YAML header and the first code chunk (up to the second closing fence)
+chunk_ends <- which(penguin_qmd == "```")
+penguin_qmd_start <- penguin_qmd[seq_len(chunk_ends[1])]
 
 cat("````{.markdown}\n")
-cat(penguin_qmd[1:24], sep = "\n")
+cat(penguin_qmd_start, sep = "\n")
 cat("\n````")
 ```
 
@@ -151,7 +157,7 @@ cat("\n````")
 
 Rコードチャンクを詳しく見てみましょう。 `targets::tar_load()` の使い方に注目してください。この関数が何をするか覚えていますか？これはワークフロー中にビルドされたターゲットをロードします。
 
-これで少し理解が深まったはずです。`targets` はレポートがワークフロー中にビルドされた `combined_summary` や `species_summary` などのターゲットに依存していることを **レポート内で `tar_load()` を使用してロードしているため** 知っています。
+これで少し理解が深まったはずです。`targets` はレポートがワークフロー中にビルドされた `combined_summary`、`species_summary`、`island_data` などのターゲットに依存していることを **レポート内で `tar_load()` を使用してロードしているため** 知っています。
 
 ## 動的コンテンツの生成
 
@@ -166,6 +172,8 @@ Rコードチャンクを詳しく見てみましょう。 `targets::tar_load()`
 :::::::::::::::::::::::::::::::::: {.solution}
 
 - `results-stats` とラベル付けされたコードチャンクでは、*R* 二乗値などのモデルからの統計が抽出され、`` `r knitr::inline_expr("combined_r2")` `` のようなインラインコードを使用してテキストに挿入されています。
+
+- 「Methods」セクションでは、島の数がインラインコード（`` `r knitr::inline_expr("nrow(island_data)")` ``）でテキストに挿入されており、島の表（`tbl-islands` とラベル付けされたコードチャンク）は、`data/islands.csv` から読み込まれた `island_data` から作成されています。このファイルを編集して `tar_make()` を実行すると、レポートが更新されます。
 
 - 2つの図があります。一つは結合モデル用、もう一つは別々のモデル用です（それぞれ `fig-combined-plot` と `fig-separate-plot` とラベル付けされたコードチャンク）。これらは `combined_predictions` と `species_predictions` のモデルから予測されたポイントを使用して構築されています。
 
@@ -182,7 +190,7 @@ Rコードチャンクを詳しく見てみましょう。 `targets::tar_load()`
 ::::::::::::::::::::::::::::::::::::: keypoints 
 
 - `tarchetypes::tar_quarto()` は Quarto ドキュメントをレンダリングするために使用されます
-- Quarto ドキュメント内で `tar_load()` および `tar_read()` を使用してターゲットをロードする必要があります
+- Quarto ドキュメント内で `tar_load()` を使用してターゲットをロードする必要があります
 - 重い計算は主な `targets` ワークフローで行い、軽いフォーマットやプロットの生成は Quarto ドキュメントで行うことが推奨されます
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
