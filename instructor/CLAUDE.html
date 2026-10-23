@@ -527,9 +527,22 @@ Deploy Site”):</p>
 <li>Runs <code>dovetail:::make_translated_dir()</code> into a temp dir,
 then <code>sandpaper:::ci_deploy()</code> to push the result to
 <code>gh-pages</code>.</li>
-<li>Trigger by pushing to <code>l10n_main</code> or manually:
-<code>gh workflow run "01 Build and Deploy Site"</code>. GitHub disables
-scheduled workflows after 60 days of repo inactivity
+<li>Pushing to <code>l10n_main</code> already starts the build and
+deploy; no manual trigger is needed. To run it manually:
+<code>gh workflow run "01 Build and Deploy Site" -R swcarpentry-ja/targets-workshop --ref l10n_main</code>.</li>
+<li>
+<strong>Always pass <code>-R swcarpentry-ja/targets-workshop</code>
+to <code>gh</code> commands</strong> (the default repo is also set with
+<code>gh repo set-default</code>, but don’t rely on it). Without it,
+<code>gh</code> can target upstream
+<code>carpentries-incubator/targets-workshop</code>, and workflow
+dispatches/reruns would run there by mistake. Check with
+<code>gh repo view --json nameWithOwner</code> if unsure.</li>
+<li>If a run fails, look at the fork’s own runs
+(<code>gh run list -R swcarpentry-ja/targets-workshop</code>) before
+changing any workflow files; workflow files are upstream boilerplate and
+should not be edited to chase a failure seen in a different repo.</li>
+<li>GitHub disables scheduled workflows after 60 days of repo inactivity
 (<code>disabled_inactivity</code>); re-enable with
 <code>gh workflow enable</code>.</li>
 <li>Other workflows (<code>pr-*.yaml</code>,
