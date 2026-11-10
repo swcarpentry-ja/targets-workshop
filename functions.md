@@ -247,8 +247,8 @@ tar_make()
 
 ``` output
 + penguins_data dispatched
-✔ penguins_data completed [11ms, 1.61 kB]
-✔ ended pipeline [138ms, 1 completed, 2 skipped]
+✔ penguins_data completed [17ms, 1.61 kB]
+✔ ended pipeline [205ms, 1 completed, 2 skipped]
 ```
 
 `targets()` が出力するメッセージについては、すぐ後で詳しく学びます。

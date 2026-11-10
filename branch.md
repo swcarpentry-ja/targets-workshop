@@ -75,8 +75,8 @@ tar_plan(
 
 ``` output
 + combined_model dispatched
-✔ combined_model completed [2ms, 11.20 kB]
-✔ ended pipeline [150ms, 1 completed, 3 skipped]
+✔ combined_model completed [23ms, 11.20 kB]
+✔ ended pipeline [231ms, 1 completed, 3 skipped]
 ```
 
 モデルを見てみましょう。`broom` パッケージの `glance()` 関数を、パッケージ全体を読み込まずに済むよう `broom::glance()` と書いて使用します（`::` 記法は、関数がどのパッケージのものかを指定します）。これは base R の `summary()` とは異なり、出力をティブル（データフレームの tidyverse 相当）として返します。後で見るように、これは下流の分析に非常に便利です。
@@ -142,20 +142,20 @@ tar_plan(
 
 ``` output
 + adelie_model dispatched
-✔ adelie_model completed [26ms, 6.48 kB]
+✔ adelie_model completed [31ms, 6.48 kB]
 + gentoo_model dispatched
 ✔ gentoo_model completed [2ms, 5.88 kB]
 + chinstrap_model dispatched
-✔ chinstrap_model completed [2ms, 4.54 kB]
+✔ chinstrap_model completed [2ms, 4.53 kB]
 + combined_summary dispatched
-✔ combined_summary completed [106ms, 350 B]
+✔ combined_summary completed [109ms, 350 B]
 + adelie_summary dispatched
-✔ adelie_summary completed [2ms, 351 B]
+✔ adelie_summary completed [3ms, 351 B]
 + gentoo_summary dispatched
-✔ gentoo_summary completed [1ms, 351 B]
+✔ gentoo_summary completed [3ms, 351 B]
 + chinstrap_summary dispatched
-✔ chinstrap_summary completed [2ms, 351 B]
-✔ ended pipeline [340ms, 7 completed, 4 skipped]
+✔ chinstrap_summary completed [3ms, 351 B]
+✔ ended pipeline [446ms, 7 completed, 4 skipped]
 ```
 
 モデルの一つのサマリーを見てみましょう：
@@ -231,12 +231,12 @@ tar_plan(
 
 ``` output
 + combined_summary dispatched
-✔ combined_summary completed [52ms, 350 B]
+✔ combined_summary completed [68ms, 350 B]
 + species_name dispatched
-✔ species_name completed [2ms, 76 B]
+✔ species_name completed [3ms, 76 B]
 + species_summary declared [3 branches]
-✔ species_summary completed [22ms, 1.05 kB]
-✔ ended pipeline [340ms, 5 completed, 3 skipped]
+✔ species_summary completed [30ms, 1.05 kB]
+✔ ended pipeline [421ms, 5 completed, 3 skipped]
 ```
 
 メッセージには、`species_summary` が3つのブランチで「宣言」され、その後完了したと表示されています。
@@ -334,10 +334,10 @@ model_glance <- function(penguins_data) {
 
 ``` output
 + combined_summary dispatched
-✔ combined_summary completed [70ms, 371 B]
+✔ combined_summary completed [96ms, 371 B]
 + species_summary declared [3 branches]
-✔ species_summary completed [97ms, 1.11 kB]
-✔ ended pipeline [339ms, 4 completed, 4 skipped]
+✔ species_summary completed [91ms, 1.11 kB]
+✔ ended pipeline [438ms, 4 completed, 4 skipped]
 ```
 
 今回は、`species_summary` をロードすると、各行がどの種に対応しているかを知ることができます（`mutate()` の `.before = 1` により、他の列より前に表示されます）。
