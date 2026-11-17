@@ -393,7 +393,7 @@
       </div>
     </nav><main id="main-content" class="main-content"><div class="container lesson-content">
         <h1>ワークフローのライフサイクル</h1>
-        <p>最終更新日：2026-11-10 |
+        <p>最終更新日：2026-11-17 |
 
         <a href="https://github.com/swcarpentry-ja/targets-workshop/edit/main/episodes/lifecycle.Rmd" class="external-link">ページの編集 <i aria-hidden="true" data-feather="edit"></i></a></p>
 
@@ -446,7 +446,7 @@
 <div class="codewrapper">
 <h3 class="code-label">出力<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="output" tabindex="0"><code>✔ skipped pipeline [136ms, 3 skipped]</code></pre>
+<pre class="output" tabindex="0"><code>✔ skipped pipeline [140ms, 3 skipped]</code></pre>
 </div>
 <p>最初にパイプラインを実行したとき、<code>targets</code>
 がビルドされている各ターゲットのリストを出力したことを覚えていますか？</p>
@@ -486,7 +486,7 @@
 </h3>
 <pre class="output" tabindex="0"><code>+ penguins_data dispatched
 ✔ penguins_data completed [28ms, 1.49 kB]
-✔ ended pipeline [233ms, 1 completed, 2 skipped]</code></pre>
+✔ ended pipeline [241ms, 1 completed, 2 skipped]</code></pre>
 </div>
 <p>何が起こったでしょうか？</p>
 <p>今回は、<code>penguins_csv_file</code> と
@@ -662,8 +662,8 @@ date (1): Date Egg
 
 ℹ Use `spec()` to retrieve the full column specification for this data.
 ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-✔ penguins_data_raw completed [222ms, 10.40 kB]
-✔ ended pipeline [424ms, 1 completed, 2 skipped]</code></pre>
+✔ penguins_data_raw completed [221ms, 10.40 kB]
+✔ ended pipeline [421ms, 1 completed, 2 skipped]</code></pre>
 </div>
 <p>再実行されたのは <code>penguins_data_raw</code>
 だけでした（追加のメッセージは <code>read_csv()</code>
@@ -693,7 +693,7 @@ date (1): Date Egg
 <div class="codewrapper">
 <h3 class="code-label">出力<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="output" tabindex="0"><code>✔ skipped pipeline [156ms, 3 skipped]</code></pre>
+<pre class="output" tabindex="0"><code>✔ skipped pipeline [159ms, 3 skipped]</code></pre>
 </div>
 <p>次に、<code>penguins_data_raw</code>
 を無効化し、そのターゲットだけをビルドしてみましょう：</p>
@@ -717,8 +717,8 @@ date (1): Date Egg
 
 ℹ Use `spec()` to retrieve the full column specification for this data.
 ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-✔ penguins_data_raw completed [220ms, 10.40 kB]
-✔ ended pipeline [422ms, 1 completed, 1 skipped]</code></pre>
+✔ penguins_data_raw completed [222ms, 10.40 kB]
+✔ ended pipeline [428ms, 1 completed, 1 skipped]</code></pre>
 </div>
 <p>ビルドされたのは <code>penguins_data_raw</code> だけです（まだ
 <code>show_col_types = FALSE</code> を使用していないため、先ほどと同じ
@@ -741,7 +741,7 @@ date (1): Date Egg
 </h3>
 <pre class="output" tabindex="0"><code>+ penguins_data dispatched
 ✔ penguins_data completed [40ms, 1.49 kB]
-✔ ended pipeline [236ms, 1 completed, 2 skipped]</code></pre>
+✔ ended pipeline [241ms, 1 completed, 2 skipped]</code></pre>
 </div>
 <p>もしすべてをリセットして新たに開始したい場合は、<code>tar_invalidate(everything())</code>
 を使用して <code>_targets</code>
@@ -778,7 +778,7 @@ date (1): Date Egg
 <div class="callout-square">
 <i class="callout-icon" data-feather="key"></i>
 </div>
-<span class="callout-header">まとめ</span>
+<h2 class="callout-header">まとめ</h2>
 <div class="callout-inner">
 <div class="callout-content">
 <ul><li>
@@ -835,7 +835,7 @@ any links that you are not going to use.
         <p>Materials licensed under <a href="LICENSE.html">CC-BY 4.0</a> by the authors</p>
 
         <p>テンプレートは<a href="https://carpentries.org/" class="external-link">The Carpentries</a>によって<a href="https://creativecommons.org/licenses/by-sa/4.0/" class="external-link">CC-BY 4.0</a>のもとに掲載を許諾されている</p>
-        <p>このレッスンは<a href="https://github.com/carpentries/sandpaper/tree/main" class="external-link">sandpaper (0.21.1)</a>、<a href="https://github.com/carpentries/pegboard/tree/0.7.9" class="external-link">pegboard (0.7.9)</a>、および<a href="https://github.com/carpentries/varnish/tree/1.1.3" class="external-link">varnish (1.1.3)</a>によって作られた</p>
+        <p>このレッスンは<a href="https://github.com/carpentries/sandpaper/tree/main" class="external-link">sandpaper (0.21.2)</a>、<a href="https://github.com/carpentries/pegboard/tree/0.8.0" class="external-link">pegboard (0.8.0)</a>、および<a href="https://github.com/carpentries/varnish/tree/1.1.4" class="external-link">varnish (1.1.4)</a>によって作られた</p>
 		</div>
 		</footer></div> <!-- / div.container -->
 	<div id="to-top">
@@ -858,8 +858,8 @@ any links that you are not going to use.
   "url": "https://swcarpentry-ja.github.io/targets-workshop/lifecycle.html",
   "identifier": "https://swcarpentry-ja.github.io/targets-workshop/lifecycle.html",
   "dateCreated": "2026-10-23",
-  "dateModified": "2026-11-10",
-  "datePublished": "2026-11-10"
+  "dateModified": "2026-11-17",
+  "datePublished": "2026-11-17"
 }
 
   </script><script>
