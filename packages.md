@@ -98,12 +98,12 @@ tar_plan(
 
 ``` output
 + penguins_csv_file dispatched
-✔ penguins_csv_file completed [110ms, 74 B]
+✔ penguins_csv_file completed [106ms, 74 B]
 + penguins_data_raw dispatched
-✔ penguins_data_raw completed [118ms, 10.40 kB]
+✔ penguins_data_raw completed [114ms, 10.40 kB]
 + penguins_data dispatched
 ✔ penguins_data completed [23ms, 1.49 kB]
-✔ ended pipeline [658ms, 3 completed, 0 skipped]
+✔ ended pipeline [654ms, 3 completed, 0 skipped]
 ```
 
 この方法は、方法1で時々経験するかもしれない遅延を回避します。
@@ -140,10 +140,10 @@ tar_plan(
 + penguins_csv_file dispatched
 ✔ penguins_csv_file completed [1ms, 74 B]
 + penguins_data_raw dispatched
-✔ penguins_data_raw completed [179ms, 10.40 kB]
+✔ penguins_data_raw completed [183ms, 10.40 kB]
 + penguins_data dispatched
-✔ penguins_data completed [63ms, 1.49 kB]
-✔ ended pipeline [647ms, 3 completed, 0 skipped]
+✔ penguins_data completed [62ms, 1.49 kB]
+✔ ended pipeline [671ms, 3 completed, 0 skipped]
 ```
 
 これは、すべてのパッケージを読み込むよりもメモリ効率が良い場合があります。なぜなら、ワークフローの通常の実行中にすべてのターゲットが常に作成されるわけではないからです。
@@ -192,8 +192,8 @@ clean_penguin_data <- function(penguins_data_raw) {
 + penguins_data_raw dispatched
 ✔ penguins_data_raw completed [180ms, 10.40 kB]
 + penguins_data dispatched
-✔ penguins_data completed [51ms, 1.49 kB]
-✔ ended pipeline [616ms, 3 completed, 0 skipped]
+✔ penguins_data completed [52ms, 1.49 kB]
+✔ ended pipeline [623ms, 3 completed, 0 skipped]
 ```
 
 このアプローチの利点は、すべての関数の起源が明確になることです。例えば、GitHub でソースを見たりすることで、すぐに関数がどこから来ているかを知ることができます。

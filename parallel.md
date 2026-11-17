@@ -192,7 +192,7 @@ tar_plan(
 ✔ combined_summary completed [4.1s, 371 B]
 ✔ combined_predictions completed [4.1s, 24.77 kB]
 ✔ species_summary completed [12.1s, 1.11 kB]
-✔ species_predictions completed [12.3s, 26.53 kB]
+✔ species_predictions completed [12.4s, 26.53 kB]
 ✔ ended pipeline [19.2s, 8 completed, 4 skipped]
 ```
 

@@ -39,7 +39,7 @@ tar_make()
 ```
 
 ``` output
-✔ skipped pipeline [136ms, 3 skipped]
+✔ skipped pipeline [140ms, 3 skipped]
 ```
 
 最初にパイプラインを実行したとき、`targets` がビルドされている各ターゲットのリストを出力したことを覚えていますか？
@@ -82,7 +82,7 @@ tar_make()
 ``` output
 + penguins_data dispatched
 ✔ penguins_data completed [28ms, 1.49 kB]
-✔ ended pipeline [233ms, 1 completed, 2 skipped]
+✔ ended pipeline [241ms, 1 completed, 2 skipped]
 ```
 
 何が起こったでしょうか？
@@ -213,8 +213,8 @@ date (1): Date Egg
 
 ℹ Use `spec()` to retrieve the full column specification for this data.
 ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-✔ penguins_data_raw completed [222ms, 10.40 kB]
-✔ ended pipeline [424ms, 1 completed, 2 skipped]
+✔ penguins_data_raw completed [221ms, 10.40 kB]
+✔ ended pipeline [421ms, 1 completed, 2 skipped]
 ```
 
 再実行されたのは `penguins_data_raw` だけでした（追加のメッセージは `read_csv()` によるもので、`show_col_types = FALSE` を削除したため、列の型が報告されています）。そのコードは変更されたため再構築されましたが、以前とまったく同じデータが生成されました。そのため、古くなっているように見えた `penguins_data` はスキップされました。
@@ -238,7 +238,7 @@ tar_make()
 ```
 
 ``` output
-✔ skipped pipeline [156ms, 3 skipped]
+✔ skipped pipeline [159ms, 3 skipped]
 ```
 
 次に、`penguins_data_raw` を無効化し、そのターゲットだけをビルドしてみましょう：
@@ -260,8 +260,8 @@ date (1): Date Egg
 
 ℹ Use `spec()` to retrieve the full column specification for this data.
 ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-✔ penguins_data_raw completed [220ms, 10.40 kB]
-✔ ended pipeline [422ms, 1 completed, 1 skipped]
+✔ penguins_data_raw completed [222ms, 10.40 kB]
+✔ ended pipeline [428ms, 1 completed, 1 skipped]
 ```
 
 ビルドされたのは `penguins_data_raw` だけです（まだ `show_col_types = FALSE` を使用していないため、先ほどと同じ `read_csv()` のメッセージが再び表示されます）。`penguins_data` はこの実行に含まれておらず、`penguins_data_raw` が依存している `penguins_csv_file` はすでに最新だったためスキップされました。
@@ -277,7 +277,7 @@ tar_make()
 ``` output
 + penguins_data dispatched
 ✔ penguins_data completed [40ms, 1.49 kB]
-✔ ended pipeline [236ms, 1 completed, 2 skipped]
+✔ ended pipeline [241ms, 1 completed, 2 skipped]
 ```
 
 もしすべてをリセットして新たに開始したい場合は、`tar_invalidate(everything())` を使用して `_targets` フォルダ全体を削除することができます（`tar_invalidate()` はターゲット名を指定するために `tidyselect` 式を受け入れます）。

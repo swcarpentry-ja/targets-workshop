@@ -373,10 +373,10 @@ tar_make()
 + penguins_csv_file dispatched
 ✔ penguins_csv_file completed [1ms, 74 B]
 + penguins_data_raw dispatched
-✔ penguins_data_raw completed [104ms, 10.40 kB]
+✔ penguins_data_raw completed [107ms, 10.40 kB]
 + penguins_data dispatched
-✔ penguins_data completed [15ms, 1.61 kB]
-✔ ended pipeline [360ms, 3 completed, 0 skipped]
+✔ penguins_data completed [14ms, 1.61 kB]
+✔ ended pipeline [370ms, 3 completed, 0 skipped]
 ```
 
 おめでとうございます、`targets` を使って最初のワークフローを実行しました！
