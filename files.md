@@ -64,10 +64,10 @@ Torgersen,-64.77,-64.08
 
 ``` output
 + island_data dispatched
-✔ island_data completed [113ms, 365 B]
+✔ island_data completed [110ms, 365 B]
 + species_summary declared [3 branches]
 + species_predictions declared [3 branches]
-✔ ended pipeline [392ms, 1 completed, 12 skipped]
+✔ ended pipeline [375ms, 1 completed, 12 skipped]
 ```
 
 `tar_load(island_data)` で `island_data` をロードして確認すると、期待通り3つの島が含まれています。
@@ -82,7 +82,7 @@ tar_make()
 ``` output
 + species_summary declared [3 branches]
 + species_predictions declared [3 branches]
-✔ skipped pipeline [209ms, 13 skipped]
+✔ skipped pipeline [197ms, 13 skipped]
 ```
 
 ファイルの内容が変更されたにもかかわらず、ターゲット `island_data` はスキップされました。
@@ -110,12 +110,12 @@ tar_make()
 
 ``` output
 + island_file dispatched
-✔ island_file completed [1ms, 91 B]
+✔ island_file completed [0ms, 91 B]
 + island_data dispatched
-✔ island_data completed [97ms, 358 B]
+✔ island_data completed [95ms, 358 B]
 + species_summary declared [3 branches]
 + species_predictions declared [3 branches]
-✔ ended pipeline [437ms, 2 completed, 12 skipped]
+✔ ended pipeline [419ms, 2 completed, 12 skipped]
 ```
 
 今回は、`targets` が期待通り `island_data` を再構築することが分かります。
@@ -151,12 +151,12 @@ tar_plan(
 
 ``` output
 + penguins_csv_file dispatched
-✔ penguins_csv_file completed [1ms, 57.98 kB]
+✔ penguins_csv_file completed [0ms, 57.98 kB]
 + penguins_data_raw dispatched
-✔ penguins_data_raw completed [101ms, 10.40 kB]
+✔ penguins_data_raw completed [98ms, 10.40 kB]
 + species_summary declared [3 branches]
 + species_predictions declared [3 branches]
-✔ ended pipeline [430ms, 2 completed, 12 skipped]
+✔ ended pipeline [419ms, 2 completed, 12 skipped]
 ```
 
 ::::::::::::::::::::::::::::::::::
@@ -226,8 +226,8 @@ x
 + species_summary declared [3 branches]
 + species_predictions declared [3 branches]
 + species_summary_file dispatched
-✔ species_summary_file completed [78ms, 664 B]
-✔ ended pipeline [374ms, 1 completed, 14 skipped]
+✔ species_summary_file completed [75ms, 664 B]
+✔ ended pipeline [356ms, 1 completed, 14 skipped]
 ```
 
 `results` フォルダ内の `species_summary.csv` を見て、期待通りであることを確認してください。
